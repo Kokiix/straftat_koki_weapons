@@ -2,7 +2,9 @@ using System.Collections;
 using BepInEx;
 using BepInEx.Logging;
 using ComputerysModdingUtilities;
+using FishNet;
 using HarmonyLib;
+using KokiWeapons.Debug;
 using UnityEngine;
 
 [assembly: StraftatMod(isVanillaCompatible: true)]
@@ -23,6 +25,13 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     private void OnDestroy()
     {
+        foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
+        {
+            if (weapon)
+            {
+                InstanceFinder.ServerManager.Despawn(weapon);
+            }
+        }
         harmony.UnpatchSelf();
     }
 }
