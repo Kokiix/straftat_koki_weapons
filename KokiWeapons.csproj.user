@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <Target Name="CopyDLL" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)"
+      DestinationFolder="C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins" />
+  </Target>
+</Project>
