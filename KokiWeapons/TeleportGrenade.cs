@@ -3,11 +3,16 @@ using UnityEngine;
 
 public static class TeleportGrenade
 {
-    public static GameObject GameObject;
-    public static void InitGameObject(GameObject visuals)
+    private static GameObject _gameObject;
+    public static GameObject VisualsGameObject;
+    public static GameObject GameObject()
     {
-        GameObject = SpawnerManager.NameToWeaponDict["HandGrenade"];
-        Transform handle = GameObject.transform.Find("SM_Grenadino_00_Low.001");
-        KokiWeaponsPlugin.Logger.LogError(handle);
+        if (_gameObject) return _gameObject;
+
+        _gameObject = SpawnerManager.NameToWeaponDict["HandGrenade"];
+        Transform parent = _gameObject.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
+        parent.Find("SM_Grenadino_01").gameObject.SetActive(false);
+        VisualsGameObject.transform.SetParent(parent);
+        return _gameObject;
     }
 }

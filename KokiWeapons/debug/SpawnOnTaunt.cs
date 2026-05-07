@@ -14,7 +14,7 @@ public class SpawnWeaponOnTaunt
     public static void Prefix(Settings __instance)
     {
         // NOT NETWORKED (i think) 
-        GameObject weaponBase = TeleportGrenade.GameObject;
+        GameObject weaponBase = TeleportGrenade.GameObject();
 
         Vector3 playerPos = __instance.localPlayer.playerCameraHolder.transform.position + __instance.localPlayer.dirForward.normalized;
         playerPos.y -= 0.5f;

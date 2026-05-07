@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
@@ -14,7 +15,6 @@ using UnityEngine;
 [BepInPlugin("com.koki.weapons", "Koki Weapons", "1.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
-    internal static List<GameObject> GOBases;
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
@@ -25,9 +25,13 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
 
-        string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
+        // string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons");
+        var bundleDir = new DirectoryInfo(Path.Combine(Paths.PluginPath, "KokiWeapons"));
+        var bundlePath = bundleDir.GetFiles("kokiWeaponsBundle_*")
+            .OrderByDescending(f => f.LastWriteTime)
+            .FirstOrDefault().FullName;
         Bundle = AssetBundle.LoadFromFile(bundlePath);
-        TeleportGrenade.InitGameObject(Bundle.LoadAsset<GameObject>("HandGrenade"));
+        TeleportGrenade.VisualsGameObject = Bundle.LoadAsset<GameObject>("HandGrenade");
     }
 
     private void OnDestroy()
