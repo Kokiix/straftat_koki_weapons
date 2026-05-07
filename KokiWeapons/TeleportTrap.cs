@@ -13,6 +13,7 @@ public static class TeleportTrap
         if (_gameObject) return _gameObject;
 
         _gameObject = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
+        _gameObject.SetActive(false);
 
         ItemBehaviour ib = _gameObject.GetComponent<ItemBehaviour>();
         ib.name = "teleport trap";
@@ -46,44 +47,5 @@ public static class TeleportTrap
         {
             KokiDebug.Log("teleport trap!");
         }
-    }
-
-    [HarmonyReversePatch]
-    [HarmonyPatch(typeof(Component), "transform", MethodType.Getter)]
-    public static Transform ItemTransform() =>
-        // its a stub so it has no initial content
-        throw new NotImplementedException("It's a stub");
-
-    [HarmonyPatch(typeof(ItemBehaviour), "Start")]
-    [HarmonyPrefix]
-    static bool ItemBehavStart(ItemBehaviour __instance)
-    {
-        __instance.maxPivot = 0f - __instance.maxPivot;
-        __instance.weaponScript = __instance.GetComponent<Weapon>();
-        ItemTransform().localScale = new Vector3(2f, 2f, 2f);
-        __instance.audio = __instance.GetComponent<AudioSource>();
-        // __instance.initialLocalPosition = base.transform.localPosition;
-        __instance.hoveredObjectRenderer = __instance.GetComponentsInChildren<MeshRenderer>();
-        __instance.hoveredObjectMat.Clear();
-        for (int i = 0; i < __instance.hoveredObjectRenderer.Length; i++)
-        {
-            Material[] materials = __instance.hoveredObjectRenderer[i].materials;
-            foreach (Material item in materials)
-            {
-                __instance.hoveredObjectMat.Add(item);
-            }
-        }
-        __instance.col = __instance.GetComponent<Collider>();
-        __instance.gripRight = __instance.GetComponentsInChildren<Grip>()[0].transform;
-        __instance.gripLeft = __instance.GetComponentsInChildren<Grip>()[1].transform;
-        // if (!dispenserStart && base.gameObject.name != "Pig Held Item")
-        // {
-        //     groundMov = base.transform.DOLocalMove(base.transform.localPosition + base.transform.parent.up / 2f, 1.4f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
-        // }
-        if (__instance.GetComponentInChildren<AimStrafePivot>() != null)
-        {
-            __instance.aimStrafePivot = __instance.GetComponentInChildren<AimStrafePivot>().transform;
-        }
-        return false;
     }
 }
