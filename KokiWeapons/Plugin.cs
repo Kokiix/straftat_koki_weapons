@@ -32,6 +32,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
 
+        TeleportTrap.BaseMineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
     }
 
     public void OnDestroy()
@@ -42,7 +43,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             {
                 InstanceFinder.ServerManager.Despawn(weapon);
             }
-        } 
+        }
+
+        TeleportTrap.BaseMineMesh.transform.SetParent(null);
 
         Harmony.UnpatchSelf();
     }
