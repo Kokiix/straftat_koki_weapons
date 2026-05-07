@@ -1,7 +1,9 @@
+using System.Collections;
 using BepInEx;
 using BepInEx.Logging;
 using ComputerysModdingUtilities;
 using HarmonyLib;
+using UnityEngine;
 
 [assembly: StraftatMod(isVanillaCompatible: true)]
 

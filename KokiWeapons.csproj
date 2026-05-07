@@ -29,6 +29,9 @@
         <Reference Include="ComputerysModdingUtilities" Publicize="true">
             <HintPath>lib\ComputerysModdingUtilities.dll</HintPath>
         </Reference>
+        <Reference Include="FishNet.Runtime" Publicize="true">
+            <HintPath>lib\ComputerysModdingUtilities.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>
