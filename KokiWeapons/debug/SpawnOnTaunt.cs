@@ -13,16 +13,19 @@ public class SpawnWeaponOnTaunt
     [HarmonyPatch("IncreaseTauntsAmount")]
     public static void Prefix(Settings __instance)
     {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
+        GameObject weaponBase = null;
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            KokiWeaponsPlugin.Logger.LogError("Triggering OnDestroy");
-            // KokiWeaponsPlugin.OnDestroy();
-            return;
+            weaponBase = TeleportTrap.GameObject();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            weaponBase = SpawnerManager.NameToWeaponDict["APMine"];
         }
 
-        // NOT NETWORKED (i think) 
-        GameObject weaponBase = TeleportTrap.GameObject();
+        if (!weaponBase) return;
 
+        // NOT NETWORKED (i think) 
         Vector3 playerPos = __instance.localPlayer.playerCameraHolder.transform.position + __instance.localPlayer.dirForward.normalized;
         playerPos.y -= 0.5f;
         GameObject weaponInstance = Object.Instantiate(weaponBase, playerPos, Quaternion.identity);

@@ -1,6 +1,7 @@
+using HarmonyLib;
 using UnityEngine;
 
-
+[HarmonyPatch]
 public static class TeleportTrap
 {
     private static GameObject _gameObject;
@@ -12,6 +13,13 @@ public static class TeleportTrap
 
         _gameObject = SpawnerManager.NameToWeaponDict["APMine"];
 
+        WeaponHandSpawner spawner = _gameObject.GetComponent<WeaponHandSpawner>();
+        spawner.currentAmmo = 2;
+
+        // Communicate to patch by flagging both at once
+        spawner.proximityMine = true;
+        spawner.apmine = true;
+
         // Swap visuals
         // Transform baseVisualParent = _gameObject.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         // baseVisualParent.Find("SM_Grenadino_01").gameObject.SetActive(false);
@@ -21,11 +29,24 @@ public static class TeleportTrap
         // physicsObj.Find("Graph").gameObject.SetActive(false);
         // PhysGrenadeMesh.name = "Graph";
         // PhysGrenadeMesh.transform.SetParent(physicsObj);
-        // foreach (var x in _gameObject.GetComponents<Component>())
-        // {
-        //     KokiWeaponsPlugin.Logger.LogError(x.GetType().Name);
-        // }
 
         return _gameObject;
+    }
+
+    [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
+    [HarmonyPrefix]
+    static void ExplodePrefix()
+    {
+        KokiWeaponsPlugin.Logger.LogError("sldfkj");
+    }
+
+    [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
+    [HarmonyPrefix]
+    static void PlaceObjectPrefix(WeaponHandSpawner __instance, GameObject obj)
+    {
+        if (__instance.proximityMine && __instance.apmine)
+        {
+            KokiDebug.Log("teleport trap!");
+        }
     }
 }
