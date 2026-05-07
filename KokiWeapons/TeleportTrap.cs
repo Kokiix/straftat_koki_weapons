@@ -5,31 +5,31 @@ using UnityEngine;
 [HarmonyPatch]
 public static class TeleportTrap
 {
-    private static GameObject _gameObject;
+    public static GameObject GO;
     public static GameObject BaseMineMesh;
     public static GameObject PhysGrenadeMesh;
     public static GameObject GameObject()
     {
-        if (_gameObject) return _gameObject;
+        if (GO) return GO;
 
-        _gameObject = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
-        _gameObject.SetActive(false);
+        GO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
+        GO.SetActive(false);
 
-        ItemBehaviour ib = _gameObject.GetComponent<ItemBehaviour>();
-        ib.name = "teleport trap";
+        ItemBehaviour ib = GO.GetComponent<ItemBehaviour>();
+        ib.weaponName = "teleport trap";
 
-        WeaponHandSpawner spawner = _gameObject.GetComponent<WeaponHandSpawner>();
+        WeaponHandSpawner spawner = GO.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
         // Communicate to patch by flagging both at once
         spawner.proximityMine = true;
         spawner.apmine = true;
 
         // Swap visuals
-        Transform baseVisualParent = _gameObject.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
+        Transform baseVisualParent = GO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
         BaseMineMesh.transform.SetParent(baseVisualParent);
 
-        return _gameObject;
+        return GO;
     }
 
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]

@@ -46,6 +46,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         TeleportTrap.BaseMineMesh.transform.SetParent(null);
+        TeleportTrap.GO = null;
 
         Harmony.UnpatchSelf();
     }
