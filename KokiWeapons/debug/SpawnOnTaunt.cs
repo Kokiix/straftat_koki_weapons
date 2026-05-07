@@ -21,7 +21,7 @@ public class SpawnWeaponOnTaunt
         }
 
         // NOT NETWORKED (i think) 
-        GameObject weaponBase = TeleportGrenade.GameObject();
+        GameObject weaponBase = TeleportTrap.GameObject();
 
         Vector3 playerPos = __instance.localPlayer.playerCameraHolder.transform.position + __instance.localPlayer.dirForward.normalized;
         playerPos.y -= 0.5f;

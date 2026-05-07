@@ -31,8 +31,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             existingBundle.Unload(true);
         string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
-        TeleportGrenade.BaseGrenadeMesh = Bundle.LoadAsset<GameObject>("HandGrenadeGraph");
-        TeleportGrenade.PhysGrenadeMesh = Bundle.LoadAsset<GameObject>("PhysicsHandGrenadeGraph");
+
     }
 
     public void OnDestroy()
@@ -43,10 +42,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             {
                 InstanceFinder.ServerManager.Despawn(weapon);
             }
-        }
- 
-        TeleportGrenade.BaseGrenadeMesh.transform.SetParent(null);
-        TeleportGrenade.PhysGrenadeMesh.transform.SetParent(null);
+        } 
 
         Harmony.UnpatchSelf();
     }
