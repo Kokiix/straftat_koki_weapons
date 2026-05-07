@@ -1,26 +1,34 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using ComputerysModdingUtilities;
 using FishNet;
 using HarmonyLib;
-using KokiWeapons.Debug;
 using UnityEngine;
 
 [assembly: StraftatMod(isVanillaCompatible: true)]
 
-namespace KokiWeapons;
-
 [BepInPlugin("com.koki.weapons", "Koki Weapons", "1.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
+    internal static List<GameObject> GOBases;
     internal static new ManualLogSource Logger;
-    internal static Harmony harmony;
+    internal static Harmony Harmony;
+    internal static AssetBundle Bundle;
+
+    internal static GameObject TeleportGrenade;
     private void Awake()
     {
         Logger = base.Logger;
-        harmony = new Harmony("com.koki.weapons");
-        harmony.PatchAll();
+        Harmony = new Harmony("com.koki.weapons");
+        Harmony.PatchAll();
+
+        string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
+        Bundle = AssetBundle.LoadFromFile(bundlePath);
+        TeleportGrenade = Bundle.LoadAsset<GameObject>("HandGrenade");
     }
 
     private void OnDestroy()
@@ -32,6 +40,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
             }
         }
-        harmony.UnpatchSelf();
+        Bundle.Unload(true); 
+        Harmony.UnpatchSelf();
     }
 }

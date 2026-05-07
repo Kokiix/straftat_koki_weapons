@@ -4,8 +4,6 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
-namespace KokiWeapons.Debug;
-
 // KokiWeaponsPlugin.Logger.LogError("
 [HarmonyPatch(typeof(Settings))]
 public class SpawnWeaponOnTaunt
@@ -16,7 +14,7 @@ public class SpawnWeaponOnTaunt
     public static void Prefix(Settings __instance)
     {
         // NOT NETWORKED (i think) 
-        GameObject weaponBase = SpawnerManager.NameToWeaponDict["AR15"];
+        GameObject weaponBase = KokiWeaponsPlugin.TeleportGrenade;
 
         Vector3 playerPos = __instance.localPlayer.playerCameraHolder.transform.position + __instance.localPlayer.dirForward.normalized;
         playerPos.y -= 0.5f;

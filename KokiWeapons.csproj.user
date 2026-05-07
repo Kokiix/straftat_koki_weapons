@@ -7,6 +7,6 @@
 
   <Target Name="CopyDLL" AfterTargets="Build">
     <Copy SourceFiles="$(TargetPath)"
-      DestinationFolder="C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins" />
+      DestinationFolder="C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins\KokiWeapons" />
   </Target>
 </Project>
