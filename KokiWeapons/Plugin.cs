@@ -19,7 +19,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
 
-    internal static GameObject TeleportGrenade;
     private void Awake()
     {
         Logger = base.Logger;
@@ -28,7 +27,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
         string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
-        TeleportGrenade = Bundle.LoadAsset<GameObject>("HandGrenade");
+        TeleportGrenade.InitGameObject(Bundle.LoadAsset<GameObject>("HandGrenade"));
     }
 
     private void OnDestroy()
@@ -40,7 +39,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
             }
         }
-        Bundle.Unload(true); 
+        Bundle.Unload(true);
         Harmony.UnpatchSelf();
     }
 }
