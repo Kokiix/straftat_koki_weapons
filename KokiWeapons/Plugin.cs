@@ -25,16 +25,16 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
 
-        // string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons");
-        var bundleDir = new DirectoryInfo(Path.Combine(Paths.PluginPath, "KokiWeapons"));
-        var bundlePath = bundleDir.GetFiles("kokiWeaponsBundle_*")
-            .OrderByDescending(f => f.LastWriteTime)
-            .FirstOrDefault().FullName;
+        var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
+        var existingBundle = loadedBundles.FirstOrDefault(b => b.name == "kokiweaponsbundle");
+        if (existingBundle)
+            existingBundle.Unload(true);
+        string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
         TeleportGrenade.VisualsGameObject = Bundle.LoadAsset<GameObject>("HandGrenade");
     }
 
-    private void OnDestroy()
+    public void OnDestroy()
     {
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
         {
@@ -43,7 +43,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
             }
         }
-        Bundle.Unload(true);
+
         Harmony.UnpatchSelf();
     }
 }

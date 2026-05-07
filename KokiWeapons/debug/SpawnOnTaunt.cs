@@ -4,7 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
-// KokiWeaponsPlugin.Logger.LogError("
+// KokiWeaponsPlugin.Logger.LogError(
 [HarmonyPatch(typeof(Settings))]
 public class SpawnWeaponOnTaunt
 {
@@ -13,6 +13,13 @@ public class SpawnWeaponOnTaunt
     [HarmonyPatch("IncreaseTauntsAmount")]
     public static void Prefix(Settings __instance)
     {
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            KokiWeaponsPlugin.Logger.LogError("Triggering OnDestroy");
+            // KokiWeaponsPlugin.OnDestroy();
+            return;
+        }
+
         // NOT NETWORKED (i think) 
         GameObject weaponBase = TeleportGrenade.GameObject();
 
