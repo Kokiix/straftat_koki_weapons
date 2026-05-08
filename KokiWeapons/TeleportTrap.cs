@@ -41,11 +41,12 @@ public static class TeleportTrap
         physMine.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMeshInstance.transform.SetParent(physMine);
 
-        Object.Destroy(physMine.transform.Find("radius(Clone)"));
+        Object.Destroy(physMine.transform.Find("radius(Clone)").gameObject);
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physMine);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
-        proxMineRadius.transform.position = new Vector3(-0.1f, 0, 0.15f);
+        proxMineRadius.transform.position = new Vector3(-0.11f, 0, 0.175f); // pretty sure this is just because the model is off center
+        proxMineRadius.SetActive(false);
 
         Object.Destroy(GetTrapLink(physMine.gameObject));
         physMine.gameObject.AddComponent<TrapLink>();
@@ -101,7 +102,9 @@ public static class TeleportTrap
         if (connector.origTrap)
         {
             connector.origTrap.GetComponent<TrapLink>().otherTrap = physMine;
+            connector.origTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
             new_trap.otherTrap = connector.origTrap;
+            physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
         }
         else
         {
