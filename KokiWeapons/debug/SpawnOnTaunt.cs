@@ -16,7 +16,7 @@ public class SpawnWeaponOnTaunt
         GameObject weaponBase = null;
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            weaponBase = TeleportTrap.CreateTemplateGameObject();
+            weaponBase = TeleportTrap.GetTemplateGameObject();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {

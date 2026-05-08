@@ -15,7 +15,7 @@ public static class TeleportTrap
     public static GameObject MineMeshInstance;
     public static GameObject PhysMineMeshInstance;
 
-    public static GameObject CreateTemplateGameObject()
+    public static GameObject GetTemplateGameObject()
     {
         if (TemplateGameObject) return TemplateGameObject;
 
@@ -25,6 +25,7 @@ public static class TeleportTrap
         TemplateGameObject = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         TemplateGameObject.SetActive(false);
         TemplateGameObject.AddComponent<TrapPair>();
+        TemplateGameObject.name = "Teleport Trap";
 
         ItemBehaviour ib = TemplateGameObject.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport trap";
@@ -41,7 +42,8 @@ public static class TeleportTrap
         physMine.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMeshInstance.transform.SetParent(physMine);
 
-        Object.Destroy(physMine.transform.Find("radius(Clone)").gameObject);
+        if (physMine.transform.Find("radius(Clone)"))
+            Object.Destroy(physMine.transform.Find("radius(Clone)").gameObject);
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physMine);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
@@ -52,7 +54,7 @@ public static class TeleportTrap
         physMine.gameObject.AddComponent<TrapLink>();
 
         BoxCollider collider = physMine.GetComponent<BoxCollider>();
-        collider.size = new Vector3(1.5f, 1.5f, 1.5f);
+        collider.size = new Vector3(1.6f, 0.81f, 1.6f);
 
         return TemplateGameObject;
     }
@@ -134,3 +136,17 @@ public class TrapLink : MonoBehaviour
     public GameObject otherTrap;
 }
 
+[HarmonyPatch]
+public class RegisterWeapon
+{
+    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+    public static void Postfix()
+    {
+        KokiDebug.Log("sdlfkj");
+        GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
+        SpawnerManager.AllWeapons.Append(TPTrap);
+        SpawnerManager.weaponInfo.Add("Teleport Trap", new WeaponData("Teleport Trap", 50, true));
+        SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
+        SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
+    }
+}

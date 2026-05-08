@@ -10,7 +10,7 @@ using FishNet;
 using HarmonyLib;
 using UnityEngine;
 
-[assembly: StraftatMod(isVanillaCompatible: false)]
+[assembly: StraftatMod(isVanillaCompatible: false)] 
 
 [BepInPlugin("com.koki.weapons", "Koki Weapons", "1.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
@@ -34,8 +34,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
 
-        TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
-        TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
+        TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
+        TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
     }
 
     public void OnDestroy()
@@ -49,7 +49,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             }
         }
 
-        TeleportTrap.PhysMineMeshInstance.transform.SetParent(null);
+        if (TeleportTrap.PhysMineMeshInstance)
+            TeleportTrap.PhysMineMeshInstance.transform.SetParent(null);
         TeleportTrap.TemplateGameObject = null;
 
         Harmony.UnpatchSelf();
