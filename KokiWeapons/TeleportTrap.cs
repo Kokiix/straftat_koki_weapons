@@ -152,21 +152,19 @@ public static class TeleportTrap
         return false;
     }
 
-    [HarmonyPatch]
-    public class RegisterWeapon
+    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+    [HarmonyPostfix]
+    public static void RegisterWeapon()
     {
-        [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
-        public static void Postfix()
-        {
-            if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
-            GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
-            System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-            // SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
-            SpawnerManager.AllWeapons[^1] = TPTrap;
-            SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
-            SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
-        }
+        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
+        GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
+        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+        // SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
+        SpawnerManager.AllWeapons[^1] = TPTrap;
+        SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
+        SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
     }
+
 
     [HarmonyPatch(typeof(ProximityMine), "OnTriggerStay")]
     [HarmonyPrefix]
@@ -189,6 +187,19 @@ public static class TeleportTrap
             __instance.HandleExplosion();
         }
         return false;
+    }
+
+
+    [HarmonyPatch(typeof(SpawnerManager), "UpdateSpawnableWeapons")]
+    [HarmonyPrefix]
+    static bool Test(SpawnerManager __instance)
+    {
+        foreach (WeaponData value in SpawnerManager.weaponInfo.Values)
+        {
+            KokiDebug.Log(value);
+        }
+
+        return true;
     }
 
     // Required because of hot reload BS

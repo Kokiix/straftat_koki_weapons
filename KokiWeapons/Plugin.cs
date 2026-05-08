@@ -52,7 +52,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (TeleportTrap.PhysMineMeshInstance)
             TeleportTrap.PhysMineMeshInstance.transform.SetParent(null);
         TeleportTrap.TemplateGameObject = null;
-        // TeleportTrap.TemplatePhysGameObject = null;
+        TeleportTrap.TemplatePhysGameObject = null;
 
         Harmony.UnpatchSelf();
     }
