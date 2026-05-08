@@ -63,39 +63,53 @@ public static class TeleportTrap
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
     {
-        PhysTPTrapData trap_data = __instance.GetComponent<PhysTPTrapData>();
-        if (!trap_data || !IsOwner(__instance)) 
-            return true;
+        // PhysTPTrapData trap_data = __instance.GetComponent<PhysTPTrapData>();
+        // KokiDebug.Log(trap_data.otherTrap);
+        // if (!trap_data.otherTrap || !IsOwner(__instance))
+        // { KokiDebug.Log("blocked explo"); return false; }
 
-        Collider[] array = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
-        if (array.Length != 0)
-        {
-            KokiDebug.Log("hit");
-        }
-        __instance.ExplodeServer();
+        // Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+        // if (colliders.Length != 0)
+        // {
+        //     foreach (Collider c in colliders)
+        //     {
+        //         FirstPersonController fpc = c.GetComponent<FirstPersonController>();
+        //         if (fpc)
+        //         {
+        //             KokiDebug.Log(trap_data.otherTrap.transform.position);
+        //             trap_data.otherTrap.HandleExplosion();
+        //             // fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: false);
+        //             break;
+        //         }
+        //     }
+        // }
+        // __instance.ExplodeServer();
         return false;
     }
 
-    [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
+    [HarmonyPatch(typeof(WeaponHandSpawner), "SpawnObject")]
     [HarmonyPrefix]
-    static void PlaceObjectPrefix(WeaponHandSpawner __instance, ref GameObject obj)
+    static void SpawnObjectPrefix(WeaponHandSpawner __instance, ref GameObject obj)
     {
         NonPhysTPTrapData connecting_data = __instance.gameObject.GetComponent<NonPhysTPTrapData>();
         if (connecting_data)
         {
-            KokiDebug.Log("placing teleport trap!");
-            obj = UnityEngine.Object.Instantiate(GetPhysGO(originalGO: obj));
-            PhysTPTrapData new_trap = obj.AddComponent<PhysTPTrapData>();
+            KokiDebug.Log(obj);
+            Transform baseVisualParent = obj.transform;
+            baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
+            GameObject meshInstance = UnityEngine.Object.Instantiate(PhysMineMesh);
+            meshInstance.transform.SetParent(baseVisualParent);
+            // PhysTPTrapData new_trap = obj.AddComponent<PhysTPTrapData>();
 
-            if (connecting_data.origTrap)
-            {
-                connecting_data.origTrap.GetComponent<PhysTPTrapData>().destination = obj.transform.position;
-                new_trap.destination = connecting_data.origTrap.transform.position;
-            }
-            else
-            {
-                connecting_data.origTrap = obj;
-            }
+            // if (connecting_data.origTrap)
+            // {
+            //     connecting_data.origTrap.GetComponent<PhysTPTrapData>().otherTrap = obj;
+            //     new_trap.otherTrap = connecting_data.origTrap;
+            // }
+            // else
+            // {
+            //     connecting_data.origTrap = obj;
+            // }
         }
     }
 }
@@ -107,5 +121,5 @@ public class NonPhysTPTrapData : MonoBehaviour
 
 public class PhysTPTrapData : MonoBehaviour
 {
-    public Vector3 destination;
+    public GameObject otherTrap;
 }
