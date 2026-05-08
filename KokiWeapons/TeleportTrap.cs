@@ -9,6 +9,7 @@ using UnityEngine;
 public static class TeleportTrap
 {
     public static GameObject TemplateGameObject;
+    public static GameObject TemplatePhysGameObject;
 
     public static GameObject MineMesh;
     public static GameObject PhysMineMesh;
@@ -40,7 +41,12 @@ public static class TeleportTrap
         MineMeshInstance.transform.SetParent(meshParent);
 
         // Also create template for physics game obj which is stored in the hand spawner component
-        Transform physMine = spawner.objToSpawn.transform;
+        TemplatePhysGameObject = Object.Instantiate(spawner.objToSpawn);
+        TemplatePhysGameObject.SetActive(false);
+        TemplatePhysGameObject.name = "Physics Teleport Trap";
+        Object.DontDestroyOnLoad(TemplatePhysGameObject);
+
+        Transform physMine = TemplatePhysGameObject.transform;
         physMine.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMeshInstance.transform.SetParent(physMine);
 
@@ -49,7 +55,6 @@ public static class TeleportTrap
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physMine);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
-        // proxMineRadius.transform.position = new Vector3(-0.11f, 0, 0.175f); // pretty sure this is just because the model is off center
         proxMineRadius.SetActive(false);
 
         Object.Destroy(GetTrapLink(physMine.gameObject));
@@ -57,6 +62,8 @@ public static class TeleportTrap
 
         BoxCollider collider = physMine.GetComponent<BoxCollider>();
         collider.size = new Vector3(1.6f, 0.81f, 1.6f);
+
+        spawner.objToSpawn = TemplatePhysGameObject;
 
         return TemplateGameObject;
     }
@@ -68,7 +75,8 @@ public static class TeleportTrap
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (PauseManager.BetweenRounds || !connector) return true;
 
-        GameObject physMine = UnityEngine.Object.Instantiate(obj, position, rotation);
+        GameObject physMine = UnityEngine.Object.Instantiate(TemplatePhysGameObject, position, rotation);
+        physMine.SetActive(true);
         InstanceFinder.ServerManager.Spawn(physMine);
 
         physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
@@ -148,7 +156,7 @@ public static class TeleportTrap
             if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
             GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
             System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-            SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
+            // SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
             SpawnerManager.AllWeapons[^1] = TPTrap;
             SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
             SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
