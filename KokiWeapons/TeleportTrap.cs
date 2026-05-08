@@ -29,7 +29,8 @@ public static class TeleportTrap
         // Swap visuals
         Transform baseVisualParent = NonPhysGO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        BaseMineMesh.transform.SetParent(baseVisualParent);
+        GameObject meshInstance = UnityEngine.Object.Instantiate(BaseMineMesh);
+        meshInstance.transform.SetParent(baseVisualParent);
 
         return NonPhysGO;
     }
@@ -44,7 +45,8 @@ public static class TeleportTrap
         // Swap visuals
         Transform baseVisualParent = PhysGO.transform;
         baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        PhysMineMesh.transform.SetParent(baseVisualParent);
+        GameObject meshInstance = UnityEngine.Object.Instantiate(PhysMineMesh);
+        meshInstance.transform.SetParent(baseVisualParent);
 
         return PhysGO;
     }
