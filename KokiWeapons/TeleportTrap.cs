@@ -5,47 +5,69 @@ using UnityEngine;
 [HarmonyPatch]
 public static class TeleportTrap
 {
-    public static GameObject GO;
+    public static GameObject PhysGO;
+    public static GameObject NonPhysGO;
+
     public static GameObject BaseMineMesh;
-    public static GameObject PhysGrenadeMesh;
-    public static GameObject GameObject()
+    public static GameObject PhysMineMesh;
+
+    public static GameObject GetNonPhysGO()
     {
-        if (GO) return GO;
+        if (NonPhysGO) return NonPhysGO;
 
-        GO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
-        GO.SetActive(false);
+        NonPhysGO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
+        NonPhysGO.SetActive(false);
 
-        ItemBehaviour ib = GO.GetComponent<ItemBehaviour>();
+        NonPhysGO.AddComponent<TPTrapData>();
+
+        ItemBehaviour ib = NonPhysGO.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport trap";
 
-        WeaponHandSpawner spawner = GO.GetComponent<WeaponHandSpawner>();
+        WeaponHandSpawner spawner = NonPhysGO.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
-        // Communicate to patch by flagging both at once
-        spawner.proximityMine = true;
-        spawner.apmine = true;
 
         // Swap visuals
-        Transform baseVisualParent = GO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
+        Transform baseVisualParent = NonPhysGO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
         BaseMineMesh.transform.SetParent(baseVisualParent);
 
-        return GO;
+        return NonPhysGO;
+    }
+
+    public static GameObject GetPhysGO(GameObject originalGO)
+    {
+        if (PhysGO) return PhysGO;
+
+        PhysGO = UnityEngine.Object.Instantiate(originalGO);
+        PhysGO.SetActive(false);
+
+        // Swap visuals
+        Transform baseVisualParent = PhysGO.transform;
+        baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
+        PhysMineMesh.transform.SetParent(baseVisualParent);
+
+        return PhysGO;
     }
 
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
     [HarmonyPrefix]
     static void ExplodePrefix()
     {
-        KokiWeaponsPlugin.Logger.LogError("sldfkj");
+        KokiWeaponsPlugin.Logger.LogError("general explosion");
     }
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
-    static void PlaceObjectPrefix(WeaponHandSpawner __instance, GameObject obj)
+    static void PlaceObjectPrefix(WeaponHandSpawner __instance, ref GameObject obj)
     {
-        if (__instance.proximityMine && __instance.apmine)
+        if (__instance.gameObject.GetComponent<TPTrapData>())
         {
-            KokiDebug.Log("teleport trap!");
+            KokiDebug.Log("placing teleport trap!");
+            obj = GetPhysGO(originalGO: obj);
         }
     }
+}
+
+public class TPTrapData : MonoBehaviour
+{
 }

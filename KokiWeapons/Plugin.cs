@@ -33,6 +33,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Bundle = AssetBundle.LoadFromFile(bundlePath);
 
         TeleportTrap.BaseMineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
+        TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
     }
 
     public void OnDestroy()
@@ -46,7 +47,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         TeleportTrap.BaseMineMesh.transform.SetParent(null);
-        TeleportTrap.GO = null;
+        TeleportTrap.PhysMineMesh.transform.SetParent(null);
+        TeleportTrap.NonPhysGO = null;
+        TeleportTrap.PhysGO = null;
 
         Harmony.UnpatchSelf();
     }
