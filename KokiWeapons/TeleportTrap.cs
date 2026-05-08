@@ -42,21 +42,13 @@ public static class TeleportTrap
         return NonPhysGO;
     }
 
-    [HarmonyReversePatch]
-    [HarmonyPatch(typeof(NetworkBehaviour), "IsOwner", MethodType.Getter)]
-    public static bool IsOwner(NetworkBehaviour __instance)
-    {
-        return false;
-    }
-
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
     {
-        TrapLink trap_data = GetTrapLink(__instance.gameObject);
-        // KokiDebug.Log(trap_data.otherTrap);
-        if (!trap_data.otherTrap || !IsOwner(__instance))
-        { KokiDebug.Log("blocked explo"); return false; }
+        TrapLink trap_data = (TrapLink)GetTrapLink(__instance.gameObject);
+        if (!trap_data.otherTrap)
+            return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
         if (colliders.Length != 0)
@@ -66,9 +58,13 @@ public static class TeleportTrap
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    KokiDebug.Log(trap_data.otherTrap.transform.position);
-                    trap_data.otherTrap.GetComponent<ProximityMine>().HandleExplosion();
-                    // fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: false);
+                    // KokiDebug.Log(trap_data.otherTrap.transform.position);
+                    ProximityMine otherMine = trap_data.otherTrap.GetComponent<ProximityMine>();
+                    if (!otherMine.sync___get_value_detonated())
+                    {
+                        otherMine.HandleExplosion();
+                    }
+                    fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
                     break;
                 }
             }
@@ -89,7 +85,7 @@ public static class TeleportTrap
         physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
         physMine.GetComponent<ProximityMine>().sync___set_value_weapon((Weapon)__instance, true);
 
-        TrapLink new_trap = GetTrapLink(physMine);
+        TrapLink new_trap = (TrapLink)GetTrapLink(physMine);
         if (connector.origTrap)
         {
             connector.origTrap.GetComponent<TrapLink>().otherTrap = physMine;
@@ -103,11 +99,11 @@ public static class TeleportTrap
     }
 
     // Required because of hot reload BS
-    public static TrapLink GetTrapLink(GameObject go)
+    public static Component GetTrapLink(GameObject go)
     {
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "TrapLink") return (TrapLink)c;
+            if (c.GetType().Name == "TrapLink") return c;
         }
         return null;
     }
