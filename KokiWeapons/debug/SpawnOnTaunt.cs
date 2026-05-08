@@ -22,6 +22,10 @@ public class SpawnWeaponOnTaunt
         {
             weaponBase = SpawnerManager.NameToWeaponDict["APMine"];
         }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            weaponBase = SpawnerManager.NameToWeaponDict["ProximityMine"];
+        }
 
         if (!weaponBase) return;
 

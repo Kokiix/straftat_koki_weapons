@@ -1,4 +1,4 @@
-using System;
+using FishNet;
 using FishNet.Object;
 using HarmonyLib;
 using UnityEngine;
@@ -6,7 +6,6 @@ using UnityEngine;
 [HarmonyPatch]
 public static class TeleportTrap
 {
-    public static GameObject PhysGO;
     public static GameObject NonPhysGO;
 
     public static GameObject BaseMineMesh;
@@ -16,10 +15,12 @@ public static class TeleportTrap
     {
         if (NonPhysGO) return NonPhysGO;
 
+        BaseMineMesh = Object.Instantiate(BaseMineMesh);
+        PhysMineMesh = Object.Instantiate(PhysMineMesh);
+
         NonPhysGO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         NonPhysGO.SetActive(false);
-
-        NonPhysGO.AddComponent<NonPhysTPTrapData>();
+        NonPhysGO.AddComponent<TrapPair>();
 
         ItemBehaviour ib = NonPhysGO.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport trap";
@@ -27,33 +28,23 @@ public static class TeleportTrap
         WeaponHandSpawner spawner = NonPhysGO.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
 
-        // Swap visuals
         Transform baseVisualParent = NonPhysGO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        GameObject meshInstance = UnityEngine.Object.Instantiate(BaseMineMesh);
-        meshInstance.transform.SetParent(baseVisualParent);
+        BaseMineMesh.transform.SetParent(baseVisualParent);
+
+        Transform physObjMine = spawner.objToSpawn.transform;
+        physObjMine.Find("PF_APMine_00").gameObject.SetActive(false);
+        PhysMineMesh.transform.SetParent(physObjMine);
+
+        KokiDebug.Log(NotInHotReload(physObjMine.gameObject));
+        if (NotInHotReload(physObjMine.gameObject))
+            physObjMine.gameObject.AddComponent<TPTrapLink>();
 
         return NonPhysGO;
     }
 
-    public static GameObject GetPhysGO(GameObject originalGO)
-    {
-        if (PhysGO) return PhysGO;
-
-        PhysGO = UnityEngine.Object.Instantiate(originalGO);
-        PhysGO.SetActive(false);
-
-        // Swap visuals
-        Transform baseVisualParent = PhysGO.transform;
-        baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        GameObject meshInstance = UnityEngine.Object.Instantiate(PhysMineMesh);
-        meshInstance.transform.SetParent(baseVisualParent);
-
-        return PhysGO;
-    }
-
     [HarmonyReversePatch]
-    [HarmonyPatch(typeof(NetworkBehaviour), "get_IsOwner")]
+    [HarmonyPatch(typeof(NetworkBehaviour), "IsOwner", MethodType.Getter)]
     public static bool IsOwner(NetworkBehaviour __instance)
     {
         return false;
@@ -87,39 +78,48 @@ public static class TeleportTrap
         return false;
     }
 
-    [HarmonyPatch(typeof(WeaponHandSpawner), "SpawnObject")]
+    [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
-    static void SpawnObjectPrefix(WeaponHandSpawner __instance, ref GameObject obj)
+    static bool MinePlacementPre(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
     {
-        NonPhysTPTrapData connecting_data = __instance.gameObject.GetComponent<NonPhysTPTrapData>();
-        if (connecting_data)
-        {
-            KokiDebug.Log(obj);
-            Transform baseVisualParent = obj.transform;
-            baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-            GameObject meshInstance = UnityEngine.Object.Instantiate(PhysMineMesh);
-            meshInstance.transform.SetParent(baseVisualParent);
-            // PhysTPTrapData new_trap = obj.AddComponent<PhysTPTrapData>();
+        TrapPair connector = __instance.gameObject.GetComponent<TrapPair>();
+        if (PauseManager.BetweenRounds || !connector) return true;
 
-            // if (connecting_data.origTrap)
-            // {
-            //     connecting_data.origTrap.GetComponent<PhysTPTrapData>().otherTrap = obj;
-            //     new_trap.otherTrap = connecting_data.origTrap;
-            // }
-            // else
-            // {
-            //     connecting_data.origTrap = obj;
-            // }
+        GameObject physMine = UnityEngine.Object.Instantiate(obj, position, rotation);
+        InstanceFinder.ServerManager.Spawn(physMine);
+        physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
+        physMine.GetComponent<ProximityMine>().sync___set_value_weapon((Weapon)__instance, true);
+
+        TPTrapLink new_trap = physMine.GetComponent<TPTrapLink>();
+        if (connector.origTrap)
+        {
+            connector.origTrap.GetComponent<TPTrapLink>().otherTrap = physMine;
+            new_trap.otherTrap = connector.origTrap;
         }
+        else
+        {
+            connector.origTrap = physMine;
+        }
+        return false;
+    }
+
+    public static bool NotInHotReload(GameObject go)
+    {
+        foreach (var c in go.GetComponents<Component>())
+        {
+            if (c.GetType().Name == "TPTrapLink") return false;
+        }
+        return true;
     }
 }
 
-public class NonPhysTPTrapData : MonoBehaviour
+public class TrapPair : MonoBehaviour
 {
     public GameObject origTrap;
 }
 
-public class PhysTPTrapData : MonoBehaviour
+public class TPTrapLink : MonoBehaviour
 {
     public GameObject otherTrap;
 }
+
