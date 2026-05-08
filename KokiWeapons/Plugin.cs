@@ -25,19 +25,22 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
 
+        // For hot reload
         var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
         var existingBundle = loadedBundles.FirstOrDefault(b => b.name == "kokiweaponsbundle");
         if (existingBundle)
             existingBundle.Unload(true);
+
         string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
 
-        TeleportTrap.BaseMineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
+        TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
         TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrap");
     }
 
     public void OnDestroy()
     {
+        // Cleanup stuff spawned by Debug
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
         {
             if (weapon)
@@ -46,9 +49,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             }
         }
 
-        TeleportTrap.BaseMineMesh.transform.SetParent(null);
-        TeleportTrap.PhysMineMesh.transform.SetParent(null);
-        TeleportTrap.NonPhysGO = null;
+        // TeleportTrap.BaseMineMesh.transform.SetParent(null);
+        // TeleportTrap.PhysMineMesh.transform.SetParent(null);
+        TeleportTrap.TemplateGameObject = null;
 
         Harmony.UnpatchSelf();
     }

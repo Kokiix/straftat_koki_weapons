@@ -7,49 +7,49 @@ using UnityEngine;
 [HarmonyPatch]
 public static class TeleportTrap
 {
-    public static GameObject NonPhysGO;
+    public static GameObject TemplateGameObject;
 
-    public static GameObject BaseMineMesh;
+    public static GameObject MineMesh;
     public static GameObject PhysMineMesh;
 
-    public static GameObject BaseMineMeshInstance;
+    public static GameObject MineMeshInstance;
     public static GameObject PhysMineMeshInstance;
 
-    public static GameObject GetNonPhysGO()
+    public static GameObject CreateTemplateGameObject()
     {
-        if (NonPhysGO) return NonPhysGO;
+        if (TemplateGameObject) return TemplateGameObject;
 
-        BaseMineMeshInstance = Object.Instantiate(BaseMineMesh);
+        MineMeshInstance = Object.Instantiate(MineMesh);
         PhysMineMeshInstance = Object.Instantiate(PhysMineMesh);
 
-        NonPhysGO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
-        NonPhysGO.SetActive(false);
-        NonPhysGO.AddComponent<TrapPair>();
+        TemplateGameObject = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
+        TemplateGameObject.SetActive(false);
+        TemplateGameObject.AddComponent<TrapPair>();
 
-        ItemBehaviour ib = NonPhysGO.GetComponent<ItemBehaviour>();
+        ItemBehaviour ib = TemplateGameObject.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport trap";
 
-        WeaponHandSpawner spawner = NonPhysGO.GetComponent<WeaponHandSpawner>();
+        WeaponHandSpawner spawner = TemplateGameObject.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
 
-        Transform baseVisualParent = NonPhysGO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
-        baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        BaseMineMeshInstance.transform.SetParent(baseVisualParent);
+        Transform meshParent = TemplateGameObject.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
+        meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
+        MineMeshInstance.transform.SetParent(meshParent);
 
-        Transform physObjMine = spawner.objToSpawn.transform;
-        physObjMine.Find("PF_APMine_00").gameObject.SetActive(false);
-        PhysMineMeshInstance.transform.SetParent(physObjMine);
+        Transform physMine = spawner.objToSpawn.transform;
+        physMine.Find("PF_APMine_00").gameObject.SetActive(false);
+        PhysMineMeshInstance.transform.SetParent(physMine);
 
-        Object.Destroy(physObjMine.transform.Find("radius"));
+        Object.Destroy(physMine.transform.Find("radius"));
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
-        proxMineRadius.transform.SetParent(physObjMine);
+        proxMineRadius.transform.SetParent(physMine);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
         proxMineRadius.transform.position = new Vector3(-0.1f, 0, 0.15f);
 
-        Object.Destroy(GetTrapLink(physObjMine.gameObject));
-        physObjMine.gameObject.AddComponent<TrapLink>();
+        Object.Destroy(GetTrapLink(physMine.gameObject));
+        physMine.gameObject.AddComponent<TrapLink>();
 
-        return NonPhysGO;
+        return TemplateGameObject;
     }
 
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
