@@ -36,9 +36,8 @@ public static class TeleportTrap
         physObjMine.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMesh.transform.SetParent(physObjMine);
 
-        KokiDebug.Log(NotInHotReload(physObjMine.gameObject));
-        if (NotInHotReload(physObjMine.gameObject))
-            physObjMine.gameObject.AddComponent<TPTrapLink>();
+        Object.Destroy(GetTrapLink(physObjMine.gameObject));
+        physObjMine.gameObject.AddComponent<TrapLink>();
 
         return NonPhysGO;
     }
@@ -54,27 +53,27 @@ public static class TeleportTrap
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
     {
-        // PhysTPTrapData trap_data = __instance.GetComponent<PhysTPTrapData>();
+        TrapLink trap_data = GetTrapLink(__instance.gameObject);
         // KokiDebug.Log(trap_data.otherTrap);
-        // if (!trap_data.otherTrap || !IsOwner(__instance))
-        // { KokiDebug.Log("blocked explo"); return false; }
+        if (!trap_data.otherTrap || !IsOwner(__instance))
+        { KokiDebug.Log("blocked explo"); return false; }
 
-        // Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
-        // if (colliders.Length != 0)
-        // {
-        //     foreach (Collider c in colliders)
-        //     {
-        //         FirstPersonController fpc = c.GetComponent<FirstPersonController>();
-        //         if (fpc)
-        //         {
-        //             KokiDebug.Log(trap_data.otherTrap.transform.position);
-        //             trap_data.otherTrap.HandleExplosion();
-        //             // fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: false);
-        //             break;
-        //         }
-        //     }
-        // }
-        // __instance.ExplodeServer();
+        Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+        if (colliders.Length != 0)
+        {
+            foreach (Collider c in colliders)
+            {
+                FirstPersonController fpc = c.GetComponent<FirstPersonController>();
+                if (fpc)
+                {
+                    KokiDebug.Log(trap_data.otherTrap.transform.position);
+                    trap_data.otherTrap.GetComponent<ProximityMine>().HandleExplosion();
+                    // fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: false);
+                    break;
+                }
+            }
+        }
+        __instance.ExplodeServer();
         return false;
     }
 
@@ -90,10 +89,10 @@ public static class TeleportTrap
         physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
         physMine.GetComponent<ProximityMine>().sync___set_value_weapon((Weapon)__instance, true);
 
-        TPTrapLink new_trap = physMine.GetComponent<TPTrapLink>();
+        TrapLink new_trap = GetTrapLink(physMine);
         if (connector.origTrap)
         {
-            connector.origTrap.GetComponent<TPTrapLink>().otherTrap = physMine;
+            connector.origTrap.GetComponent<TrapLink>().otherTrap = physMine;
             new_trap.otherTrap = connector.origTrap;
         }
         else
@@ -103,13 +102,14 @@ public static class TeleportTrap
         return false;
     }
 
-    public static bool NotInHotReload(GameObject go)
+    // Required because of hot reload BS
+    public static TrapLink GetTrapLink(GameObject go)
     {
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "TPTrapLink") return false;
+            if (c.GetType().Name == "TrapLink") return (TrapLink)c;
         }
-        return true;
+        return null;
     }
 }
 
@@ -118,7 +118,7 @@ public class TrapPair : MonoBehaviour
     public GameObject origTrap;
 }
 
-public class TPTrapLink : MonoBehaviour
+public class TrapLink : MonoBehaviour
 {
     public GameObject otherTrap;
 }
