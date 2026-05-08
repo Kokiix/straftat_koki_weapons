@@ -1,6 +1,7 @@
 using System.Linq;
 using FishNet;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using HarmonyLib;
 using UnityEngine;
 
@@ -50,6 +51,9 @@ public static class TeleportTrap
         proxMineRadius.transform.position = new Vector3(-0.11f, 0, 0.175f); // pretty sure this is just because the model is off center
         proxMineRadius.SetActive(false);
 
+        if (!physMine.gameObject.GetComponent<NetworkObject>())
+            physMine.gameObject.AddComponent<NetworkObject>();
+
         Object.Destroy(GetTrapLink(physMine.gameObject));
         physMine.gameObject.AddComponent<TrapLink>();
 
@@ -61,7 +65,7 @@ public static class TeleportTrap
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
-    static bool MinePlacementPre(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
+    static bool PlaceMinePrefix(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
     {
         TrapPair connector = __instance.gameObject.GetComponent<TrapPair>();
         if (PauseManager.BetweenRounds || !connector) return true;
@@ -74,15 +78,23 @@ public static class TeleportTrap
         TrapLink new_trap = (TrapLink)GetTrapLink(physMine);
         if (connector.origTrap)
         {
-            connector.origTrap.GetComponent<TrapLink>().otherTrap = physMine;
-            connector.origTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            GameObject origObj = connector.origTrap.gameObject;
+            origObj.GetComponent<TrapLink>().otherTrap = physMine.AddComponent<NetworkObject>();
             new_trap.otherTrap = connector.origTrap;
+            origObj.transform.Find("radius(Clone)").gameObject.SetActive(true);
             physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
         }
         else
         {
-            connector.origTrap = physMine;
+            connector.origTrap = physMine.GetComponent<NetworkObject>();
         }
+        return false;
+    }
+
+    [HarmonyReversePatch]
+    [HarmonyPatch(typeof(NetworkBehaviour), "IsOwner", MethodType.Getter)]
+    public static bool IsOwner(NetworkBehaviour __instance)
+    {
         return false;
     }
 
@@ -92,7 +104,7 @@ public static class TeleportTrap
     {
         TrapLink trap_data = (TrapLink)GetTrapLink(__instance.gameObject);
         if (!trap_data) return true;
-        if (!trap_data.otherTrap) return false;
+        if (!trap_data.otherTrap || !IsOwner(__instance)) return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
         if (colliders.Length != 0)
@@ -142,12 +154,14 @@ public static class TeleportTrap
     }
 }
 
-public class TrapPair : MonoBehaviour
+public class TrapPair : NetworkBehaviour
 {
-    public GameObject origTrap;
+    [SyncVar]
+    public NetworkObject origTrap;
 }
 
-public class TrapLink : MonoBehaviour
+public class TrapLink : NetworkBehaviour
 {
-    public GameObject otherTrap;
+    [SyncVar]
+    public NetworkObject otherTrap;
 }
