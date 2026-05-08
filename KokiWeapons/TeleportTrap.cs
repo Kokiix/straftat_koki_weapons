@@ -59,6 +59,33 @@ public static class TeleportTrap
         return TemplateGameObject;
     }
 
+    [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
+    [HarmonyPrefix]
+    static bool MinePlacementPre(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
+    {
+        TrapPair connector = __instance.gameObject.GetComponent<TrapPair>();
+        if (PauseManager.BetweenRounds || !connector) return true;
+
+        GameObject physMine = UnityEngine.Object.Instantiate(obj, position, rotation);
+        InstanceFinder.ServerManager.Spawn(physMine);
+        physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
+        physMine.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
+
+        TrapLink new_trap = (TrapLink)GetTrapLink(physMine);
+        if (connector.origTrap)
+        {
+            connector.origTrap.GetComponent<TrapLink>().otherTrap = physMine;
+            connector.origTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            new_trap.otherTrap = connector.origTrap;
+            physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
+        }
+        else
+        {
+            connector.origTrap = physMine;
+        }
+        return false;
+    }
+
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
@@ -88,32 +115,21 @@ public static class TeleportTrap
         return false;
     }
 
-    [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
-    [HarmonyPrefix]
-    static bool MinePlacementPre(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
+    [HarmonyPatch]
+    public class RegisterWeapon
     {
-        TrapPair connector = __instance.gameObject.GetComponent<TrapPair>();
-        if (PauseManager.BetweenRounds || !connector) return true;
-
-        GameObject physMine = UnityEngine.Object.Instantiate(obj, position, rotation);
-        InstanceFinder.ServerManager.Spawn(physMine);
-        physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
-        physMine.GetComponent<ProximityMine>().sync___set_value_weapon((Weapon)__instance, true);
-
-        TrapLink new_trap = (TrapLink)GetTrapLink(physMine);
-        if (connector.origTrap)
+        [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+        public static void Postfix()
         {
-            connector.origTrap.GetComponent<TrapLink>().otherTrap = physMine;
-            connector.origTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
-            new_trap.otherTrap = connector.origTrap;
-            physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
+            GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
+            System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+            SpawnerManager.AllWeapons[^1] = TPTrap;
+            SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
+            SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
         }
-        else
-        {
-            connector.origTrap = physMine;
-        }
-        return false;
     }
+
 
     // Required because of hot reload BS
     public static Component GetTrapLink(GameObject go)
@@ -135,19 +151,3 @@ public class TrapLink : MonoBehaviour
 {
     public GameObject otherTrap;
 }
-
-[HarmonyPatch]
-public class RegisterWeapon
-{
-    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
-    public static void Postfix()
-    {
-        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
-        GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-        SpawnerManager.AllWeapons[^1] = TPTrap;
-        SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
-        SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
-    }
-}
-
