@@ -36,6 +36,7 @@ public static class TeleportTrap
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         MineMeshInstance.transform.SetParent(meshParent);
 
+        // Also create template for physics game obj which is stored in the hand spawner component
         Transform physMine = spawner.objToSpawn.transform;
         physMine.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMeshInstance.transform.SetParent(physMine);
@@ -48,6 +49,9 @@ public static class TeleportTrap
 
         Object.Destroy(GetTrapLink(physMine.gameObject));
         physMine.gameObject.AddComponent<TrapLink>();
+
+        BoxCollider collider = physMine.GetComponent<BoxCollider>();
+        collider.size = new Vector3(1.5f, 1.5f, 1.5f);
 
         return TemplateGameObject;
     }
