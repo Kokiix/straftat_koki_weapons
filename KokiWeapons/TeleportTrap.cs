@@ -27,6 +27,7 @@ public static class TeleportTrap
         TemplateGameObject.SetActive(false);
         TemplateGameObject.AddComponent<TrapPair>();
         TemplateGameObject.name = "Teleport Trap";
+        Object.DontDestroyOnLoad(TemplateGameObject);
 
         ItemBehaviour ib = TemplateGameObject.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport trap";
@@ -36,7 +37,7 @@ public static class TeleportTrap
 
         Transform meshParent = TemplateGameObject.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        MineMeshInstance.transform.SetParent(meshParent);
+        MineMeshInstance.transform.SetParent(meshParent); 
 
         // Also create template for physics game obj which is stored in the hand spawner component
         Transform physMine = spawner.objToSpawn.transform;
@@ -51,7 +52,7 @@ public static class TeleportTrap
         // proxMineRadius.transform.position = new Vector3(-0.11f, 0, 0.175f); // pretty sure this is just because the model is off center
         proxMineRadius.SetActive(false);
 
-        Object.Destroy(physMine.gameObject.GetComponentByName("TrapLink"));
+        Object.Destroy(GetTrapLink(physMine.gameObject));
         physMine.gameObject.AddComponent<TrapLink>();
 
         BoxCollider collider = physMine.GetComponent<BoxCollider>();
@@ -84,7 +85,7 @@ public static class TeleportTrap
         }
         else
         {
-            connector.origTrap = physMine.GetComponent<NetworkObject>();
+            connector.origTrap = physMine;
         }
         return false;
     }
@@ -93,7 +94,7 @@ public static class TeleportTrap
     [HarmonyPatch(typeof(NetworkBehaviour), "IsOwner", MethodType.Getter)]
     public static bool IsOwner(NetworkBehaviour __instance)
     {
-        return false;
+        return true;
     }
 
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
@@ -102,7 +103,8 @@ public static class TeleportTrap
     {
         TrapLink trap_data = (TrapLink)GetTrapLink(__instance.gameObject);
         if (!trap_data) return true;
-        if (!trap_data.otherTrap || !IsOwner(__instance)) return false;
+        if (!trap_data.otherTrap) return false;
+        // if (!trap_data.otherTrap || !IsOwner(__instance)) return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
         if (colliders.Length != 0)
