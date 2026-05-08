@@ -46,21 +46,24 @@ public static class TeleportTrap
         TemplatePhysGameObject.name = "Physics Teleport Trap";
         Object.DontDestroyOnLoad(TemplatePhysGameObject);
 
-        Transform physMine = TemplatePhysGameObject.transform;
-        physMine.Find("PF_APMine_00").gameObject.SetActive(false);
-        PhysMineMeshInstance.transform.SetParent(physMine);
+        ProximityMine mine = TemplatePhysGameObject.GetComponent<ProximityMine>();
+        mine.instantExplode = false;
 
-        if (physMine.transform.Find("radius(Clone)"))
-            Object.Destroy(physMine.transform.Find("radius(Clone)").gameObject);
+        Transform physGOTransform = TemplatePhysGameObject.transform;
+        physGOTransform.Find("PF_APMine_00").gameObject.SetActive(false);
+        PhysMineMeshInstance.transform.SetParent(physGOTransform);
+
+        if (physGOTransform.Find("radius(Clone)"))
+            Object.Destroy(physGOTransform.Find("radius(Clone)").gameObject);
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
-        proxMineRadius.transform.SetParent(physMine);
+        proxMineRadius.transform.SetParent(physGOTransform);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
         proxMineRadius.SetActive(false);
 
-        Object.Destroy(GetTrapLink(physMine.gameObject));
-        physMine.gameObject.AddComponent<TrapLink>();
+        Object.Destroy(GetTrapLink(TemplatePhysGameObject));
+        TemplatePhysGameObject.AddComponent<TrapLink>();
 
-        BoxCollider collider = physMine.GetComponent<BoxCollider>();
+        BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
         collider.size = new Vector3(1.6f, 0.81f, 1.6f);
 
         spawner.objToSpawn = TemplatePhysGameObject;
@@ -75,18 +78,22 @@ public static class TeleportTrap
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (PauseManager.BetweenRounds || !connector) return true;
 
-        GameObject physMine = UnityEngine.Object.Instantiate(TemplatePhysGameObject, position, rotation);
-        physMine.SetActive(true);
-        InstanceFinder.ServerManager.Spawn(physMine);
+        GameObject newTrap = UnityEngine.Object.Instantiate(TemplatePhysGameObject, position, rotation);
+        newTrap.SetActive(true);
 
-        physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
+        ProximityMine mine = newTrap.GetComponent<ProximityMine>();
+        mine.activated = false;
+
+        InstanceFinder.ServerManager.Spawn(newTrap);
+
+        newTrap.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
 
         if (connector.otherTrap)
         {
             GameObject otherTrap = connector.otherTrap.gameObject;
 
             NetworkObject otherNob = otherTrap.GetComponent<NetworkObject>();
-            NetworkObject thisNob = physMine.GetComponent<NetworkObject>();
+            NetworkObject thisNob = newTrap.GetComponent<NetworkObject>();
             __instance.damage = otherNob.ObjectId;
 
             Weapon otherTrapWeapon = otherTrap.GetComponent<ProximityMine>().sync___get_value_weapon();
@@ -94,13 +101,16 @@ public static class TeleportTrap
             otherTrap.GetComponent<ProximityMine>().sync___set_value_weapon(otherTrapWeapon, true);
 
             otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
-            physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            newTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
         }
         else
         {
-            connector.otherTrap = physMine;
+            __instance.damage = -1;
+            __instance.bulletsAmount = -1;
+            connector.otherTrap = newTrap;
         }
-        physMine.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
+
+        newTrap.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
         return false;
     }
 
@@ -108,10 +118,8 @@ public static class TeleportTrap
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
     {
+
         if (!GetTrapLink(__instance.gameObject)) return true;
-        TrapLink isTPTrap = (TrapLink)GetTrapLink(__instance.gameObject);
-        if (!isTPTrap) return true;
-        if (!InstanceFinder.IsServer) return false;
 
         Weapon sharedWeapon = __instance.sync___get_value_weapon();
         int otherTrapID;
@@ -120,11 +128,8 @@ public static class TeleportTrap
         else
             otherTrapID = (int)sharedWeapon.damage;
 
-        if (!InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
-        {
-            __instance.sync___set_value_detonated(false, false);
-            return false;
-        }
+        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob);
+
         ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
@@ -163,6 +168,28 @@ public static class TeleportTrap
         }
     }
 
+    [HarmonyPatch(typeof(ProximityMine), "OnTriggerStay")]
+    [HarmonyPrefix]
+    static bool DetectExplosion(ProximityMine __instance)
+    {
+        if (!GetTrapLink(__instance.gameObject)) return true;
+        if (!InstanceFinder.IsServer) return false;
+
+        Weapon sharedWeapon = __instance.sync___get_value_weapon();
+        int otherTrapID;
+        if (sharedWeapon.bulletsAmount == -1 || sharedWeapon.damage == -1f) return false;
+        if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
+            otherTrapID = sharedWeapon.bulletsAmount;
+        else
+            otherTrapID = (int)sharedWeapon.damage;
+
+        if (InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
+        {
+            __instance.ChangeState();
+            __instance.HandleExplosion();
+        }
+        return false;
+    }
 
     // Required because of hot reload BS
     public static Component GetTrapLink(GameObject go)
