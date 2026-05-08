@@ -1,4 +1,5 @@
 using System;
+using FishNet.Object;
 using HarmonyLib;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ public static class TeleportTrap
         NonPhysGO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         NonPhysGO.SetActive(false);
 
-        NonPhysGO.AddComponent<TPTrapData>();
+        NonPhysGO.AddComponent<NonPhysTPTrapData>();
 
         ItemBehaviour ib = NonPhysGO.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport trap";
@@ -51,25 +52,60 @@ public static class TeleportTrap
         return PhysGO;
     }
 
+    [HarmonyReversePatch]
+    [HarmonyPatch(typeof(NetworkBehaviour), "get_IsOwner")]
+    public static bool IsOwner(NetworkBehaviour __instance)
+    {
+        return false;
+    }
+
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
     [HarmonyPrefix]
-    static void ExplodePrefix()
+    static bool ExplodePrefix(ProximityMine __instance)
     {
-        KokiWeaponsPlugin.Logger.LogError("general explosion");
+        PhysTPTrapData trap_data = __instance.GetComponent<PhysTPTrapData>();
+        if (!trap_data || !IsOwner(__instance)) 
+            return true;
+
+        Collider[] array = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+        if (array.Length != 0)
+        {
+            KokiDebug.Log("hit");
+        }
+        __instance.ExplodeServer();
+        return false;
     }
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
     static void PlaceObjectPrefix(WeaponHandSpawner __instance, ref GameObject obj)
     {
-        if (__instance.gameObject.GetComponent<TPTrapData>())
+        NonPhysTPTrapData connecting_data = __instance.gameObject.GetComponent<NonPhysTPTrapData>();
+        if (connecting_data)
         {
             KokiDebug.Log("placing teleport trap!");
-            obj = GetPhysGO(originalGO: obj);
+            obj = UnityEngine.Object.Instantiate(GetPhysGO(originalGO: obj));
+            PhysTPTrapData new_trap = obj.AddComponent<PhysTPTrapData>();
+
+            if (connecting_data.origTrap)
+            {
+                connecting_data.origTrap.GetComponent<PhysTPTrapData>().destination = obj.transform.position;
+                new_trap.destination = connecting_data.origTrap.transform.position;
+            }
+            else
+            {
+                connecting_data.origTrap = obj;
+            }
         }
     }
 }
 
-public class TPTrapData : MonoBehaviour
+public class NonPhysTPTrapData : MonoBehaviour
 {
+    public GameObject origTrap;
+}
+
+public class PhysTPTrapData : MonoBehaviour
+{
+    public Vector3 destination;
 }
