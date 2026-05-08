@@ -142,11 +142,12 @@ public class RegisterWeapon
     [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
     public static void Postfix()
     {
-        KokiDebug.Log("sdlfkj");
+        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
         GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
-        SpawnerManager.AllWeapons.Append(TPTrap);
-        SpawnerManager.weaponInfo.Add("Teleport Trap", new WeaponData("Teleport Trap", 50, true));
+        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+        SpawnerManager.AllWeapons[^1] = TPTrap;
         SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
         SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
     }
 }
+
