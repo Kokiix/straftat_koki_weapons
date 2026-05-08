@@ -41,7 +41,7 @@ public static class TeleportTrap
         physMine.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMeshInstance.transform.SetParent(physMine);
 
-        Object.Destroy(physMine.transform.Find("radius"));
+        Object.Destroy(physMine.transform.Find("radius(Clone)"));
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physMine);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
@@ -72,14 +72,12 @@ public static class TeleportTrap
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    // KokiDebug.Log(trap_data.otherTrap.transform.position);
                     ProximityMine otherMine = trap_data.otherTrap.GetComponent<ProximityMine>();
                     if (!otherMine.sync___get_value_detonated())
                     {
                         otherMine.HandleExplosion();
                     }
                     fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-                    break;
                 }
             }
         }

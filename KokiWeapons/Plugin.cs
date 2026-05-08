@@ -10,7 +10,7 @@ using FishNet;
 using HarmonyLib;
 using UnityEngine;
 
-[assembly: StraftatMod(isVanillaCompatible: true)]
+[assembly: StraftatMod(isVanillaCompatible: false)]
 
 [BepInPlugin("com.koki.weapons", "Koki Weapons", "1.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
@@ -49,8 +49,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             }
         }
 
-        // TeleportTrap.BaseMineMesh.transform.SetParent(null);
-        // TeleportTrap.PhysMineMesh.transform.SetParent(null);
+        TeleportTrap.PhysMineMeshInstance.transform.SetParent(null);
         TeleportTrap.TemplateGameObject = null;
 
         Harmony.UnpatchSelf();
