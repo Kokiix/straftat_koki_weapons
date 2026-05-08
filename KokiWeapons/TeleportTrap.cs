@@ -48,13 +48,10 @@ public static class TeleportTrap
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physMine);
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
-        proxMineRadius.transform.position = new Vector3(-0.11f, 0, 0.175f); // pretty sure this is just because the model is off center
+        // proxMineRadius.transform.position = new Vector3(-0.11f, 0, 0.175f); // pretty sure this is just because the model is off center
         proxMineRadius.SetActive(false);
 
-        if (!physMine.gameObject.GetComponent<NetworkObject>())
-            physMine.gameObject.AddComponent<NetworkObject>();
-
-        Object.Destroy(GetTrapLink(physMine.gameObject));
+        Object.Destroy(physMine.gameObject.GetComponentByName("TrapLink"));
         physMine.gameObject.AddComponent<TrapLink>();
 
         BoxCollider collider = physMine.GetComponent<BoxCollider>();
@@ -72,6 +69,7 @@ public static class TeleportTrap
 
         GameObject physMine = UnityEngine.Object.Instantiate(obj, position, rotation);
         InstanceFinder.ServerManager.Spawn(physMine);
+
         physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
         physMine.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
 
@@ -79,7 +77,7 @@ public static class TeleportTrap
         if (connector.origTrap)
         {
             GameObject origObj = connector.origTrap.gameObject;
-            origObj.GetComponent<TrapLink>().otherTrap = physMine.AddComponent<NetworkObject>();
+            origObj.GetComponent<TrapLink>().otherTrap = physMine;
             new_trap.otherTrap = connector.origTrap;
             origObj.transform.Find("radius(Clone)").gameObject.SetActive(true);
             physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
@@ -154,14 +152,12 @@ public static class TeleportTrap
     }
 }
 
-public class TrapPair : NetworkBehaviour
+public class TrapPair : MonoBehaviour
 {
-    [SyncVar]
-    public NetworkObject origTrap;
+    public GameObject origTrap;
 }
 
-public class TrapLink : NetworkBehaviour
+public class TrapLink : MonoBehaviour
 {
-    [SyncVar]
-    public NetworkObject otherTrap;
+    public GameObject otherTrap;
 }
