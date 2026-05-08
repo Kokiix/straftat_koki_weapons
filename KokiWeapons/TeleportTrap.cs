@@ -1,3 +1,4 @@
+using System.Linq;
 using FishNet;
 using FishNet.Object;
 using HarmonyLib;
@@ -11,12 +12,15 @@ public static class TeleportTrap
     public static GameObject BaseMineMesh;
     public static GameObject PhysMineMesh;
 
+    public static GameObject BaseMineMeshInstance;
+    public static GameObject PhysMineMeshInstance;
+
     public static GameObject GetNonPhysGO()
     {
         if (NonPhysGO) return NonPhysGO;
 
-        BaseMineMesh = Object.Instantiate(BaseMineMesh);
-        PhysMineMesh = Object.Instantiate(PhysMineMesh);
+        BaseMineMeshInstance = Object.Instantiate(BaseMineMesh);
+        PhysMineMeshInstance = Object.Instantiate(PhysMineMesh);
 
         NonPhysGO = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         NonPhysGO.SetActive(false);
@@ -30,11 +34,17 @@ public static class TeleportTrap
 
         Transform baseVisualParent = NonPhysGO.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         baseVisualParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        BaseMineMesh.transform.SetParent(baseVisualParent);
+        BaseMineMeshInstance.transform.SetParent(baseVisualParent);
 
         Transform physObjMine = spawner.objToSpawn.transform;
         physObjMine.Find("PF_APMine_00").gameObject.SetActive(false);
-        PhysMineMesh.transform.SetParent(physObjMine);
+        PhysMineMeshInstance.transform.SetParent(physObjMine);
+
+        Object.Destroy(physObjMine.transform.Find("radius"));
+        GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
+        proxMineRadius.transform.SetParent(physObjMine);
+        proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
+        proxMineRadius.transform.position = new Vector3(-0.1f, 0, 0.15f);
 
         Object.Destroy(GetTrapLink(physObjMine.gameObject));
         physObjMine.gameObject.AddComponent<TrapLink>();
@@ -47,8 +57,8 @@ public static class TeleportTrap
     static bool ExplodePrefix(ProximityMine __instance)
     {
         TrapLink trap_data = (TrapLink)GetTrapLink(__instance.gameObject);
-        if (!trap_data.otherTrap)
-            return false;
+        if (!trap_data) return true;
+        if (!trap_data.otherTrap) return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
         if (colliders.Length != 0)
