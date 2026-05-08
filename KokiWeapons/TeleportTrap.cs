@@ -25,7 +25,7 @@ public static class TeleportTrap
 
         TemplateGameObject = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         TemplateGameObject.SetActive(false);
-        TemplateGameObject.AddComponent<TrapPair>();
+        TemplateGameObject.AddComponent<TrapLink>();
         TemplateGameObject.name = "Teleport Trap";
         Object.DontDestroyOnLoad(TemplateGameObject);
 
@@ -37,7 +37,7 @@ public static class TeleportTrap
 
         Transform meshParent = TemplateGameObject.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        MineMeshInstance.transform.SetParent(meshParent); 
+        MineMeshInstance.transform.SetParent(meshParent);
 
         // Also create template for physics game obj which is stored in the hand spawner component
         Transform physMine = spawner.objToSpawn.transform;
@@ -65,28 +65,33 @@ public static class TeleportTrap
     [HarmonyPrefix]
     static bool PlaceMinePrefix(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
     {
-        TrapPair connector = __instance.gameObject.GetComponent<TrapPair>();
+        TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (PauseManager.BetweenRounds || !connector) return true;
 
         GameObject physMine = UnityEngine.Object.Instantiate(obj, position, rotation);
         InstanceFinder.ServerManager.Spawn(physMine);
 
         physMine.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
-        physMine.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
 
-        TrapLink new_trap = (TrapLink)GetTrapLink(physMine);
-        if (connector.origTrap)
+        if (connector.otherTrap)
         {
-            GameObject origObj = connector.origTrap.gameObject;
-            origObj.GetComponent<TrapLink>().otherTrap = physMine;
-            new_trap.otherTrap = connector.origTrap;
-            origObj.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            GameObject otherTrap = connector.otherTrap.gameObject;
+
+            NetworkObject otherNob = otherTrap.GetComponent<NetworkObject>();
+            NetworkObject thisNob = physMine.GetComponent<NetworkObject>();
+            __instance.damage = otherNob.ObjectId;
+            Weapon otherTrapWeapon = otherTrap.GetComponent<ProximityMine>().sync___get_value_weapon();
+            otherTrapWeapon.damage = thisNob.ObjectId;
+            otherTrap.GetComponent<ProximityMine>().sync___set_value_weapon(otherTrapWeapon, true);
+
+            otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
             physMine.transform.Find("radius(Clone)").gameObject.SetActive(true);
         }
         else
         {
-            connector.origTrap = physMine;
+            connector.otherTrap = physMine;
         }
+        physMine.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
         return false;
     }
 
@@ -101,28 +106,38 @@ public static class TeleportTrap
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
     {
+        if (!GetTrapLink(__instance.gameObject)) return true;
+        KokiDebug.Log(GetTrapLink(__instance.gameObject));
         TrapLink trap_data = (TrapLink)GetTrapLink(__instance.gameObject);
         if (!trap_data) return true;
-        if (!trap_data.otherTrap) return false;
-        // if (!trap_data.otherTrap || !IsOwner(__instance)) return false;
+        // if (!trap_data.otherTrap) return false;
+        if (!trap_data.otherTrap || !InstanceFinder.IsServer) return false;
 
-        Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
-        if (colliders.Length != 0)
-        {
-            foreach (Collider c in colliders)
-            {
-                FirstPersonController fpc = c.GetComponent<FirstPersonController>();
-                if (fpc)
-                {
-                    ProximityMine otherMine = trap_data.otherTrap.GetComponent<ProximityMine>();
-                    if (!otherMine.sync___get_value_detonated())
-                    {
-                        otherMine.HandleExplosion();
-                    }
-                    fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-                }
-            }
-        }
+        NetworkObject otherTrap;
+        int otherTrapID = (int)__instance.sync___get_value_weapon().damage;
+        if (InstanceFinder.IsServer)
+            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out otherTrap);
+        else
+            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(otherTrapID, out otherTrap);
+
+        KokiDebug.Log(otherTrap.gameObject);
+        // Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+        // if (colliders.Length != 0)
+        // {
+        //     foreach (Collider c in colliders)
+        //     {
+        //         FirstPersonController fpc = c.GetComponent<FirstPersonController>();
+        //         if (fpc)
+        //         {
+        //             ProximityMine otherMine = trap_data.otherTrap.GetComponent<ProximityMine>();
+        //             if (!otherMine.sync___get_value_detonated())
+        //             {
+        //                 otherMine.HandleExplosion();
+        //             }
+        //             fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+        //         }
+        //     }
+        // }
         __instance.ExplodeServer();
         return false;
     }
@@ -152,11 +167,6 @@ public static class TeleportTrap
         }
         return null;
     }
-}
-
-public class TrapPair : MonoBehaviour
-{
-    public GameObject origTrap;
 }
 
 public class TrapLink : MonoBehaviour
