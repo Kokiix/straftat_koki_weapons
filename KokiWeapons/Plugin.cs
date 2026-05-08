@@ -10,7 +10,7 @@ using FishNet;
 using HarmonyLib;
 using UnityEngine;
 
-[assembly: StraftatMod(isVanillaCompatible: false)] 
+[assembly: StraftatMod(isVanillaCompatible: false)]
 
 [BepInPlugin("com.koki.weapons", "Koki Weapons", "1.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin

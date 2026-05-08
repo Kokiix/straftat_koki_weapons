@@ -80,8 +80,9 @@ public static class TeleportTrap
             NetworkObject otherNob = otherTrap.GetComponent<NetworkObject>();
             NetworkObject thisNob = physMine.GetComponent<NetworkObject>();
             __instance.damage = otherNob.ObjectId;
+
             Weapon otherTrapWeapon = otherTrap.GetComponent<ProximityMine>().sync___get_value_weapon();
-            otherTrapWeapon.damage = thisNob.ObjectId;
+            otherTrapWeapon.bulletsAmount = thisNob.ObjectId;
             otherTrap.GetComponent<ProximityMine>().sync___set_value_weapon(otherTrapWeapon, true);
 
             otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
@@ -95,49 +96,42 @@ public static class TeleportTrap
         return false;
     }
 
-    [HarmonyReversePatch]
-    [HarmonyPatch(typeof(NetworkBehaviour), "IsOwner", MethodType.Getter)]
-    public static bool IsOwner(NetworkBehaviour __instance)
-    {
-        return true;
-    }
-
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
     [HarmonyPrefix]
     static bool ExplodePrefix(ProximityMine __instance)
     {
         if (!GetTrapLink(__instance.gameObject)) return true;
-        KokiDebug.Log(GetTrapLink(__instance.gameObject));
-        TrapLink trap_data = (TrapLink)GetTrapLink(__instance.gameObject);
-        if (!trap_data) return true;
-        // if (!trap_data.otherTrap) return false;
-        if (!trap_data.otherTrap || !InstanceFinder.IsServer) return false;
+        TrapLink isTPTrap = (TrapLink)GetTrapLink(__instance.gameObject);
+        if (!isTPTrap) return true;
+        if (!InstanceFinder.IsServer) return false;
 
-        NetworkObject otherTrap;
-        int otherTrapID = (int)__instance.sync___get_value_weapon().damage;
-        if (InstanceFinder.IsServer)
-            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out otherTrap);
+        Weapon sharedWeapon = __instance.sync___get_value_weapon();
+        int otherTrapID;
+        if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
+            otherTrapID = sharedWeapon.bulletsAmount;
         else
-            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(otherTrapID, out otherTrap);
+            otherTrapID = (int)sharedWeapon.damage;
 
-        KokiDebug.Log(otherTrap.gameObject);
-        // Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
-        // if (colliders.Length != 0)
-        // {
-        //     foreach (Collider c in colliders)
-        //     {
-        //         FirstPersonController fpc = c.GetComponent<FirstPersonController>();
-        //         if (fpc)
-        //         {
-        //             ProximityMine otherMine = trap_data.otherTrap.GetComponent<ProximityMine>();
-        //             if (!otherMine.sync___get_value_detonated())
-        //             {
-        //                 otherMine.HandleExplosion();
-        //             }
-        //             fpc.Teleport(trap_data.otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-        //         }
-        //     }
-        // }
+        if (!InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
+            return false;
+        ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
+
+        Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+        if (colliders.Length != 0)
+        {
+            foreach (Collider c in colliders)
+            {
+                FirstPersonController fpc = c.GetComponent<FirstPersonController>();
+                if (fpc)
+                {
+                    if (!otherTrap.sync___get_value_detonated())
+                    {
+                        otherTrap.HandleExplosion();
+                    }
+                    fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                }
+            }
+        }
         __instance.ExplodeServer();
         return false;
     }
