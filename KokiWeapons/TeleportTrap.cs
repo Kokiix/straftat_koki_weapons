@@ -113,7 +113,10 @@ public static class TeleportTrap
             otherTrapID = (int)sharedWeapon.damage;
 
         if (!InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
+        {
+            __instance.sync___set_value_detonated(false, false);
             return false;
+        }
         ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
@@ -145,6 +148,7 @@ public static class TeleportTrap
             if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
             GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
             System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+            SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
             SpawnerManager.AllWeapons[^1] = TPTrap;
             SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
             SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
