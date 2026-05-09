@@ -6,6 +6,7 @@ using FishNet.Managing.Server;
 using FishNet.Object;
 using FishNet.Serializing;
 using HarmonyLib;
+using UnityEngine;
 
 public struct TPTrapConversion : IBroadcast
 {
@@ -35,6 +36,7 @@ public static class TPTrapNetworking
         GenericWriter<TPTrapConversion>.Write = TPTrapSerializers.WriteTPTrap;
         GenericReader<TPTrapConversion>.Read = TPTrapSerializers.ReadTPTrap;
         InstanceFinder.ClientManager.RegisterBroadcast<TPTrapConversion>(APMineToTPTrap);
+
     }
 
     [HarmonyPatch(typeof(ServerManager), "Spawn", new Type[] { typeof(NetworkObject), typeof(NetworkConnection) })]
@@ -53,6 +55,11 @@ public static class TPTrapNetworking
 
     public static void APMineToTPTrap(TPTrapConversion msg)
     {
-        KokiDebug.Log("hi");
+        if (InstanceFinder.IsServer) return;
+
+        KokiDebug.Log("trying conversion");
+        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(msg.NobID, out NetworkObject nob);
+        GameObject apmine = nob.gameObject;
+        TeleportTrap.ConvertAPToTPTrap(apmine);
     }
 }
