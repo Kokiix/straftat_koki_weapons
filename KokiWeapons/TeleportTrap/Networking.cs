@@ -1,8 +1,10 @@
+using System;
 using FishNet;
 using FishNet.Broadcast;
 using FishNet.Connection;
 using FishNet.Managing.Server;
 using FishNet.Object;
+using FishNet.Serializing;
 using HarmonyLib;
 
 public struct TPTrapConversion : IBroadcast
@@ -10,32 +12,43 @@ public struct TPTrapConversion : IBroadcast
     public int NobID;
 }
 
+public static class TPTrapSerializers
+{
+    public static void WriteTPTrap(this Writer writer, TPTrapConversion value)
+    {
+        writer.WriteInt32(value.NobID);
+    }
+    public static TPTrapConversion ReadTPTrap(this Reader reader)
+    {
+        return new TPTrapConversion
+        {
+            NobID = reader.ReadInt32()
+        };
+    }
+}
+
 [HarmonyPatch]
 public static class TPTrapNetworking
 {
     public static void Init()
     {
+        GenericWriter<TPTrapConversion>.Write = TPTrapSerializers.WriteTPTrap;
+        GenericReader<TPTrapConversion>.Read = TPTrapSerializers.ReadTPTrap;
         InstanceFinder.ClientManager.RegisterBroadcast<TPTrapConversion>(APMineToTPTrap);
     }
 
-    [HarmonyPatch(typeof(ServerManager), "Spawn")]
+    [HarmonyPatch(typeof(ServerManager), "Spawn", new Type[] { typeof(NetworkObject), typeof(NetworkConnection) })]
     [HarmonyPrefix]
-    public static void DetectServerSpawnTPTrap(NetworkObject nob, NetworkConnection ownerConnection = null)
+    public static void DetectServerSpawnTPTrap(NetworkObject nob)
     {
-        if (InstanceFinder.IsClient)
+        KokiDebug.Log($"spawn detected {nob.gameObject.name}");
+        // if (TeleportTrap.GetTrapLink(nob.gameObject))
+        // {
+        InstanceFinder.ServerManager.Broadcast(new TPTrapConversion
         {
-            KokiDebug.Log("--------------------------------------------------NOT HOST------------------------------------------------------");
-            return;
-        }
-
-        KokiDebug.Log("spawn detected");
-        if (TeleportTrap.GetTrapLink(nob.gameObject))
-        {
-            InstanceFinder.ServerManager.Broadcast(new TPTrapConversion
-            {
-                NobID = nob.ObjectId
-            });
-        }
+            NobID = nob.ObjectId
+        });
+        // }
     }
 
     public static void APMineToTPTrap(TPTrapConversion msg)

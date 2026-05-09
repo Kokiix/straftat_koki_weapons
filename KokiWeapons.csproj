@@ -30,7 +30,7 @@
             <HintPath>lib\ComputerysModdingUtilities.dll</HintPath>
         </Reference>
         <Reference Include="FishNet.Runtime" Publicize="true">
-            <HintPath>lib\ComputerysModdingUtilities.dll</HintPath>
+            <HintPath>lib\FishNet.Runtime.dll</HintPath>
         </Reference>
         <Reference Include="Heathen.PhysKit" Publicize="true">
             <HintPath>lib\Heathen.PhysKit.dll</HintPath>
