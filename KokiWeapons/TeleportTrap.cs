@@ -17,10 +17,24 @@ public static class TeleportTrap
     public static GameObject MineMeshInstance;
     public static GameObject PhysMineMeshInstance;
 
-    public static GameObject GetTemplateGameObject()
+    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+    [HarmonyPostfix]
+    public static void RegisterWeapon()
     {
-        if (TemplateGameObject) return TemplateGameObject;
+        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
+        CreateGOTemplates();
+        GameObject TPTrap = TemplateGameObject;
+        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+        SpawnerManager.AllWeapons[^1] = TPTrap;
 
+        SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
+        SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
+        // SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
+    }
+
+    public static void CreateGOTemplates()
+    {
+        // Non Physics GO (used only in registration)
         MineMeshInstance = Object.Instantiate(MineMesh);
         PhysMineMeshInstance = Object.Instantiate(PhysMineMesh);
 
@@ -40,7 +54,7 @@ public static class TeleportTrap
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         MineMeshInstance.transform.SetParent(meshParent);
 
-        // Also create template for physics game obj which is stored in the hand spawner component
+        // Physics GO (used as "objToSpawn" in hand spawner)
         TemplatePhysGameObject = Object.Instantiate(spawner.objToSpawn);
         TemplatePhysGameObject.SetActive(false);
         TemplatePhysGameObject.name = "Physics Teleport Trap";
@@ -49,10 +63,12 @@ public static class TeleportTrap
         ProximityMine mine = TemplatePhysGameObject.GetComponent<ProximityMine>();
         mine.instantExplode = false;
 
+        // Replace mesh
         Transform physGOTransform = TemplatePhysGameObject.transform;
         physGOTransform.Find("PF_APMine_00").gameObject.SetActive(false);
         PhysMineMeshInstance.transform.SetParent(physGOTransform);
 
+        // Insert radius GO from prox mine
         if (physGOTransform.Find("radius(Clone)"))
             Object.Destroy(physGOTransform.Find("radius(Clone)").gameObject);
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
@@ -60,6 +76,7 @@ public static class TeleportTrap
         proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
         proxMineRadius.SetActive(false);
 
+        // Add behavior to flag as TP trap (does nothing else)
         Object.Destroy(GetTrapLink(TemplatePhysGameObject));
         TemplatePhysGameObject.AddComponent<TrapLink>();
 
@@ -67,8 +84,6 @@ public static class TeleportTrap
         collider.size = new Vector3(1.6f, 0.81f, 1.6f);
 
         spawner.objToSpawn = TemplatePhysGameObject;
-
-        return TemplateGameObject;
     }
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
@@ -152,19 +167,6 @@ public static class TeleportTrap
         return false;
     }
 
-    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
-    [HarmonyPostfix]
-    public static void RegisterWeapon()
-    {
-        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
-        GameObject TPTrap = TeleportTrap.GetTemplateGameObject();
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-        // SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
-        SpawnerManager.AllWeapons[^1] = TPTrap;
-        SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
-        SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
-    }
-
 
     [HarmonyPatch(typeof(ProximityMine), "OnTriggerStay")]
     [HarmonyPrefix]
@@ -190,14 +192,11 @@ public static class TeleportTrap
     }
 
 
-    [HarmonyPatch(typeof(SpawnerManager), "UpdateSpawnableWeapons")]
+    [HarmonyPatch(typeof(ProximityMine), "ReadSyncVar___ProximityMine")]
     [HarmonyPrefix]
-    static bool Test(SpawnerManager __instance)
+    static bool Test(ProximityMine __instance)
     {
-        foreach (WeaponData value in SpawnerManager.weaponInfo.Values)
-        {
-            KokiDebug.Log(value);
-        }
+        KokiDebug.Log("aaaaaaaaaaa");
 
         return true;
     }

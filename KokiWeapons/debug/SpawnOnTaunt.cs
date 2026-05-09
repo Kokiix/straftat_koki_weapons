@@ -15,7 +15,7 @@ public class SpawnWeaponOnTaunt
         GameObject weaponBase = null;
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            weaponBase = TeleportTrap.GetTemplateGameObject();
+            weaponBase = TeleportTrap.TemplateGameObject;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
@@ -24,6 +24,10 @@ public class SpawnWeaponOnTaunt
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             weaponBase = SpawnerManager.NameToWeaponDict["ProximityMine"];
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            KokiDebug.Log(SpawnerManager.Instance.GetRandomSpawnableWeapon().name);
         }
 
         if (!weaponBase) return;
