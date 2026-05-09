@@ -30,4 +30,4 @@ cool screenshot here
 
 ### Networking
 
-- it is so jank.
+- it is so jank. If I had to do it over I would probably try out the [mycelium port by kestrel](https://github.com/straftat-modding/Mycelium-Networking-For-STRAFTAT?tab=License-1-ov-file).

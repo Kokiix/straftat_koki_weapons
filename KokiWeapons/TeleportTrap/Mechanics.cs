@@ -10,6 +10,8 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool PlaceMine(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
     {
+
+        KokiDebug.Log($"spawn mine server: {InstanceFinder.IsServer}   client: {InstanceFinder.IsClient}");
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (PauseManager.BetweenRounds || !connector) return true;
 
@@ -41,7 +43,6 @@ public static class TPTrapMechanics
         else
         {
             __instance.damage = -1;
-            __instance.bulletsAmount = -1;
             connector.otherTrap = newTrap;
         }
 
@@ -53,12 +54,13 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
     {
+        KokiDebug.Log($"detect explosion server: {InstanceFinder.IsServer}   client: {InstanceFinder.IsClient}");
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
         if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated()) return false;
 
         Weapon sharedWeapon = __instance.sync___get_value_weapon();
         int otherTrapID;
-        if (sharedWeapon.bulletsAmount == -1 || sharedWeapon.damage == -1f) return false;
+        if (sharedWeapon.damage == -1f) return false;
         if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
             otherTrapID = sharedWeapon.bulletsAmount;
         else
@@ -76,7 +78,7 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool HandleExplosion(ProximityMine __instance)
     {
-
+        KokiDebug.Log($"explosion server: {InstanceFinder.IsServer}   client: {InstanceFinder.IsClient}");
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
         Weapon sharedWeapon = __instance.sync___get_value_weapon();
