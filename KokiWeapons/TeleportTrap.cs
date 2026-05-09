@@ -144,11 +144,12 @@ public static class TeleportTrap
 
         InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob);
         ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
-        __instance.sync___set_value_detonated(true, false);
+        __instance.sync___set_value_detonated(true, true);
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
         if (!otherTrap.sync___get_value_detonated())
         {
+            otherTrap.ChangeState();
             otherTrap.HandleExplosion();
         }
 
@@ -173,7 +174,7 @@ public static class TeleportTrap
     static bool DetectExplosion(ProximityMine __instance)
     {
         if (!GetTrapLink(__instance.gameObject)) return true;
-        if (!InstanceFinder.IsServer) return false;
+        if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated()) return false;
 
         Weapon sharedWeapon = __instance.sync___get_value_weapon();
         int otherTrapID;
