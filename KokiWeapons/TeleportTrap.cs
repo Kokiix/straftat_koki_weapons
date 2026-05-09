@@ -192,14 +192,14 @@ public static class TeleportTrap
     }
 
 
-    // [HarmonyPatch(typeof(ProximityMine), "ReadSyncVar___ProximityMine")]
-    // [HarmonyPrefix]
-    // static bool Test(ProximityMine __instance)
-    // {
-    //     KokiDebug.Log("aaaaaaaaaaa");
+    [HarmonyPatch(typeof(ItemSpawner), "StartNewRound")]
+    [HarmonyPrefix]
+    static bool Test(ItemSpawner __instance)
+    {
+        KokiDebug.Log(__instance.itemToSpawn.name);
 
-    //     return true;
-    // }
+        return true;
+    }
 
     // Required because of hot reload BS
     public static Component GetTrapLink(GameObject go)
