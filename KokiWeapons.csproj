@@ -35,7 +35,7 @@
         <Reference Include="Heathen.PhysKit" Publicize="true">
             <HintPath>lib\Heathen.PhysKit.dll</HintPath>
         </Reference>
-        <Reference Include="MyceliumNetworkingForStraftat" Publicize="true">
+        <Reference Include="MyceliumNetworkingForStraftat">
             <HintPath>lib\MyceliumNetworkingForStraftat.dll</HintPath>
         </Reference>
     </ItemGroup>

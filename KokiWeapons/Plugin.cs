@@ -9,9 +9,11 @@ using ComputerysModdingUtilities;
 using FishNet;
 using HarmonyLib;
 using UnityEngine;
+using MyceliumNetworking;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
+[BepInDependency(MyceliumNetworking.MyPluginInfo.PLUGIN_GUID)]
 [BepInPlugin("com.koki.weapons", "Koki Weapons", "1.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
@@ -19,11 +21,16 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
 
+    public const uint MyceliumID = 932828;
+
     private void Awake()
     {
         Logger = base.Logger;
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
+
+        // Networking
+        MyceliumNetwork.RegisterNetworkObject(this, MyceliumID);
 
         // For hot reload
         var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();

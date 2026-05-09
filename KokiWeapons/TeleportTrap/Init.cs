@@ -22,7 +22,6 @@ public static class TeleportTrap
     public static void RegisterWeapon()
     {
         if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Mine")) return;
-        TPTrapNetworking.Init();
         Init();
         GameObject TPTrap = TemplateGameObject;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
