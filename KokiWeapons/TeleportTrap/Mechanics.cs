@@ -3,6 +3,7 @@ using FishNet.Object;
 using HarmonyLib;
 using UnityEngine;
 
+[HarmonyPatch]
 public static class TPTrapMechanics
 {
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
