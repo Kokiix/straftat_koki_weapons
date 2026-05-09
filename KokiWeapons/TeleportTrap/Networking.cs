@@ -44,12 +44,7 @@ public static class TPTrapNetworking
     public static void DetectServerSpawnTPTrap(NetworkObject nob)
     {
         KokiDebug.Log($"spawn detected {nob.gameObject.name}");
-        // if (TeleportTrap.GetTrapLink(nob.gameObject))
-        // {
-
-        // debug convert all weapons into tp
-        if (nob.gameObject.GetComponent<ItemBehaviour>() && !TeleportTrap.GetTrapLink(nob.gameObject))
-
+        if (TeleportTrap.GetTrapLink(nob.gameObject))
         {
             KokiDebug.Log("try broadcast");
             InstanceFinder.ServerManager.Broadcast(new TPTrapConversion
@@ -57,7 +52,6 @@ public static class TPTrapNetworking
                 NobID = nob.ObjectId
             });
         }
-        // }
     }
 
     public static void APMineToTPTrap(TPTrapConversion msg)

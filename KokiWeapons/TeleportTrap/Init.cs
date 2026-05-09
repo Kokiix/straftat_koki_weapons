@@ -45,23 +45,30 @@ public static class TeleportTrap
 
     public static GameObject ConvertAPToTPTrap(GameObject go)
     {
+        KokiDebug.Log("start conversion");
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
+        KokiDebug.Log("step 1");
 
         ItemBehaviour ib = go.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport mine";
+        KokiDebug.Log("step 2");
 
         WeaponHandSpawner spawner = go.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
+        KokiDebug.Log("step 3");
 
         Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         MineMeshInstance.transform.SetParent(meshParent);
+        KokiDebug.Log("step 4");
 
         if (!TemplatePhysGameObject)
             InitTemplatePhysGO(originalPhysMine: spawner.objToSpawn);
+        KokiDebug.Log("step 5");
 
         spawner.objToSpawn = TemplatePhysGameObject;
+        KokiDebug.Log("step 6");
 
         return go;
     }
