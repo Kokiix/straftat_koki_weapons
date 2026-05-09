@@ -29,7 +29,6 @@ public static class TeleportTrap
 
         SpawnerManager.NameToWeaponDict[TPTrap.name] = TPTrap;
         SpawnerManager.NameToIndexDict[TPTrap.name] = SpawnerManager.AllWeapons.Length - 1;
-        // SpawnerManager.weaponInfo["Teleport Trap"] = new WeaponData("Teleport Trap", 50, true);
     }
 
     public static void CreateGOTemplates()
@@ -144,10 +143,15 @@ public static class TeleportTrap
             otherTrapID = (int)sharedWeapon.damage;
 
         InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob);
-
         ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
-
+        __instance.sync___set_value_detonated(true, false);
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+
+        if (!otherTrap.sync___get_value_detonated())
+        {
+            otherTrap.HandleExplosion();
+        }
+
         if (colliders.Length != 0)
         {
             foreach (Collider c in colliders)
@@ -155,10 +159,6 @@ public static class TeleportTrap
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    if (!otherTrap.sync___get_value_detonated())
-                    {
-                        otherTrap.HandleExplosion();
-                    }
                     fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
                 }
             }
@@ -192,14 +192,14 @@ public static class TeleportTrap
     }
 
 
-    [HarmonyPatch(typeof(ProximityMine), "ReadSyncVar___ProximityMine")]
-    [HarmonyPrefix]
-    static bool Test(ProximityMine __instance)
-    {
-        KokiDebug.Log("aaaaaaaaaaa");
+    // [HarmonyPatch(typeof(ProximityMine), "ReadSyncVar___ProximityMine")]
+    // [HarmonyPrefix]
+    // static bool Test(ProximityMine __instance)
+    // {
+    //     KokiDebug.Log("aaaaaaaaaaa");
 
-        return true;
-    }
+    //     return true;
+    // }
 
     // Required because of hot reload BS
     public static Component GetTrapLink(GameObject go)
