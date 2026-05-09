@@ -10,43 +10,28 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool PlaceMine(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
     {
-
-        KokiDebug.Log($"spawn mine server: {InstanceFinder.IsServer}   client: {InstanceFinder.IsClient}");
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (PauseManager.BetweenRounds || !connector) return true;
 
         GameObject newTrap = UnityEngine.Object.Instantiate(TeleportTrap.TemplatePhysGameObject, position, rotation);
         newTrap.SetActive(true);
-
-        ProximityMine mine = newTrap.GetComponent<ProximityMine>();
-        mine.activated = false;
-
-        InstanceFinder.ServerManager.Spawn(newTrap);
-
+        newTrap.GetComponent<ProximityMine>().activated = false;
         newTrap.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
+        newTrap.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
+        InstanceFinder.ServerManager.Spawn(newTrap);
 
         if (connector.otherTrap)
         {
             GameObject otherTrap = connector.otherTrap.gameObject;
 
-            NetworkObject otherNob = otherTrap.GetComponent<NetworkObject>();
-            NetworkObject thisNob = newTrap.GetComponent<NetworkObject>();
-            __instance.damage = otherNob.ObjectId;
-
-            Weapon otherTrapWeapon = otherTrap.GetComponent<ProximityMine>().sync___get_value_weapon();
-            otherTrapWeapon.bulletsAmount = thisNob.ObjectId;
-            otherTrap.GetComponent<ProximityMine>().sync___set_value_weapon(otherTrapWeapon, true);
+            ((TrapLink)TeleportTrap.GetTrapLink(otherTrap)).otherTrap = newTrap;
+            ((TrapLink)TeleportTrap.GetTrapLink(newTrap)).otherTrap = otherTrap;
 
             otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
             newTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
         }
         else
-        {
-            __instance.damage = -1;
             connector.otherTrap = newTrap;
-        }
-
-        newTrap.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
         return false;
     }
 
@@ -54,17 +39,11 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
     {
-        KokiDebug.Log($"detect explosion server: {InstanceFinder.IsServer}   client: {InstanceFinder.IsClient}");
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
-        if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated()) return false;
 
-        Weapon sharedWeapon = __instance.sync___get_value_weapon();
-        int otherTrapID;
-        if (sharedWeapon.damage == -1f) return false;
-        if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
-            otherTrapID = sharedWeapon.bulletsAmount;
-        else
-            otherTrapID = (int)sharedWeapon.damage;
+        GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
+
+        if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated() || !otherTrap) return false;
 
         if (InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
         {
