@@ -21,7 +21,7 @@ public static class TeleportTrap
     [HarmonyPostfix]
     public static void RegisterWeapon()
     {
-        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Trap")) return;
+        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Mine")) return;
         CreateGOTemplates();
         GameObject TPTrap = TemplateGameObject;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
@@ -40,11 +40,11 @@ public static class TeleportTrap
         TemplateGameObject = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         TemplateGameObject.SetActive(false);
         TemplateGameObject.AddComponent<TrapLink>();
-        TemplateGameObject.name = "Teleport Trap";
+        TemplateGameObject.name = "Teleport Mine";
         Object.DontDestroyOnLoad(TemplateGameObject);
 
         ItemBehaviour ib = TemplateGameObject.GetComponent<ItemBehaviour>();
-        ib.weaponName = "teleport trap";
+        ib.weaponName = "teleport mine";
 
         WeaponHandSpawner spawner = TemplateGameObject.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
@@ -56,7 +56,7 @@ public static class TeleportTrap
         // Physics GO (used as "objToSpawn" in hand spawner)
         TemplatePhysGameObject = Object.Instantiate(spawner.objToSpawn);
         TemplatePhysGameObject.SetActive(false);
-        TemplatePhysGameObject.name = "Physics Teleport Trap";
+        TemplatePhysGameObject.name = "Physics Teleport Mine";
         Object.DontDestroyOnLoad(TemplatePhysGameObject);
 
         ProximityMine mine = TemplatePhysGameObject.GetComponent<ProximityMine>();
