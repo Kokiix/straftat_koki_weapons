@@ -71,7 +71,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     {
         if (InstanceFinder.IsServer) return;
 
-        KokiDebug.Log("starting delay thingy");
         if (isPhysicsMine)
             StartCoroutine(DelayedConvertToPhysTPMine(nobID));
         else

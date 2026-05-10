@@ -54,7 +54,7 @@ public static class TeleportTrap
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         GameObject mesh = Object.Instantiate(MineMesh);
         mesh.transform.SetParent(meshParent);
-        mesh.transform.localPosition = new Vector3(0, -0.25f, 0);
+        mesh.transform.localPosition = new Vector3(0, -0.35f, 0);
         mesh.SetActive(true);
 
         if (!TemplatePhysGameObject)

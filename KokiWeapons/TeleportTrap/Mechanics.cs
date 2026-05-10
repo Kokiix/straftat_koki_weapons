@@ -17,6 +17,7 @@ public static class TPTrapMechanics
         GameObject newTrap = UnityEngine.Object.Instantiate(TeleportTrap.TemplatePhysGameObject, position, rotation);
         newTrap.SetActive(true);
         newTrap.GetComponent<ProximityMine>().activated = false;
+        newTrap.GetComponent<ProximityMine>().canActivate = false;
         newTrap.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
         newTrap.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
         InstanceFinder.ServerManager.Spawn(newTrap);
