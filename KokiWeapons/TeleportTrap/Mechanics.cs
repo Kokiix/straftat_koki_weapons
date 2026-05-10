@@ -22,6 +22,7 @@ public static class TPTrapMechanics
         ProximityMine mine = newTrap.GetComponent<ProximityMine>();
         mine.activated = false;
         mine.canActivate = false;
+        mine.stunMine = false; // Used as detonated flag
         mine.sync___set_value__rootObject(__instance.rootObject, true);
         mine.sync___set_value_weapon(__instance, true);
         InstanceFinder.ServerManager.Spawn(newTrap);
@@ -58,18 +59,13 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
     {
-        KokiDebug.Log("player detected");
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
         GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
-        KokiDebug.Log($"{__instance.sync___get_value_detonated()}, {!otherTrap}, {!__instance.canExplode}");
+        if (!InstanceFinder.IsServer || __instance.stunMine || !otherTrap || !__instance.canExplode) return false;
 
-        if (InstanceFinder.IsClient || __instance.sync___get_value_detonated() || !otherTrap || !__instance.canExplode) return false;
-
-        KokiDebug.Log("trying to boom");
         __instance.ChangeState();
-        KokiDebug.Log("almost there");
         __instance.HandleExplosion();
 
         return false;
@@ -81,15 +77,15 @@ public static class TPTrapMechanics
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        if (InstanceFinder.IsClient) return false;
+        if (!InstanceFinder.IsServer) return false;
 
         ProximityMine otherMine = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
-        __instance.sync___set_value_detonated(true, true);
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
         Vector3 destination = otherMine.transform.position;
 
-        if (!otherMine.sync___get_value_detonated())
+        __instance.stunMine = true;
+        if (!otherMine.stunMine)
         {
             otherMine.ChangeState();
             otherMine.HandleExplosion();
