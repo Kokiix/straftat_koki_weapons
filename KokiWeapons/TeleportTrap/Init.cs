@@ -49,7 +49,8 @@ public static class TeleportTrap
         WeaponHandSpawner spawner = go.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
 
-        Object.Destroy(go.GetComponent<BoxCollider>());
+        // Causes NRE in itembehavior.update
+        // Object.Destroy(go.GetComponent<BoxCollider>());
 
         Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
@@ -89,6 +90,7 @@ public static class TeleportTrap
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physGOTransform);
         proxMineRadius.transform.localScale = new Vector3(1.858382f, 1.858382f, 1.858382f);
+        proxMineRadius.transform.localPosition = new Vector3(0f, 0f, 0f);
         proxMineRadius.SetActive(false);
 
         // Add behavior to flag as TP trap (does nothing else)
