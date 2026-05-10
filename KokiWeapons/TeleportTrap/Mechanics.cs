@@ -71,7 +71,7 @@ public static class TPTrapMechanics
         if (!otherMine.sync___get_value_detonated())
         {
             otherMine.ChangeState();
-            otherMine.HandleExplosion();
+            otherMine.HandleExplosion(); 
         }
 
         if (colliders.Length != 0)
@@ -87,5 +87,12 @@ public static class TPTrapMechanics
         }
         __instance.ExplodeServer();
         return false;
+    }
+
+    [HarmonyPatch(typeof(ProximityMine), "Start")]
+    [HarmonyPrefix]
+    static bool StopMineActivationForTP(ProximityMine __instance)
+    {
+        return !TeleportTrap.GetTrapLink(__instance.gameObject);
     }
 }

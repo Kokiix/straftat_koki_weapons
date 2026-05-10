@@ -22,7 +22,6 @@ public class CustomWeaponNetworkManager : MonoBehaviour
 
     public void OnDestroy()
     {
-        KokiDebug.Log("deregister");
         MyceliumNetwork.DeregisterNetworkObject(this, MyceliumID);
     }
 
