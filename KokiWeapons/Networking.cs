@@ -27,9 +27,13 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     {
         GameObject go = nob.gameObject;
         if (TeleportTrap.GetTrapLink(go))
-        {
             MyceliumNetwork.RPC(MyceliumID, nameof(DisplayClientVisual), ReliableType.Reliable, nob.ObjectId, nameof(TeleportTrap.ConvertToTPTrap), true);
-        }
+    }
+
+    [CustomRPC]
+    public void ChangeRadiusVisibility(GameObject trap, bool state)
+    {
+        trap.transform.Find("radius(Clone)").gameObject.SetActive(state);
     }
 
     [CustomRPC]
