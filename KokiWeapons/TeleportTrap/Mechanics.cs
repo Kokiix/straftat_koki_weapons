@@ -26,8 +26,8 @@ public static class TPTrapMechanics
         {
             GameObject otherTrap = connector.otherTrap.gameObject;
 
-            ((TrapLink)TeleportTrap.GetTrapLink(otherTrap)).otherTrap = newTrap;
-            ((TrapLink)TeleportTrap.GetTrapLink(newTrap)).otherTrap = otherTrap;
+            TeleportTrap.GetTrapLink(otherTrap).otherTrap = newTrap;
+            TeleportTrap.GetTrapLink(newTrap).otherTrap = otherTrap;
 
             otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
             newTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
@@ -47,7 +47,7 @@ public static class TPTrapMechanics
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
+        GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
         // is server check needed?
         if (__instance.sync___get_value_detonated() || !otherTrap) return false;
@@ -64,7 +64,7 @@ public static class TPTrapMechanics
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        ProximityMine otherMine = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap.GetComponent<ProximityMine>();
+        ProximityMine otherMine = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
         __instance.sync___set_value_detonated(true, true);
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 

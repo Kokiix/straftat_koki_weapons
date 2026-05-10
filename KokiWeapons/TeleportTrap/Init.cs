@@ -99,11 +99,14 @@ public static class TeleportTrap
     }
 
     // Required because of hot reload BS
-    public static Component GetTrapLink(GameObject go)
+    public static TrapLink GetTrapLink(GameObject go)
     {
+        // return go.GetComponent<TrapLink>();
+
+        // Debug
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "TrapLink") return c;
+            if (c.GetType().Name == "TrapLink") return (TrapLink)c;
         }
         return null;
     }
