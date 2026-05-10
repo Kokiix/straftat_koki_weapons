@@ -43,12 +43,13 @@ public static class TeleportTrap
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
 
-        // KokiDebug.PrintComponents(go);
         ItemBehaviour ib = go.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport mine";
 
         WeaponHandSpawner spawner = go.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
+
+        Object.Destroy(go.GetComponent<BoxCollider>());
 
         Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
