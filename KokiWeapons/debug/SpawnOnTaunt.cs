@@ -43,7 +43,7 @@ public class SpawnWeaponOnTaunt
             GameObject weaponInstance = Object.Instantiate(weaponBase, playerPos, Quaternion.identity);
 
             weaponInstance.GetComponent<ItemBehaviour>().DispenserDrop(Vector3.zero);
-            weaponInstance.GetComponent<Rigidbody>().isKinematic = true;
+            // weaponInstance.GetComponent<Rigidbody>().isKinematic = true;
             fpc.ServerManager.Spawn(weaponInstance);
 
             weapons.Add(weaponInstance);

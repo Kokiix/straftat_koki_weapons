@@ -31,12 +31,6 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     }
 
     [CustomRPC]
-    public void ChangeRadiusVisibility(GameObject trap, bool state)
-    {
-        trap.transform.Find("radius(Clone)").gameObject.SetActive(state);
-    }
-
-    [CustomRPC]
     public void TeleportClient(Vector3 pos)
     {
         FirstPersonController.instance.Teleport(pos, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
@@ -49,22 +43,29 @@ public class CustomWeaponNetworkManager : MonoBehaviour
 
         Dictionary<string, Action<GameObject, bool>> callbackNameToMethod = new() {
             { nameof(TeleportTrap.ConvertToTPTrap), TeleportTrap.ConvertToTPTrap },
-            { nameof(TeleportTrap.ConvertToPhysTPTrap), TeleportTrap.ConvertToPhysTPTrap }
+            { nameof(TeleportTrap.ConvertToPhysTPTrap), TeleportTrap.ConvertToPhysTPTrap },
+            { nameof(ToggleRadius), ToggleRadius }
         };
 
         StartCoroutine(DelayedApplyVisuals(nobID, callbackNameToMethod[callbackName], waitForIBheavior));
     }
 
-    private IEnumerator DelayedApplyVisuals(int nobid, Action<GameObject, bool> callback, bool waitForIBheavior)
+    private IEnumerator DelayedApplyVisuals(int nobid, Action<GameObject, bool> callback, bool waitForIBehavior)
     {
         NetworkObject nob = null;
         do
         {
-            yield return new WaitForSeconds(0.25f);
-            if (waitForIBheavior && nob)
-                waitForIBheavior = !nob.gameObject.GetComponent<ItemBehaviour>();
-        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob) || waitForIBheavior);
+            yield return new WaitForSeconds(0.15f);
+            if (waitForIBehavior && nob)
+                waitForIBehavior = !nob.gameObject.GetComponent<ItemBehaviour>();
+        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob) || waitForIBehavior);
 
         callback(nob.gameObject, true);
+    }
+
+    public static void ToggleRadius(GameObject go, bool state)
+    {
+        GameObject radius = go.transform.Find("radius(Clone)").gameObject;
+        radius.SetActive(!radius.activeSelf);
     }
 }
