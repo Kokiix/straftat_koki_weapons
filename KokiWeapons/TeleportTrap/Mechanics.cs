@@ -55,7 +55,7 @@ public static class TPTrapMechanics
 
         MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
         nameof(CustomWeaponNetworkManager.ChangeRadiusVisibility), ReliableType.Reliable,
-        __instance, true);
+        __instance.gameObject, true);
     }
 
 
@@ -138,7 +138,7 @@ public static class TPTrapMechanics
                 otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(false);
                 MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
                 nameof(CustomWeaponNetworkManager.ChangeRadiusVisibility), ReliableType.Reliable,
-                __instance, false);
+                otherTrap, false);
             }
             obj.transform.root.GetComponent<ProximityMine>().ChangeState();
             obj.transform.root.GetComponent<ProximityMine>().ExplodeServer();
