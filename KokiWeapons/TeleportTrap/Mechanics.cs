@@ -35,8 +35,16 @@ public static class TPTrapMechanics
             TeleportTrap.GetTrapLink(newTrap).otherTrap = otherTrap;
 
             ProximityMine otherMine = otherTrap.GetComponent<ProximityMine>();
-            otherMine.StartCoroutine(ActivateTPMine(otherMine));
-            mine.StartCoroutine(ActivateTPMine(mine));
+            otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            newTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
+
+            MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
+            nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
+            otherTrap.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
+
+            MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
+            nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
+            newTrap.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
         }
         else
             connector.otherTrap = newTrap;
@@ -47,18 +55,6 @@ public static class TPTrapMechanics
         return false;
     }
 
-    static IEnumerator ActivateTPMine(ProximityMine __instance)
-    {
-        yield return new WaitForSeconds(1);
-        __instance.transform.Find("radius(Clone)").gameObject.SetActive(true);
-        __instance.canExplode = true;
-
-        MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-        nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
-        __instance.gameObject.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
-    }
-
-
     [HarmonyPatch(typeof(ProximityMine), "OnTriggerStay")]
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
@@ -67,7 +63,7 @@ public static class TPTrapMechanics
 
         GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
-        if (!InstanceFinder.IsServer || __instance.stunMine || !otherTrap || !__instance.canExplode) return false;
+        if (!InstanceFinder.IsServer || __instance.stunMine || !otherTrap) return false;
 
         __instance.ChangeState();
         __instance.HandleExplosion();
