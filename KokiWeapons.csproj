@@ -38,6 +38,9 @@
         <Reference Include="MyceliumNetworkingForStraftat">
             <HintPath>lib\MyceliumNetworkingForStraftat.dll</HintPath>
         </Reference>
+        <Reference Include="Steamworks">
+            <HintPath>lib\Steamworks.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

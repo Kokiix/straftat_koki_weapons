@@ -72,7 +72,6 @@ public static class TeleportTrap
 
     public static void ConvertToPhysTPTrap(GameObject go)
     {
-        go.SetActive(false);
         go.name = "Physics Teleport Mine";
         Object.DontDestroyOnLoad(go);
 
@@ -103,7 +102,6 @@ public static class TeleportTrap
 
         // Remove bullet collider since comes with one
         Object.Destroy(physGOTransform.transform.Find("Cube").gameObject);
-
     }
 
     // Required because of hot reload BS
