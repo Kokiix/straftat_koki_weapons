@@ -95,7 +95,7 @@ public static class TeleportTrap
         go.AddComponent<TrapLink>();
 
         BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
-        collider.size = new Vector3(1.6f, 0.81f, 1.6f);
+        collider.size = new Vector3(1.6f, 1.6f, 1.6f);
     }
 
     // Required because of hot reload BS
