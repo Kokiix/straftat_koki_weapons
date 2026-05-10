@@ -16,10 +16,12 @@ public static class TPTrapMechanics
 
         GameObject newTrap = UnityEngine.Object.Instantiate(TeleportTrap.TemplatePhysGameObject, position, rotation);
         newTrap.SetActive(true);
-        newTrap.GetComponent<ProximityMine>().activated = false;
-        newTrap.GetComponent<ProximityMine>().canActivate = false;
-        newTrap.GetComponent<ProximityMine>().sync___set_value__rootObject(__instance.rootObject, true);
-        newTrap.GetComponent<ProximityMine>().sync___set_value_weapon(__instance, true);
+        ProximityMine mine = newTrap.GetComponent<ProximityMine>();
+        mine.activated = false;
+        mine.canActivate = false;
+        mine.canExplode = true;
+        mine.sync___set_value__rootObject(__instance.rootObject, true);
+        mine.sync___set_value_weapon(__instance, true);
         InstanceFinder.ServerManager.Spawn(newTrap);
 
         if (connector.otherTrap)
@@ -49,7 +51,6 @@ public static class TPTrapMechanics
 
         GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
-        // is server check needed?
         if (__instance.sync___get_value_detonated() || !otherTrap) return false;
 
         __instance.ChangeState();
@@ -94,5 +95,23 @@ public static class TPTrapMechanics
     static bool StopMineActivationForTP(ProximityMine __instance)
     {
         return !TeleportTrap.GetTrapLink(__instance.gameObject);
+    }
+
+    [HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
+    [HarmonyPrefix]
+    static bool ExplodeTPTrapOnHit(Weapon __instance, GameObject obj)
+    {
+        GameObject trap = obj.transform.root.gameObject;
+        if (obj.CompareTag("Mine") && TeleportTrap.GetTrapLink(trap))
+        {
+            GameObject otherTrap = TeleportTrap.GetTrapLink(trap).otherTrap;
+            if (otherTrap)
+                otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(false);
+            obj.transform.root.GetComponent<ProximityMine>().ChangeState();
+            obj.transform.root.GetComponent<ProximityMine>().ExplodeServer();
+            return false;
+        }
+
+        return true;
     }
 }

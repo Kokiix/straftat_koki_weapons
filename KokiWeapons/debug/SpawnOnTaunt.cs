@@ -29,7 +29,7 @@ public class SpawnWeaponOnTaunt
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            KokiDebug.Log(SpawnerManager.Instance.GetRandomSpawnableWeapon().name);
+            weaponBase = SpawnerManager.NameToWeaponDict["Gun"];
         }
 
         if (!weaponBase) return;

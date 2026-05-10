@@ -17,14 +17,9 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     public const uint MyceliumID = 932828;
     public void Awake()
     {
+        MyceliumNetwork.DeregisterNetworkObject(this.gameObject.GetComponent<CustomWeaponNetworkManager>(), CustomWeaponNetworkManager.MyceliumID);
         MyceliumNetwork.RegisterNetworkObject(this, MyceliumID);
     }
-
-    public void OnDestroy()
-    {
-        MyceliumNetwork.DeregisterNetworkObject(this, MyceliumID);
-    }
-
 
     [HarmonyPatch(typeof(ServerManager), "Spawn", new Type[] { typeof(NetworkObject), typeof(NetworkConnection) })]
     [HarmonyPostfix]

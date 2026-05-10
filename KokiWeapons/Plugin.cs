@@ -69,7 +69,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         TeleportTrap.MineMesh = null;
         TeleportTrap.PhysMineMesh = null;
 
-        Object.Destroy(this.gameObject.GetComponent<CustomWeaponNetworkManager>());
         Harmony.UnpatchSelf();
     }
 }
