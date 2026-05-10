@@ -87,15 +87,20 @@ public static class TeleportTrap
             Object.Destroy(physGOTransform.Find("radius(Clone)").gameObject);
         GameObject proxMineRadius = Object.Instantiate(Resources.FindObjectsOfTypeAll<GameObject>().First(go => go.name == "ProximityMine" && go.transform.Find("radius")).transform.Find("radius").gameObject);
         proxMineRadius.transform.SetParent(physGOTransform);
-        proxMineRadius.transform.localScale = new Vector3(1.8584f, 1.8584f, 1.8584f);
+        proxMineRadius.transform.localScale = new Vector3(1.858382f, 1.858382f, 1.858382f);
         proxMineRadius.SetActive(false);
 
         // Add behavior to flag as TP trap (does nothing else)
         Object.Destroy(GetTrapLink(go));
         go.AddComponent<TrapLink>();
 
+        // Adjust radius for player detection
         BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
         collider.size = new Vector3(1.6f, 1.6f, 1.6f);
+
+        // Remove bullet collider since comes with one
+        Object.Destroy(physGOTransform.transform.Find("Cube").gameObject);
+
     }
 
     // Required because of hot reload BS
