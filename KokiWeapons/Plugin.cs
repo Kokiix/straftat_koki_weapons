@@ -28,6 +28,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony = new Harmony("com.koki.weapons");
 
         // For hot reload
+        this.gameObject.hideFlags = HideFlags.HideAndDontSave;
         var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
         var existingBundle = loadedBundles.FirstOrDefault(b => b.name == "kokiweaponsbundle");
         if (existingBundle)
