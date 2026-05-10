@@ -15,9 +15,6 @@ public static class TeleportTrap
     public static GameObject MineMesh;
     public static GameObject PhysMineMesh;
 
-    public static GameObject MineMeshInstance;
-    public static GameObject PhysMineMeshInstance;
-
     [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
     [HarmonyPostfix]
     public static void RegisterWeapon()
@@ -34,8 +31,6 @@ public static class TeleportTrap
 
     public static void Init()
     {
-        MineMeshInstance = Object.Instantiate(MineMesh);
-        PhysMineMeshInstance = Object.Instantiate(PhysMineMesh);
         GameObject templateAPMine = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         ConvertAPToTPTrap(templateAPMine);
         TemplateGameObject = templateAPMine;
@@ -48,6 +43,7 @@ public static class TeleportTrap
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
 
+        KokiDebug.PrintComponents(go);
         ItemBehaviour ib = go.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport mine";
 
@@ -56,7 +52,9 @@ public static class TeleportTrap
 
         Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
-        MineMeshInstance.transform.SetParent(meshParent);
+        GameObject mesh = Object.Instantiate(MineMesh);
+        mesh.SetActive(true);
+        mesh.transform.SetParent(meshParent);
 
         if (!TemplatePhysGameObject)
             InitTemplatePhysGO(originalPhysMine: spawner.objToSpawn);
@@ -79,7 +77,7 @@ public static class TeleportTrap
         // Replace mesh
         Transform physGOTransform = TemplatePhysGameObject.transform;
         physGOTransform.Find("PF_APMine_00").gameObject.SetActive(false);
-        PhysMineMeshInstance.transform.SetParent(physGOTransform);
+        Object.Instantiate(PhysMineMesh).transform.SetParent(physGOTransform);
 
         // Insert radius GO from prox mine
         if (physGOTransform.Find("radius(Clone)"))

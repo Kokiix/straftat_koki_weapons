@@ -70,10 +70,17 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     public void APMineToTPTrap(int nobID)
     {
         if (InstanceFinder.IsServer) return;
+        StartCoroutine(DelayedConvertToTPMine(nobID));
+    }
 
-        KokiDebug.Log("received nob ID!!");
-        bool test = InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
-        KokiDebug.Log($"id: {nobID}, found: {test}");
+    private IEnumerator DelayedConvertToTPMine(int nobid)
+    {
+        NetworkObject nob;
+        do
+        {
+            yield return new WaitForSeconds(1);
+        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob));
+
         TeleportTrap.ConvertAPToTPTrap(nob.gameObject);
     }
 }
