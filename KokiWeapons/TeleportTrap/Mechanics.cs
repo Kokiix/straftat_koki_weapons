@@ -1,3 +1,4 @@
+using System.Collections;
 using FishNet;
 using FishNet.Object;
 using HarmonyLib;
@@ -16,10 +17,10 @@ public static class TPTrapMechanics
 
         GameObject newTrap = UnityEngine.Object.Instantiate(TeleportTrap.TemplatePhysGameObject, position, rotation);
         newTrap.SetActive(true);
+
         ProximityMine mine = newTrap.GetComponent<ProximityMine>();
         mine.activated = false;
         mine.canActivate = false;
-        mine.canExplode = true;
         mine.sync___set_value__rootObject(__instance.rootObject, true);
         mine.sync___set_value_weapon(__instance, true);
         InstanceFinder.ServerManager.Spawn(newTrap);
@@ -31,8 +32,9 @@ public static class TPTrapMechanics
             TeleportTrap.GetTrapLink(otherTrap).otherTrap = newTrap;
             TeleportTrap.GetTrapLink(newTrap).otherTrap = otherTrap;
 
-            otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
-            newTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
+            ProximityMine otherMine = otherTrap.GetComponent<ProximityMine>();
+            otherMine.StartCoroutine(ActivateTPMine(otherMine));
+            mine.StartCoroutine(ActivateTPMine(mine));
         }
         else
             connector.otherTrap = newTrap;
@@ -43,6 +45,14 @@ public static class TPTrapMechanics
         return false;
     }
 
+    static IEnumerator ActivateTPMine(ProximityMine __instance)
+    {
+        yield return new WaitForSeconds(1);
+        __instance.transform.Find("radius(Clone)").gameObject.SetActive(true);
+        __instance.canExplode = true;
+    }
+
+
     [HarmonyPatch(typeof(ProximityMine), "OnTriggerStay")]
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
@@ -51,7 +61,7 @@ public static class TPTrapMechanics
 
         GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
-        if (__instance.sync___get_value_detonated() || !otherTrap) return false;
+        if (__instance.sync___get_value_detonated() || !otherTrap || !__instance.canExplode) return false;
 
         __instance.ChangeState();
         __instance.HandleExplosion();
@@ -92,7 +102,7 @@ public static class TPTrapMechanics
 
     [HarmonyPatch(typeof(ProximityMine), "Start")]
     [HarmonyPrefix]
-    static bool StopMineActivationForTP(ProximityMine __instance)
+    static bool HandleMineActivation(ProximityMine __instance)
     {
         return !TeleportTrap.GetTrapLink(__instance.gameObject);
     }
