@@ -43,7 +43,7 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     {
         if (InstanceFinder.IsServer) return;
 
-        Dictionary<string, Action<GameObject>> callbackNameToMethod = new() {
+        Dictionary<string, Action<GameObject, bool>> callbackNameToMethod = new() {
             { nameof(TeleportTrap.ConvertToTPTrap), TeleportTrap.ConvertToTPTrap },
             { nameof(TeleportTrap.ConvertToPhysTPTrap), TeleportTrap.ConvertToPhysTPTrap }
         };
@@ -51,7 +51,7 @@ public class CustomWeaponNetworkManager : MonoBehaviour
         StartCoroutine(DelayedApplyVisuals(nobID, callbackNameToMethod[callbackName], waitForIBheavior));
     }
 
-    private IEnumerator DelayedApplyVisuals(int nobid, Action<GameObject> callback, bool waitForIBheavior)
+    private IEnumerator DelayedApplyVisuals(int nobid, Action<GameObject, bool> callback, bool waitForIBheavior)
     {
         NetworkObject nob = null;
         do
@@ -61,6 +61,6 @@ public class CustomWeaponNetworkManager : MonoBehaviour
                 waitForIBheavior = !nob.gameObject.GetComponent<ItemBehaviour>();
         } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob) || waitForIBheavior);
 
-        callback(nob.gameObject);
+        callback(nob.gameObject, true);
     }
 }

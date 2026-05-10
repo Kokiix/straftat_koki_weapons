@@ -32,13 +32,13 @@ public static class TeleportTrap
     public static void Init()
     {
         GameObject templateAPMine = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
-        ConvertToTPTrap(templateAPMine);
+        ConvertToTPTrap(templateAPMine, false);
         TemplateGameObject = templateAPMine;
         TemplateGameObject.SetActive(false);
         Object.DontDestroyOnLoad(TemplateGameObject);
     }
 
-    public static void ConvertToTPTrap(GameObject go)
+    public static void ConvertToTPTrap(GameObject go, bool isClientVisual)
     {
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
@@ -56,21 +56,25 @@ public static class TeleportTrap
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         GameObject mesh = Object.Instantiate(MineMesh);
         mesh.transform.SetParent(meshParent);
-        mesh.transform.localPosition = new Vector3(0, -0.35f, 0);
+        if (isClientVisual)
+        {
+            mesh.transform.localPosition = new Vector3(0, -0.35f, 0);
+            mesh.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+        }
         mesh.SetActive(true);
 
 
         if (!TemplatePhysGameObject)
         {
             GameObject physGO = Object.Instantiate(spawner.objToSpawn);
-            ConvertToPhysTPTrap(physGO);
+            ConvertToPhysTPTrap(physGO, false);
             TemplatePhysGameObject = physGO;
         }
 
         spawner.objToSpawn = TemplatePhysGameObject;
     }
 
-    public static void ConvertToPhysTPTrap(GameObject go)
+    public static void ConvertToPhysTPTrap(GameObject go, bool isClientVisual)
     {
         go.name = "Physics Teleport Mine";
         Object.DontDestroyOnLoad(go);
@@ -83,7 +87,10 @@ public static class TeleportTrap
         physGOTransform.Find("PF_APMine_00").gameObject.SetActive(false);
         GameObject mesh = Object.Instantiate(PhysMineMesh);
         mesh.transform.SetParent(physGOTransform);
-        mesh.transform.localPosition = new Vector3(0f, 0f, 0f);
+        if (isClientVisual)
+        {
+            mesh.transform.localPosition = new Vector3(0f, 0f, 0f);
+        }
 
         // Insert radius GO from prox mine
         if (physGOTransform.Find("radius(Clone)"))
