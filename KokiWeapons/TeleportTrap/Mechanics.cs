@@ -34,7 +34,7 @@ public static class TPTrapMechanics
         else
             connector.otherTrap = newTrap;
 
-        MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(KokiWeaponsPlugin.APMineToTPTrap), ReliableType.Reliable, newTrap.GetComponent<NetworkObject>(), true);
+        MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(KokiWeaponsPlugin.APMineToTPTrap), ReliableType.Reliable, newTrap.GetComponent<NetworkObject>().ObjectId, true);
         return false;
     }
 
@@ -46,7 +46,8 @@ public static class TPTrapMechanics
 
         GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
 
-        if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated() || !otherTrap) return false;
+        // is server check needed?
+        if (__instance.sync___get_value_detonated() || !otherTrap) return false;
 
         __instance.ChangeState();
         __instance.HandleExplosion();
@@ -60,22 +61,14 @@ public static class TPTrapMechanics
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        Weapon sharedWeapon = __instance.sync___get_value_weapon();
-        int otherTrapID;
-        if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
-            otherTrapID = sharedWeapon.bulletsAmount;
-        else
-            otherTrapID = (int)sharedWeapon.damage;
-
-        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob);
-        ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
+        ProximityMine otherMine = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap.GetComponent<ProximityMine>();
         __instance.sync___set_value_detonated(true, true);
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
-        if (!otherTrap.sync___get_value_detonated())
+        if (!otherMine.sync___get_value_detonated())
         {
-            otherTrap.ChangeState();
-            otherTrap.HandleExplosion();
+            otherMine.ChangeState();
+            otherMine.HandleExplosion();
         }
 
         if (colliders.Length != 0)
@@ -85,7 +78,7 @@ public static class TPTrapMechanics
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                    fpc.Teleport(otherMine.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
                 }
             }
         }
