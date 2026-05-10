@@ -71,8 +71,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (InstanceFinder.IsServer) return;
 
         KokiDebug.Log("received nob ID!!");
-        bool test = InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
-        KokiDebug.Log($"id: {nobID}, found: {test}");
+        // bool test = InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
+        // KokiDebug.Log($"id: {nobID}, found: {test}");
         // TeleportTrap.ConvertAPToTPTrap(nob.gameObject);
     }
 }
