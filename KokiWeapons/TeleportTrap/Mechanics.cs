@@ -35,7 +35,9 @@ public static class TPTrapMechanics
         else
             connector.otherTrap = newTrap;
 
-        MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(KokiWeaponsPlugin.APMineToTPTrap), ReliableType.Reliable, newTrap.GetComponent<NetworkObject>().ObjectId, true);
+        MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
+        nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
+        newTrap.GetComponent<NetworkObject>().ObjectId, nameof(TeleportTrap.ConvertToPhysTPTrap), false);
         return false;
     }
 

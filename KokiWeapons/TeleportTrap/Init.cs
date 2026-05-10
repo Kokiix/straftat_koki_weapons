@@ -38,7 +38,7 @@ public static class TeleportTrap
         Object.DontDestroyOnLoad(TemplateGameObject);
     }
 
-    public static GameObject ConvertToTPTrap(GameObject go)
+    public static void ConvertToTPTrap(GameObject go)
     {
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
@@ -57,15 +57,18 @@ public static class TeleportTrap
         mesh.transform.localPosition = new Vector3(0, -0.35f, 0);
         mesh.SetActive(true);
 
+
         if (!TemplatePhysGameObject)
-            TemplatePhysGameObject = ConvertToPhysTPTrap(Object.Instantiate(spawner.objToSpawn));
+        {
+            GameObject physGO = Object.Instantiate(spawner.objToSpawn);
+            ConvertToPhysTPTrap(physGO);
+            TemplatePhysGameObject = physGO;
+        }
 
         spawner.objToSpawn = TemplatePhysGameObject;
-
-        return go;
     }
 
-    public static GameObject ConvertToPhysTPTrap(GameObject go)
+    public static void ConvertToPhysTPTrap(GameObject go)
     {
         go.SetActive(false);
         go.name = "Physics Teleport Mine";
@@ -93,8 +96,6 @@ public static class TeleportTrap
 
         BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
         collider.size = new Vector3(1.6f, 0.81f, 1.6f);
-
-        return go;
     }
 
     // Required because of hot reload BS

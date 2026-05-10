@@ -22,8 +22,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
 
-    public const uint MyceliumID = 932828;
-
     private void Awake()
     {
         Logger = base.Logger;
@@ -31,7 +29,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony.PatchAll();
 
         // Networking
-        MyceliumNetwork.RegisterNetworkObject(this, MyceliumID);
+        this.gameObject.AddComponent<CustomWeaponNetworkManager>();
 
         // For hot reload
         var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
@@ -46,7 +44,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
     }
 
-    public void OnDestroy()
+    public void OnDestroy() 
     {
         // Cleanup stuff spawned by Debug
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
@@ -62,40 +60,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         TeleportTrap.MineMesh = null;
         TeleportTrap.PhysMineMesh = null;
 
-        MyceliumNetwork.DeregisterNetworkObject(this, MyceliumID);
+        Object.Destroy(this.gameObject.GetComponent<CustomWeaponNetworkManager>());
         Harmony.UnpatchSelf();
-    }
-
-    [CustomRPC]
-    public void APMineToTPTrap(int nobID, bool isPhysicsMine)
-    {
-        if (InstanceFinder.IsServer) return;
-
-        if (isPhysicsMine)
-            StartCoroutine(DelayedConvertToPhysTPMine(nobID));
-        else
-            StartCoroutine(DelayedConvertToTPMine(nobID));
-    }
-
-    private IEnumerator DelayedConvertToTPMine(int nobid)
-    {
-        NetworkObject nob;
-        do
-        {
-            yield return new WaitForSeconds(0.25f);
-        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob) || !nob.gameObject.GetComponent<ItemBehaviour>());
-
-        TeleportTrap.ConvertToTPTrap(nob.gameObject);
-    }
-
-    private IEnumerator DelayedConvertToPhysTPMine(int nobid)
-    {
-        NetworkObject nob;
-        do
-        {
-            yield return new WaitForSeconds(0.25f);
-        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob));
-
-        TeleportTrap.ConvertToPhysTPTrap(nob.gameObject);
     }
 }
