@@ -38,6 +38,12 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     }
 
     [CustomRPC]
+    public void ClientTeleport(Vector3 pos)
+    {
+        FirstPersonController.instance.Teleport(pos, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+    }
+
+    [CustomRPC]
     public void DisplayClientVisual(int nobID, string callbackName, bool waitForIBheavior)
     {
         if (InstanceFinder.IsServer) return;

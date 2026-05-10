@@ -71,7 +71,7 @@ public static class TPTrapMechanics
         if (!otherMine.sync___get_value_detonated())
         {
             otherMine.ChangeState();
-            otherMine.HandleExplosion(); 
+            otherMine.HandleExplosion();
         }
 
         if (colliders.Length != 0)
@@ -81,7 +81,7 @@ public static class TPTrapMechanics
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    fpc.Teleport(otherMine.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                    MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.ClientTeleport), ReliableType.Reliable, otherMine.transform.position);
                 }
             }
         }
