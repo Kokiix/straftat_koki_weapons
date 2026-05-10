@@ -92,7 +92,7 @@ public static class TPTrapMechanics
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.ClientTeleport), ReliableType.Reliable, otherMine.transform.position);
+                    MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), ReliableType.Reliable, otherMine.transform.position);
                 }
             }
         }
