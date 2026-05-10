@@ -93,8 +93,17 @@ public static class TPTrapMechanics
                 FirstPersonController fpc = c.GetComponent<FirstPersonController>();
                 if (fpc)
                 {
-                    ulong.TryParse(fpc.Owner.GetAddress(), out ulong steamID);
-                    MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, otherMine.transform.position);
+                    if (fpc.Owner.IsLocalClient)
+                    {
+                        KokiDebug.Log("teleporting host");
+                        fpc.Teleport(otherMine.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                    }
+                    else
+                    {
+                        KokiDebug.Log("teleporting not host");
+                        ulong.TryParse(fpc.Owner.GetAddress(), out ulong steamID);
+                        MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, otherMine.transform.position);
+                    }
                 }
             }
         }
