@@ -39,17 +39,17 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
     {
-        if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
+        // if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
+        // GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
 
-        if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated() || !otherTrap) return false;
+        // if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated() || !otherTrap) return false;
 
-        if (InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
-        {
-            __instance.ChangeState();
-            __instance.HandleExplosion();
-        }
+        // if (InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob))
+        // {
+        //     __instance.ChangeState();
+        //     __instance.HandleExplosion();
+        // }
         return false;
     }
 

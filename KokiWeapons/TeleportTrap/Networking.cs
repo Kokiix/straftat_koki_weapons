@@ -16,22 +16,14 @@ public static class TPTrapNetworking
     [HarmonyPrefix]
     public static void DetectServerSpawnTPTrap(NetworkObject nob)
     {
-        KokiDebug.Log($"spawn detected {nob.gameObject.name}");
-        if (TeleportTrap.GetTrapLink(nob.gameObject))
+        GameObject go = nob.gameObject;
+        KokiDebug.Log($"spawn detected {go.name}");
+        if (TeleportTrap.GetTrapLink(go))
         {
             KokiDebug.Log("trying to send to client");
-            MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(APMineToTPTrap), ReliableType.Reliable, nob.ObjectId);
+            // MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(TrapLink.APMineToTPTrap), ReliableType.Reliable, nob.ObjectId);
         }
     }
 
-    [CustomRPC]
-    public static void APMineToTPTrap(int nobID)
-    {
-        if (InstanceFinder.IsServer) return;
 
-        KokiDebug.Log("received nob ID!!");
-        bool test = InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
-        KokiDebug.Log($"id: {nobID}, found: {test}");
-        // TeleportTrap.ConvertAPToTPTrap(nob.gameObject);
-    }
 }
