@@ -26,10 +26,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     {
         Logger = base.Logger;
         Harmony = new Harmony("com.koki.weapons");
-        Harmony.PatchAll();
-
-        // Networking
-        this.gameObject.AddComponent<CustomWeaponNetworkManager>();
 
         // For hot reload
         var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
@@ -38,13 +34,25 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             existingBundle.Unload(true);
 
         string bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
+        string altBundlePath = Path.Combine(Paths.PluginPath, "kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
+        if (!Bundle)
+            Bundle = AssetBundle.LoadFromFile(altBundlePath);
+        if (!Bundle)
+        {
+            Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");
+            return;
+        }
 
+        // Networking
+        this.gameObject.AddComponent<CustomWeaponNetworkManager>();
+
+        Harmony.PatchAll();
         TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
         TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
     }
 
-    public void OnDestroy() 
+    public void OnDestroy()
     {
         // Cleanup stuff spawned by Debug
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
