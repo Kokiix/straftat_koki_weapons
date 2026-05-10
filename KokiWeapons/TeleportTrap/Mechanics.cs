@@ -58,13 +58,18 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
     {
+        KokiDebug.Log("player detected");
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
         GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
-        if (__instance.sync___get_value_detonated() || !otherTrap || !__instance.canExplode) return false;
+        KokiDebug.Log($"{__instance.sync___get_value_detonated()}, {!otherTrap}, {!__instance.canExplode}");
 
+        if (InstanceFinder.IsClient || __instance.sync___get_value_detonated() || !otherTrap || !__instance.canExplode) return false;
+
+        KokiDebug.Log("trying to boom");
         __instance.ChangeState();
+        KokiDebug.Log("almost there");
         __instance.HandleExplosion();
 
         return false;
@@ -76,9 +81,13 @@ public static class TPTrapMechanics
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
+        if (InstanceFinder.IsClient) return false;
+
         ProximityMine otherMine = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
         __instance.sync___set_value_detonated(true, true);
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+
+        Vector3 destination = otherMine.transform.position;
 
         if (!otherMine.sync___get_value_detonated())
         {
@@ -95,14 +104,12 @@ public static class TPTrapMechanics
                 {
                     if (fpc.Owner.IsLocalClient)
                     {
-                        KokiDebug.Log("teleporting host");
-                        fpc.Teleport(otherMine.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                        fpc.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
                     }
                     else
                     {
-                        KokiDebug.Log("teleporting not host");
                         ulong.TryParse(fpc.Owner.GetAddress(), out ulong steamID);
-                        MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, otherMine.transform.position);
+                        MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, destination);
                     }
                 }
             }
