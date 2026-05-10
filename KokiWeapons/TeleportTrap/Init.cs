@@ -43,7 +43,7 @@ public static class TeleportTrap
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
 
-        KokiDebug.PrintComponents(go);
+        // KokiDebug.PrintComponents(go);
         ItemBehaviour ib = go.GetComponent<ItemBehaviour>();
         ib.weaponName = "teleport mine";
 
@@ -53,8 +53,9 @@ public static class TeleportTrap
         Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         GameObject mesh = Object.Instantiate(MineMesh);
-        mesh.SetActive(true);
         mesh.transform.SetParent(meshParent);
+        mesh.transform.localPosition = new Vector3(0, -0.25f, 0);
+        mesh.SetActive(true);
 
         if (!TemplatePhysGameObject)
             InitTemplatePhysGO(originalPhysMine: spawner.objToSpawn);

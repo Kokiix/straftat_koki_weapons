@@ -70,6 +70,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     public void APMineToTPTrap(int nobID)
     {
         if (InstanceFinder.IsServer) return;
+
+        KokiDebug.Log("starting delay thingy");
         StartCoroutine(DelayedConvertToTPMine(nobID));
     }
 
@@ -78,8 +80,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         NetworkObject nob;
         do
         {
-            yield return new WaitForSeconds(1);
-        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob));
+            yield return new WaitForSeconds(0.5f);
+        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob) || !nob.gameObject.GetComponent<ItemBehaviour>());
 
         TeleportTrap.ConvertAPToTPTrap(nob.gameObject);
     }
