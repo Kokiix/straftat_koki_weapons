@@ -67,12 +67,15 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     }
 
     [CustomRPC]
-    public void APMineToTPTrap(int nobID)
+    public void APMineToTPTrap(int nobID, bool isPhysicsMine)
     {
         if (InstanceFinder.IsServer) return;
 
         KokiDebug.Log("starting delay thingy");
-        StartCoroutine(DelayedConvertToTPMine(nobID));
+        if (isPhysicsMine)
+            StartCoroutine(DelayedConvertToPhysTPMine(nobID));
+        else
+            StartCoroutine(DelayedConvertToTPMine(nobID));
     }
 
     private IEnumerator DelayedConvertToTPMine(int nobid)
@@ -80,9 +83,20 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         NetworkObject nob;
         do
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.25f);
         } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob) || !nob.gameObject.GetComponent<ItemBehaviour>());
 
-        TeleportTrap.ConvertAPToTPTrap(nob.gameObject);
+        TeleportTrap.ConvertToTPTrap(nob.gameObject);
+    }
+
+    private IEnumerator DelayedConvertToPhysTPMine(int nobid)
+    {
+        NetworkObject nob;
+        do
+        {
+            yield return new WaitForSeconds(0.25f);
+        } while (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobid, out nob));
+
+        TeleportTrap.ConvertToPhysTPTrap(nob.gameObject);
     }
 }

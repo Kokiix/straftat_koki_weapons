@@ -19,11 +19,10 @@ public static class TPTrapNetworking
         GameObject go = nob.gameObject;
         KokiDebug.Log($"spawn detected {go.name}");
         if (TeleportTrap.GetTrapLink(go))
-        // if (go.GetComponent<ItemBehaviour>() && !TeleportTrap.GetTrapLink(go)) // debug
         {
             KokiDebug.Log("trying to send to client");
             KokiDebug.Log($"sending {nob.ObjectId}");
-            MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(KokiWeaponsPlugin.APMineToTPTrap), ReliableType.Reliable, nob.ObjectId);
+            MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(KokiWeaponsPlugin.APMineToTPTrap), ReliableType.Reliable, nob.ObjectId, false);
         }
     }
 

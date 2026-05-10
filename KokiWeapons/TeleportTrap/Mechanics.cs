@@ -1,6 +1,7 @@
 using FishNet;
 using FishNet.Object;
 using HarmonyLib;
+using MyceliumNetworking;
 using UnityEngine;
 
 [HarmonyPatch]
@@ -32,6 +33,8 @@ public static class TPTrapMechanics
         }
         else
             connector.otherTrap = newTrap;
+
+        MyceliumNetwork.RPC(KokiWeaponsPlugin.MyceliumID, nameof(KokiWeaponsPlugin.APMineToTPTrap), ReliableType.Reliable, newTrap.GetComponent<NetworkObject>(), true);
         return false;
     }
 
@@ -39,14 +42,14 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool DetectExplosion(ProximityMine __instance)
     {
-        // if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
+        if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        // GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
+        GameObject otherTrap = ((TrapLink)TeleportTrap.GetTrapLink(__instance.gameObject)).otherTrap;
 
-        // if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated() || !otherTrap) return false;
+        if (!InstanceFinder.IsServer || __instance.sync___get_value_detonated() || !otherTrap) return false;
 
-        // __instance.ChangeState();
-        // __instance.HandleExplosion();
+        __instance.ChangeState();
+        __instance.HandleExplosion();
 
         return false;
     }
@@ -55,38 +58,38 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static bool HandleExplosion(ProximityMine __instance)
     {
-        // if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
+        if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        // Weapon sharedWeapon = __instance.sync___get_value_weapon();
-        // int otherTrapID;
-        // if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
-        //     otherTrapID = sharedWeapon.bulletsAmount;
-        // else
-        //     otherTrapID = (int)sharedWeapon.damage;
+        Weapon sharedWeapon = __instance.sync___get_value_weapon();
+        int otherTrapID;
+        if (sharedWeapon.damage == __instance.gameObject.GetComponent<NetworkObject>().ObjectId)
+            otherTrapID = sharedWeapon.bulletsAmount;
+        else
+            otherTrapID = (int)sharedWeapon.damage;
 
-        // InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob);
-        // ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
-        // __instance.sync___set_value_detonated(true, true);
-        // Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(otherTrapID, out NetworkObject otherNob);
+        ProximityMine otherTrap = otherNob.gameObject.GetComponent<ProximityMine>();
+        __instance.sync___set_value_detonated(true, true);
+        Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
-        // if (!otherTrap.sync___get_value_detonated())
-        // {
-        //     otherTrap.ChangeState();
-        //     otherTrap.HandleExplosion();
-        // }
+        if (!otherTrap.sync___get_value_detonated())
+        {
+            otherTrap.ChangeState();
+            otherTrap.HandleExplosion();
+        }
 
-        // if (colliders.Length != 0)
-        // {
-        //     foreach (Collider c in colliders)
-        //     {
-        //         FirstPersonController fpc = c.GetComponent<FirstPersonController>();
-        //         if (fpc)
-        //         {
-        //             fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-        //         }
-        //     }
-        // }
-        // __instance.ExplodeServer();
+        if (colliders.Length != 0)
+        {
+            foreach (Collider c in colliders)
+            {
+                FirstPersonController fpc = c.GetComponent<FirstPersonController>();
+                if (fpc)
+                {
+                    fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                }
+            }
+        }
+        __instance.ExplodeServer();
         return false;
     }
 }

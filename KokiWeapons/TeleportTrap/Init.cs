@@ -32,13 +32,13 @@ public static class TeleportTrap
     public static void Init()
     {
         GameObject templateAPMine = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
-        ConvertAPToTPTrap(templateAPMine);
+        ConvertToTPTrap(templateAPMine);
         TemplateGameObject = templateAPMine;
         TemplateGameObject.SetActive(false);
         Object.DontDestroyOnLoad(TemplateGameObject);
     }
 
-    public static GameObject ConvertAPToTPTrap(GameObject go)
+    public static GameObject ConvertToTPTrap(GameObject go)
     {
         go.AddComponent<TrapLink>();
         go.name = "Teleport Mine";
@@ -58,25 +58,24 @@ public static class TeleportTrap
         mesh.SetActive(true);
 
         if (!TemplatePhysGameObject)
-            InitTemplatePhysGO(originalPhysMine: spawner.objToSpawn);
+            TemplatePhysGameObject = ConvertToPhysTPTrap(Object.Instantiate(spawner.objToSpawn));
 
         spawner.objToSpawn = TemplatePhysGameObject;
 
         return go;
     }
 
-    public static void InitTemplatePhysGO(GameObject originalPhysMine)
+    public static GameObject ConvertToPhysTPTrap(GameObject go)
     {
-        TemplatePhysGameObject = Object.Instantiate(originalPhysMine);
-        TemplatePhysGameObject.SetActive(false);
-        TemplatePhysGameObject.name = "Physics Teleport Mine";
-        Object.DontDestroyOnLoad(TemplatePhysGameObject);
+        go.SetActive(false);
+        go.name = "Physics Teleport Mine";
+        Object.DontDestroyOnLoad(go);
 
-        ProximityMine mine = TemplatePhysGameObject.GetComponent<ProximityMine>();
+        ProximityMine mine = go.GetComponent<ProximityMine>();
         mine.instantExplode = false;
 
         // Replace mesh
-        Transform physGOTransform = TemplatePhysGameObject.transform;
+        Transform physGOTransform = go.transform;
         physGOTransform.Find("PF_APMine_00").gameObject.SetActive(false);
         Object.Instantiate(PhysMineMesh).transform.SetParent(physGOTransform);
 
@@ -89,11 +88,13 @@ public static class TeleportTrap
         proxMineRadius.SetActive(false);
 
         // Add behavior to flag as TP trap (does nothing else)
-        Object.Destroy(GetTrapLink(TemplatePhysGameObject));
-        TemplatePhysGameObject.AddComponent<TrapLink>();
+        Object.Destroy(GetTrapLink(go));
+        go.AddComponent<TrapLink>();
 
         BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
         collider.size = new Vector3(1.6f, 0.81f, 1.6f);
+
+        return go;
     }
 
     // Required because of hot reload BS
