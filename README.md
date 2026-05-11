@@ -6,6 +6,9 @@
 # How does it work
 *Credit to Znoki for modeling and DankoBanko for testing*
 
+> [!NOTE]
+> This thing is probably going to be constantly outdated lol
+
 ## Teleport Mine
 
 - I refer to it internally as teleporttrap sometimes for some reason
