@@ -34,11 +34,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (existingBundle)
             existingBundle.Unload(true);
 
-        string bundlePath = Path.Combine(Paths.PluginPath, "koki-Koki_Weapons/kokiWeaponsBundle");
-        string altBundlePath = Path.Combine(Paths.PluginPath, "kokiWeaponsBundle");
+        string bundlePath = Path.Combine(Path.GetDirectoryName(Info.Location), "kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
-        if (!Bundle)
-            Bundle = AssetBundle.LoadFromFile(altBundlePath);
         if (!Bundle)
         {
             Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");

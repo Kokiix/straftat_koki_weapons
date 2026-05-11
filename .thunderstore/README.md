@@ -21,8 +21,8 @@ Comes in pairs. When activated, swaps the positions of the players touching eith
 
 *Any good swapper codes/randomizer presets I find or that people send me will go here!*
 - <details>
-  <summary>Swapping AP/Prox Mines for TP mines on all maps is a good start, though it breaks some maps like {example}.</summary>
-    {swapper code here}
+  <summary>Swapping AP/Prox Mines for TP mines on all maps is a good start.</summary>
+    H4sIAAAAAAAACoWOOwrDMAyGr2I0FkN3bzlAikkDHUoHU0Qx+IWs0ISQu1c2dOhUNEig73/sYAkrMpgdLi4iGBjs2VJeFWc1WzX6hGoIQY2uVNDQl7nv7bgy+fQSyUkeN3QlpwnjFxDj50I1U/dsPkJNWJcgaTBjwJKJewAc+pdvBXz0vP2RPWQ08FZa8fp2BY4PDnR8ydIAAAA=
 </details>
 
 **Known Issues**:
