@@ -1,7 +1,0 @@
-{
-  "name": "Koki_Weapons",
-  "version_number": "1.0.2",
-  "website_url": "https://github.com/Kokiix/straftat_koki_weapons",
-  "description": "Custom weapons by Koki",
-  "dependencies": ["BepInEx-BepInExPack-5.4.2305", "straftatmodding-MyceliumNetworking-1.1.17"]
-}
