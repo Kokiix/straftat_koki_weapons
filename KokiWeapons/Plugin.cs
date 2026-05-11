@@ -21,6 +21,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
+    internal static bool Debug = true;
 
     private void Awake()
     {
@@ -34,7 +35,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (existingBundle)
             existingBundle.Unload(true);
 
-        string bundlePath = Path.Combine(Path.GetDirectoryName(Info.Location), "kokiWeaponsBundle");
+        string bundlePath;
+        if (Debug)
+            bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
+        else
+            bundlePath = Path.Combine(Path.GetDirectoryName(Info.Location), "kokiWeaponsBundle");
         Bundle = AssetBundle.LoadFromFile(bundlePath);
         if (!Bundle)
         {
@@ -53,13 +58,14 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     public void OnDestroy()
     {
         // Cleanup stuff spawned by Debug
-        // foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
-        // {
-        //     if (weapon)
-        //     {
-        //         InstanceFinder.ServerManager.Despawn(weapon);
-        //     }
-        // }
+        if (Debug)
+            foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
+            {
+                if (weapon)
+                {
+                    InstanceFinder.ServerManager.Despawn(weapon);
+                }
+            }
 
         TeleportTrap.TemplateGameObject = null;
         TeleportTrap.TemplatePhysGameObject = null;
