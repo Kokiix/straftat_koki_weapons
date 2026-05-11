@@ -26,6 +26,7 @@ Comes in pairs. When activated, swaps the positions of the players touching eith
 </details>
 
 **Known Issues**:
+- If you have "Invert fire binding when holding two weapons" enabled, placing your final ammo from left hand will also trigger your right hand to place. This is a vanilla bug I might fix. For now, you have to not use that setting to use TP mines effectively :(
 - Vending machine dispenses AP mines instead of TP mines when randomizer is set to 100% TP mines
 - Client console fills with warnings every time client moves
 ---
