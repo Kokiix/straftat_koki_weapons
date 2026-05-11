@@ -37,7 +37,15 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     }
 
     [CustomRPC]
-    public void DisplayClientVisual(int nobID, string callbackName, bool waitForIBheavior)
+    public void ExplodeMineFromClient(int nobID)
+    {
+        if (!InstanceFinder.IsHost) return;
+        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
+        TPTrapMechanics.ExplodeTPTrapOnHit(null, nob.gameObject);
+    }
+
+    [CustomRPC]
+    public void DisplayClientVisual(int nobID, string callbackName, bool waitForIbehavior)
     {
         if (InstanceFinder.IsServer) return;
 
@@ -47,10 +55,10 @@ public class CustomWeaponNetworkManager : MonoBehaviour
             { nameof(ToggleRadius), ToggleRadius }
         };
 
-        StartCoroutine(DelayedApplyVisuals(nobID, callbackNameToMethod[callbackName], waitForIBheavior));
+        StartCoroutine(CallOnObj(nobID, callbackNameToMethod[callbackName], waitForIbehavior));
     }
 
-    private IEnumerator DelayedApplyVisuals(int nobid, Action<GameObject, bool> callback, bool waitForIBehavior)
+    private IEnumerator CallOnObj(int nobid, Action<GameObject, bool> callback, bool waitForIBehavior)
     {
         NetworkObject nob = null;
         do
@@ -63,7 +71,7 @@ public class CustomWeaponNetworkManager : MonoBehaviour
         callback(nob.gameObject, true);
     }
 
-    public static void ToggleRadius(GameObject go, bool state)
+    public static void ToggleRadius(GameObject go, bool _)
     {
         GameObject radius = go.transform.Find("radius(Clone)").gameObject;
         radius.transform.localPosition = Vector3.zero;

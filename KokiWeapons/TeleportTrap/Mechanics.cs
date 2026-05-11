@@ -124,14 +124,22 @@ public static class TPTrapMechanics
 
     [HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
     [HarmonyPrefix]
-    static bool ExplodeTPTrapOnHit(Weapon __instance, GameObject obj)
+    public static bool ExplodeTPTrapOnHit(Weapon __instance, GameObject obj)
     {
         GameObject trap = obj.transform.root.gameObject;
         if (obj.CompareTag("Mine") && TeleportTrap.GetTrapLink(trap))
         {
+            if (!InstanceFinder.IsHost)
+            {
+                MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
+                nameof(CustomWeaponNetworkManager.ExplodeMineFromClient), ReliableType.Reliable,
+                obj.transform.root.gameObject.GetComponent<NetworkObject>().ObjectId);
+                return false;
+            }
             GameObject otherTrap = TeleportTrap.GetTrapLink(trap).otherTrap;
             if (otherTrap)
             {
+                KokiDebug.Log("flag2");
                 otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(false);
                 MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
                 nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
