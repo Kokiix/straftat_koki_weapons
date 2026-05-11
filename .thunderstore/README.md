@@ -10,7 +10,8 @@ Custom weapons! Use them with the weapon randomizer or swapper in game.
 
 
 ## Teleport Mine
-{image here} | {gif demo here}
+<img src="https://files.catbox.moe/gnt0rz.png" width="40%" />
+<img src="https://files.catbox.moe/j59ai7.gif" width="59%" />
 
 *^ Placeholder art*
 
