@@ -4,7 +4,7 @@ cool screenshot here
 ---
 
 > [!WARNING]
-> When installing manually, ensure that the bundle file is located directly in the `plugins` folder or under `KokiWeapons` in the plugins folder.
+> When installing manually, ensure that the bundle file is located directly in the `plugins` folder or under `koki-Koki_Weapons` in the plugins folder.
 
 # How does it work
 *Credit to Znoki for modeling and DankoBanko for testing*
