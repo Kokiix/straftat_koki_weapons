@@ -139,7 +139,6 @@ public static class TPTrapMechanics
             GameObject otherTrap = TeleportTrap.GetTrapLink(trap).otherTrap;
             if (otherTrap)
             {
-                KokiDebug.Log("flag2");
                 otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(false);
                 MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
                 nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,

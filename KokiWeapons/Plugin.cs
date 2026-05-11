@@ -53,13 +53,13 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     public void OnDestroy()
     {
         // Cleanup stuff spawned by Debug
-        foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
-        {
-            if (weapon)
-            {
-                InstanceFinder.ServerManager.Despawn(weapon);
-            }
-        }
+        // foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
+        // {
+        //     if (weapon)
+        //     {
+        //         InstanceFinder.ServerManager.Despawn(weapon);
+        //     }
+        // }
 
         TeleportTrap.TemplateGameObject = null;
         TeleportTrap.TemplatePhysGameObject = null;
