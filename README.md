@@ -1,10 +1,7 @@
-cool screenshot here
 
+<img width="256" height="256" alt="icon(1)" src="https://github.com/user-attachments/assets/3584015d-18a0-4245-a35e-fe5f471d64fa" />
 
 ---
-
-> [!WARNING]
-> When installing manually, ensure that the bundle file is located directly in the `plugins` folder or under `koki-Koki_Weapons` in the plugins folder.
 
 # How does it work
 *Credit to Znoki for modeling and DankoBanko for testing*
