@@ -55,8 +55,8 @@ public static class TeleportTrap
         mesh.transform.SetParent(meshParent);
         if (isClientVisual)
         {
-            mesh.transform.localPosition = new Vector3(0.2f, -0.35f, -0.2f);
-            mesh.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            mesh.transform.localPosition = new Vector3(0.2f, -0.45f, -0.2f);
+            mesh.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             mesh.transform.localRotation = Quaternion.identity;
         }
         mesh.SetActive(true);
