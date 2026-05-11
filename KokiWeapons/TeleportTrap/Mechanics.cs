@@ -27,6 +27,10 @@ public static class TPTrapMechanics
         mine.sync___set_value_weapon(__instance, true);
         InstanceFinder.ServerManager.Spawn(newTrap);
 
+        MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
+        nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
+        newTrap.GetComponent<NetworkObject>().ObjectId, nameof(TeleportTrap.ConvertToPhysTPTrap), false);
+
         if (connector.otherTrap)
         {
             GameObject otherTrap = connector.otherTrap.gameObject;
@@ -49,9 +53,6 @@ public static class TPTrapMechanics
         else
             connector.otherTrap = newTrap;
 
-        MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-        nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
-        newTrap.GetComponent<NetworkObject>().ObjectId, nameof(TeleportTrap.ConvertToPhysTPTrap), false);
         return false;
     }
 

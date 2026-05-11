@@ -44,11 +44,9 @@ public class CustomWeaponNetworkManager : MonoBehaviour
         Dictionary<string, Action<GameObject, bool>> callbackNameToMethod = new() {
             { nameof(TeleportTrap.ConvertToTPTrap), TeleportTrap.ConvertToTPTrap },
             { nameof(TeleportTrap.ConvertToPhysTPTrap), TeleportTrap.ConvertToPhysTPTrap },
-            { nameof(ToggleRadius), ToggleRadius }
+            { nameof(ToggleRadius), ToggleRadius } 
         };
 
-        if (callbackName == nameof(ToggleRadius))
-            KokiDebug.Log("RPC received, waiting to find object");
         StartCoroutine(DelayedApplyVisuals(nobID, callbackNameToMethod[callbackName], waitForIBheavior));
     }
 
@@ -68,7 +66,9 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     public static void ToggleRadius(GameObject go, bool state)
     {
         GameObject radius = go.transform.Find("radius(Clone)").gameObject;
-        KokiDebug.Log($"object found, radius is {radius.activeSelf}. toggling");
+        KokiDebug.Log(go.transform.position);
+        KokiDebug.Log(radius.transform.position);
+        radius.transform.localPosition = Vector3.zero;
         radius.SetActive(!radius.activeSelf);
     }
 }
