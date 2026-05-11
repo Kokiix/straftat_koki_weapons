@@ -21,18 +21,18 @@ public class SpawnWeaponOnTaunt
                 TeleportTrap.Init();
             weaponBase = TeleportTrap.TemplateGameObject;
         }
-        // else if (Input.GetKeyDown(KeyCode.Alpha2))
-        // {
-        //     weaponBase = SpawnerManager.NameToWeaponDict["APMine"];
-        // }
-        // else if (Input.GetKeyDown(KeyCode.Alpha3))
-        // {
-        //     weaponBase = SpawnerManager.NameToWeaponDict["ProximityMine"];
-        // }
-        // else if (Input.GetKeyDown(KeyCode.Alpha4))
-        // {
-        //     weaponBase = SpawnerManager.NameToWeaponDict["Gun"];
-        // }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            weaponBase = SpawnerManager.NameToWeaponDict["APMine"];
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            weaponBase = SpawnerManager.NameToWeaponDict["ProximityMine"];
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            weaponBase = SpawnerManager.NameToWeaponDict["Gun"];
+        }
 
         if (!weaponBase || !InstanceFinder.IsServer) return;
 
@@ -43,7 +43,7 @@ public class SpawnWeaponOnTaunt
             GameObject weaponInstance = Object.Instantiate(weaponBase, playerPos, Quaternion.identity);
 
             weaponInstance.GetComponent<ItemBehaviour>().DispenserDrop(Vector3.zero);
-            // weaponInstance.GetComponent<Rigidbody>().isKinematic = true;
+            weaponInstance.GetComponent<Rigidbody>().isKinematic = true;
             fpc.ServerManager.Spawn(weaponInstance);
 
             weapons.Add(weaponInstance);

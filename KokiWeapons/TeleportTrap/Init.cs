@@ -49,9 +49,6 @@ public static class TeleportTrap
         WeaponHandSpawner spawner = go.GetComponent<WeaponHandSpawner>();
         spawner.currentAmmo = 2;
 
-        // Causes NRE in itembehavior.update
-        // Object.Destroy(go.GetComponent<BoxCollider>());
-
         Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         meshParent.Find("PF_APMine_00").gameObject.SetActive(false);
         GameObject mesh = Object.Instantiate(MineMesh);
@@ -64,6 +61,9 @@ public static class TeleportTrap
         }
         mesh.SetActive(true);
 
+        BoxCollider coll = go.GetComponent<BoxCollider>();
+        coll.center = new Vector3(0, 0.03f, 0.01f);
+        coll.size = new Vector3(0.25f, 0.41f, 0.29f);
 
         if (!TemplatePhysGameObject)
         {
