@@ -15,7 +15,7 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     static void SwapTemplateGO(WeaponHandSpawner __instance, ref GameObject obj)
     {
-        if (__instance.gameObject.GetComponent<TrapLink>())
+        if (TPTrap.GetTrapLink(__instance.gameObject))
             obj = TPTrap.TemplatePhysGameObject;
     }
 

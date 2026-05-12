@@ -33,6 +33,12 @@ public class SpawnWeaponOnTaunt
         {
             weaponBase = SpawnerManager.NameToWeaponDict["Gun"];
         }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            if (!KBGrenade.TemplateGameObject)
+                KBGrenade.InitTemplate();
+            weaponBase = KBGrenade.TemplateGameObject;
+        }
 
         if (!weaponBase || !InstanceFinder.IsServer) return;
 

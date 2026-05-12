@@ -55,7 +55,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
         TPTrap.LoadBundleAssets(Bundle);
-    } 
+    }
 
     public void OnDestroy()
     {

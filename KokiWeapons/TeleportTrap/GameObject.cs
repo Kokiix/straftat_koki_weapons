@@ -86,7 +86,7 @@ public static class TPTrap
         }
 
         // this doesn't seem to work... still end up needing to patch the spawn function
-        spawner.objToSpawn = TemplatePhysGameObject;
+        // spawner.objToSpawn = TemplatePhysGameObject;
     }
 
     public static void ConvertToPhysTPTrap(GameObject go, bool isClientVisual)
@@ -141,12 +141,13 @@ public static class TPTrap
     // Required because of hot reload BS
     public static TrapLink GetTrapLink(GameObject go)
     {
-        // return go.GetComponent<TrapLink>();
+        if (!KokiWeaponsPlugin.Debug)
+            return go.GetComponent<TrapLink>();
 
         // Debug
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "TrapLink") return (TrapLink)c;
+            if (c.GetType().Name == "TrapLink") return (dynamic)c;
         }
         return null;
     }
