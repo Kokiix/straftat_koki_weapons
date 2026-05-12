@@ -106,6 +106,13 @@ public static class TPTrapMechanics
         var implicitBool = AccessTools.Method(typeof(Object), "op_Implicit");
         var matcher = new CodeMatcher(instructions, generator);
 
+        // disabled owner check later means that clients will go forward when they shouldnt, so separate check needed
+        matcher.End().CreateLabel(out Label ret);
+        matcher.Start()
+        .Insert(
+            new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(InstanceFinder), nameof(InstanceFinder.IsHost))),
+            new CodeInstruction(OpCodes.Brfalse, ret));
+
         // set isTPTrap variable
         matcher.Start()
         .Insert(
