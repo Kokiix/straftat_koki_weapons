@@ -12,8 +12,8 @@ Custom weapons! Use them with the weapon randomizer or swapper in game.
 
 
 ## Teleport Mine
-<img src="https://files.catbox.moe/d7h09v.png" width="40%" />
-<img src="https://files.catbox.moe/gakore.gif" width="59%" />
+<img src="https://files.catbox.moe/d7h09v.png" width="40%" alt="TP mine render" />
+<img src="https://files.catbox.moe/gakore.gif" width="59%" alt="TP mine demo GIF" />
 
 Comes in pairs. When activated, swaps the positions of the players touching either mine.
 
