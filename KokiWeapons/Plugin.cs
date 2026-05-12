@@ -11,6 +11,7 @@ using HarmonyLib;
 using UnityEngine;
 using MyceliumNetworking;
 using FishNet.Object;
+using HarmonyLib.Tools;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
@@ -48,7 +49,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         // Networking
-        this.gameObject.AddComponent<CustomWeaponNetworkManager>();
+        this.gameObject.AddComponent<CustomWeaponNetworkManager>(); 
 
         Harmony.PatchAll();
         TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
