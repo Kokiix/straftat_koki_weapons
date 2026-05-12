@@ -194,7 +194,7 @@ public static class TPTrapMechanics
 
     [HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
     [HarmonyPrefix]
-    public static bool ExplodeTPTrapOnHit(Weapon __instance, GameObject obj)
+    public static void ExplodeTPTrapOnHit(Weapon __instance, GameObject obj)
     {
         GameObject trap = obj.transform.root.gameObject;
         if (obj.CompareTag("Mine") && TeleportTrap.GetTrapLink(trap))
@@ -204,7 +204,7 @@ public static class TPTrapMechanics
                 MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
                 nameof(CustomWeaponNetworkManager.ExplodeMineFromClient), ReliableType.Reliable,
                 obj.transform.root.gameObject.GetComponent<NetworkObject>().ObjectId);
-                return false;
+                return;
             }
             GameObject otherTrap = TeleportTrap.GetTrapLink(trap).otherTrap;
             if (otherTrap)
@@ -214,11 +214,9 @@ public static class TPTrapMechanics
                 nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
                 otherTrap.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
             }
+
             obj.transform.root.GetComponent<ProximityMine>().ChangeState();
             obj.transform.root.GetComponent<ProximityMine>().ExplodeServer();
-            return false;
         }
-
-        return true;
     }
 }
