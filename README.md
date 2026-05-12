@@ -4,7 +4,7 @@
 ---
 
 # How does it work
-*Credit to Znoki for modeling and DankoBanko for testing*
+*Credit to Znoki, DankoBanko for modeling, testing, and ideas*
 
 > [!NOTE]
 > This thing is probably going to be constantly outdated lol

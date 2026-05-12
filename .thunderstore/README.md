@@ -1,6 +1,7 @@
 # Koki Weapons
 
 Custom weapons! Use them with the weapon randomizer or swapper in game.
+*Credit to Znoki, DankoBanko for modeling, testing, and ideas*
 <details open>
   <summary>Weapon List:</summary>
 
