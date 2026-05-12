@@ -23,11 +23,15 @@ public class SpawnWeaponOnTaunt
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            weaponBase = SpawnerManager.NameToWeaponDict["APMine"];
+            if (!KBGrenade.TemplateGameObject)
+                KBGrenade.InitTemplate();
+            weaponBase = KBGrenade.TemplateGameObject;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            weaponBase = SpawnerManager.NameToWeaponDict["ProximityMine"];
+            if (!Marksman.TemplateGameObject)
+                Marksman.InitTemplate();
+            weaponBase = Marksman.TemplateGameObject;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
@@ -35,9 +39,6 @@ public class SpawnWeaponOnTaunt
         }
         else if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            if (!KBGrenade.TemplateGameObject)
-                KBGrenade.InitTemplate();
-            weaponBase = KBGrenade.TemplateGameObject;
         }
 
         if (!weaponBase || !InstanceFinder.IsServer) return;
