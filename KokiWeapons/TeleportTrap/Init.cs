@@ -15,6 +15,9 @@ public static class TeleportTrap
     public static GameObject MineMesh;
     public static GameObject PhysMineMesh;
 
+    public static AnimationClip SphereAnim;
+    public static AnimationClip TorusAnim;
+
     [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
     [HarmonyPostfix]
     public static void RegisterWeapon()
@@ -69,7 +72,7 @@ public static class TeleportTrap
         {
             GameObject physGO = Object.Instantiate(spawner.objToSpawn);
             ConvertToPhysTPTrap(physGO, false);
-            TemplatePhysGameObject = physGO; 
+            TemplatePhysGameObject = physGO;
         }
 
         spawner.objToSpawn = TemplatePhysGameObject;
@@ -92,6 +95,10 @@ public static class TeleportTrap
         {
             mesh.transform.localPosition = new Vector3(0f, 0f, 0f);
         }
+
+        var anim = go.transform.Find("TeleTrapPhysMesh(Clone)").Find("trap_010").gameObject.AddComponent<Animation>();
+        anim.AddClip(SphereAnim, "sphere");
+        anim.AddClip(TorusAnim, "torus");
 
         // Insert radius GO from prox mine
         if (physGOTransform.Find("radius(Clone)"))

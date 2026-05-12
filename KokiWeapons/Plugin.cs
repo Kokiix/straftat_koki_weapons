@@ -49,11 +49,15 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         // Networking
-        this.gameObject.AddComponent<CustomWeaponNetworkManager>(); 
+        this.gameObject.AddComponent<CustomWeaponNetworkManager>();
 
         Harmony.PatchAll();
         TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
         TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
+        TeleportTrap.SphereAnim = Bundle.LoadAsset<AnimationClip>("tpmineSphere");
+        TeleportTrap.TorusAnim = Bundle.LoadAsset<AnimationClip>("tpmineTorus");
+        TeleportTrap.SphereAnim.wrapMode = WrapMode.Loop;
+        TeleportTrap.TorusAnim.wrapMode = WrapMode.Loop;
     }
 
     public void OnDestroy()

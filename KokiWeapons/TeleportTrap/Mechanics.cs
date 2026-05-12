@@ -23,7 +23,7 @@ public static class TPTrapMechanics
     [HarmonyTranspiler]
     static IEnumerable<CodeInstruction> LinkMineOnPlace(IEnumerable<CodeInstruction> instructions)
     {
-        var linkmines = AccessTools.Method(typeof(TPTrapMechanics), nameof(LinkMines));
+        var linkmines = AccessTools.Method(typeof(TPTrapMechanics), nameof(OnPlace));
 
         return new CodeMatcher(instructions)
         .MatchForward(useEnd: false, new CodeMatch(OpCodes.Call,
@@ -35,7 +35,7 @@ public static class TPTrapMechanics
         .InstructionEnumeration();
     }
 
-    public static void LinkMines(WeaponHandSpawner __instance, GameObject newTrap)
+    public static void OnPlace(WeaponHandSpawner __instance, GameObject newTrap)
     {
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (!connector) return;
@@ -44,6 +44,14 @@ public static class TPTrapMechanics
         mine.activated = false;
         mine.canActivate = false;
         mine.stunMine = false; // Used as detonated flag
+
+        var anim = newTrap.transform.Find("TeleTrapPhysMesh(Clone)").Find("trap_010").GetComponent<Animation>();
+        anim["sphere"].layer = 0;
+        anim.Play("sphere");
+        anim["torus"].layer = 1;
+        anim["torus"].weight = 1;
+        anim["torus"].enabled = true;
+        anim.Play("torus");
 
         MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
         nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
