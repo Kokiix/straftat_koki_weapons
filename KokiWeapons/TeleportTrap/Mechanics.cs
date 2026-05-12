@@ -95,67 +95,16 @@ public static class TPTrapMechanics
     }
 
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
-    [HarmonyTranspiler]
-    public static IEnumerable<CodeInstruction> InsertHandleExplosion(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    [HarmonyPrefix]
+    public static bool HandleExplosion(ProximityMine __instance)
     {
-        var resumeAfterInject = generator.DefineLabel();
-        LocalBuilder isTPTrap = generator.DeclareLocal(typeof(bool));
+        if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
-        var handleExplosion = AccessTools.Method(typeof(TPTrapMechanics), nameof(HandleExplosion));
-        var getTrapLink = AccessTools.Method(typeof(TeleportTrap), nameof(TeleportTrap.GetTrapLink));
-        var implicitBool = AccessTools.Method(typeof(Object), "op_Implicit");
-        var matcher = new CodeMatcher(instructions, generator);
-
-        // disabled owner check later means that clients will go forward when they shouldnt, so separate check needed
-        matcher.End().CreateLabel(out Label ret);
-        matcher.Start()
-        .Insert(
-            new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(InstanceFinder), nameof(InstanceFinder.IsHost))),
-            new CodeInstruction(OpCodes.Brfalse, ret));
-
-        // set isTPTrap variable
-        matcher.Start()
-        .Insert(
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(ProximityMine), nameof(ProximityMine.gameObject))),
-            new CodeInstruction(OpCodes.Call, getTrapLink),
-            new CodeInstruction(OpCodes.Call, implicitBool),
-            new CodeInstruction(OpCodes.Stloc, isTPTrap));
-
-        // blow up the mine even if not owner
-        var postOwnerCheckLabel = (Label)matcher.MatchForward(useEnd: false,
-        new CodeMatch(OpCodes.Call, AccessTools.PropertyGetter(typeof(NetworkBehaviour), nameof(NetworkBehaviour.IsOwner))))
-        .Advance(1).Instruction.operand;
-        matcher.Advance(1).Insert(
-            new CodeInstruction(OpCodes.Ldloc, isTPTrap),
-            new CodeInstruction(OpCodes.Brtrue, postOwnerCheckLabel));
-
-        // logic inside loop over each collider
-        var loopContinueLabel = (Label)matcher.MatchForward(useEnd: false,
-        new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(PlayerHealth), nameof(PlayerHealth.sync___get_value_isKilled))))
-        .Advance(1).Instruction.operand;
-        matcher.Advance(1).Insert(
-            // if instance has no trap link, continue
-            new CodeInstruction(OpCodes.Ldloc, isTPTrap),
-            new CodeInstruction(OpCodes.Brfalse, resumeAfterInject),
-
-            // else, use TP mine HandleExplosion and skip to next loop cycle
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(ProximityMine), nameof(ProximityMine.ph2))),
-            new CodeInstruction(OpCodes.Ldloc_3),
-            new CodeInstruction(OpCodes.Ldelem_Ref),
-            new CodeInstruction(OpCodes.Call, handleExplosion),
-            new CodeInstruction(OpCodes.Br, loopContinueLabel)
-        ).AddLabels([resumeAfterInject]);
-        return matcher.InstructionEnumeration();
-    }
-
-    public static void HandleExplosion(ProximityMine __instance, PlayerHealth health)
-    {
-        if (!InstanceFinder.IsServer) return;
+        if (!InstanceFinder.IsServer) return false;
 
         ProximityMine otherMine = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
+        Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
+
         Vector3 destination = otherMine.transform.position;
 
         __instance.stunMine = true;
@@ -165,19 +114,27 @@ public static class TPTrapMechanics
             otherMine.HandleExplosion();
         }
 
-        FirstPersonController fpc = health.controller;
-        if (fpc)
+        if (colliders.Length != 0)
         {
-            if (fpc.Owner.IsLocalClient)
+            foreach (Collider c in colliders)
             {
-                fpc.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-            }
-            else
-            {
-                ulong.TryParse(fpc.Owner.GetAddress(), out ulong steamID);
-                MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, destination);
+                FirstPersonController fpc = c.GetComponent<FirstPersonController>();
+                if (fpc)
+                {
+                    if (fpc.Owner.IsLocalClient)
+                    {
+                        fpc.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                    }
+                    else
+                    {
+                        ulong.TryParse(fpc.Owner.GetAddress(), out ulong steamID);
+                        MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, destination);
+                    }
+                }
             }
         }
+        __instance.ExplodeServer();
+        return false;
     }
 
     [HarmonyPatch(typeof(ProximityMine), "Start")]
