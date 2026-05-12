@@ -5,27 +5,45 @@ using HarmonyLib;
 using MyceliumNetworking;
 using UnityEngine;
 using Steamworks;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 
 [HarmonyPatch]
 public static class TPTrapMechanics
 {
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
-    static bool PlaceMine(WeaponHandSpawner __instance, GameObject obj, Vector3 position, Quaternion rotation)
+    static void SwapTemplateGO(WeaponHandSpawner __instance, ref GameObject obj)
+    {
+        if (__instance.gameObject.GetComponent<TrapLink>())
+            obj = TeleportTrap.TemplatePhysGameObject;
+    }
+
+    [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
+    [HarmonyTranspiler]
+    static IEnumerable<CodeInstruction> LinkMineOnPlace(IEnumerable<CodeInstruction> instructions)
+    {
+        var matcher = new CodeMatcher(instructions);
+        var linkmines = AccessTools.Method(typeof(TPTrapMechanics), nameof(LinkMines));
+        matcher.MatchForward(useEnd: false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.sync___set_value__rootObject))))
+        .ThrowIfInvalid("place mine instruction not found!")
+        .Insert(
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Ldloc_0),
+            new CodeInstruction(OpCodes.Call, linkmines)
+        );
+        return matcher.InstructionEnumeration();
+    }
+
+    public static void LinkMines(WeaponHandSpawner __instance, GameObject newTrap)
     {
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
-        if (PauseManager.BetweenRounds || !connector) return true;
-
-        GameObject newTrap = UnityEngine.Object.Instantiate(TeleportTrap.TemplatePhysGameObject, position, rotation);
-        newTrap.SetActive(true);
+        if (!connector) return;
 
         ProximityMine mine = newTrap.GetComponent<ProximityMine>();
         mine.activated = false;
         mine.canActivate = false;
         mine.stunMine = false; // Used as detonated flag
-        mine.sync___set_value__rootObject(__instance.rootObject, true);
-        mine.sync___set_value_weapon(__instance, true);
-        InstanceFinder.ServerManager.Spawn(newTrap);
 
         MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
         nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
@@ -52,13 +70,11 @@ public static class TPTrapMechanics
         }
         else
             connector.otherTrap = newTrap;
-
-        return false;
     }
 
     [HarmonyPatch(typeof(ProximityMine), "OnTriggerStay")]
     [HarmonyPrefix]
-    static bool DetectExplosion(ProximityMine __instance)
+    public static bool DetectExplosion(ProximityMine __instance)
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
@@ -74,7 +90,7 @@ public static class TPTrapMechanics
 
     [HarmonyPatch(typeof(ProximityMine), "HandleExplosion")]
     [HarmonyPrefix]
-    static bool HandleExplosion(ProximityMine __instance)
+    public static bool HandleExplosion(ProximityMine __instance)
     {
         if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
 
@@ -117,7 +133,7 @@ public static class TPTrapMechanics
 
     [HarmonyPatch(typeof(ProximityMine), "Start")]
     [HarmonyPrefix]
-    static bool HandleMineActivation(ProximityMine __instance)
+    public static bool HandleMineActivation(ProximityMine __instance)
     {
         return !TeleportTrap.GetTrapLink(__instance.gameObject);
     }
