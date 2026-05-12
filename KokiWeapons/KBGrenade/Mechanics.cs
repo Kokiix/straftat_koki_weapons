@@ -35,7 +35,7 @@ public static class KBGrenadeMechanics
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Callvirt, gameObject),
             new CodeInstruction(OpCodes.Call, getIsKBGrenade),
-            // new CodeInstruction(OpCodes.Call, implicitBool),
+            new CodeInstruction(OpCodes.Call, implicitBool),
             new CodeInstruction(OpCodes.Brfalse, loopStart),
 
             // Execute KB effect
@@ -47,9 +47,9 @@ public static class KBGrenadeMechanics
         .InstructionEnumeration();
     }
 
-    public static void KBEffect(Collider[] colliders, ref PlayerHealth[] healths)
+    public static void KBEffect(Collider[] colliders, PlayerHealth[] healths)
     {
-        healths = [.. healths.Distinct()];
+        PlayerHealth[] uniqueHealth = [.. healths.Distinct()];
         healths.Do(x => KokiDebug.Log(x));
     }
 }
