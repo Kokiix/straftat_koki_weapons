@@ -23,16 +23,16 @@ public static class TPTrapMechanics
     [HarmonyTranspiler]
     static IEnumerable<CodeInstruction> LinkMineOnPlace(IEnumerable<CodeInstruction> instructions)
     {
-        var matcher = new CodeMatcher(instructions);
         var linkmines = AccessTools.Method(typeof(TPTrapMechanics), nameof(LinkMines));
-        matcher.MatchForward(useEnd: false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.sync___set_value__rootObject))))
-        .ThrowIfInvalid("place mine instruction not found!")
+
+        return new CodeMatcher(instructions)
+        .MatchForward(useEnd: false, new CodeMatch(OpCodes.Call,
+            AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.sync___set_value__rootObject))))
         .Insert(
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Ldloc_0),
-            new CodeInstruction(OpCodes.Call, linkmines)
-        );
-        return matcher.InstructionEnumeration();
+            new CodeInstruction(OpCodes.Call, linkmines))
+        .InstructionEnumeration();
     }
 
     public static void LinkMines(WeaponHandSpawner __instance, GameObject newTrap)
@@ -166,10 +166,22 @@ public static class TPTrapMechanics
     }
 
     [HarmonyPatch(typeof(ProximityMine), "Start")]
-    [HarmonyPrefix]
-    public static bool HandleMineActivation(ProximityMine __instance)
+    [HarmonyTranspiler]
+    public static IEnumerable<CodeInstruction> StopActivateCoroutine(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        return !TeleportTrap.GetTrapLink(__instance.gameObject);
+        var getTrapLink = AccessTools.Method(typeof(TeleportTrap), nameof(TeleportTrap.GetTrapLink));
+
+        return new CodeMatcher(instructions, generator)
+            .End()
+            .CreateLabel(out Label ret)
+
+            .Start()
+            .Insert(
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(ProximityMine), nameof(ProximityMine.gameObject))),
+            new CodeInstruction(OpCodes.Call, getTrapLink),
+            new CodeInstruction(OpCodes.Brtrue, ret))
+            .InstructionEnumeration();
     }
 
     [HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
