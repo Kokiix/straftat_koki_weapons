@@ -58,9 +58,9 @@ public static class TeleportTrap
         mesh.transform.SetParent(meshParent);
         if (isClientVisual)
         {
-            // mesh.transform.localPosition = new Vector3(0.2f, -0.45f, -0.2f);
-            // mesh.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            // mesh.transform.localRotation = Quaternion.identity;
+            mesh.transform.localPosition = new Vector3(0, -0.2f, 0);
+            mesh.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            mesh.transform.localRotation = Quaternion.identity;
         }
         mesh.SetActive(true);
 
@@ -91,14 +91,21 @@ public static class TeleportTrap
         physGOTransform.Find("PF_APMine_00").gameObject.SetActive(false);
         GameObject mesh = Object.Instantiate(PhysMineMesh);
         mesh.transform.SetParent(physGOTransform);
-        if (isClientVisual)
-        {
-            mesh.transform.localPosition = new Vector3(0f, 0f, 0f);
-        }
 
         var anim = go.transform.Find("TeleTrapPhysMesh(Clone)").Find("trap_010").gameObject.AddComponent<Animation>();
         anim.AddClip(SphereAnim, "sphere");
         anim.AddClip(TorusAnim, "torus");
+
+        if (isClientVisual)
+        {
+            mesh.transform.localPosition = new Vector3(0f, 0f, 0f);
+            anim["sphere"].layer = 0;
+            anim.Play("sphere");
+            anim["torus"].layer = 1;
+            anim["torus"].weight = 1;
+            anim["torus"].enabled = true;
+            anim.Play("torus");
+        }
 
         // Insert radius GO from prox mine
         if (physGOTransform.Find("radius(Clone)"))
