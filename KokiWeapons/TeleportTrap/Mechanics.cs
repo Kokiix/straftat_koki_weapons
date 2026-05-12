@@ -102,9 +102,8 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     public static bool HandleExplosion(ProximityMine __instance)
     {
-        if (!TPTrap.GetTrapLink(__instance.gameObject)) return true;
-
         if (!InstanceFinder.IsServer) return false;
+        if (!TPTrap.GetTrapLink(__instance.gameObject)) return true;
 
         ProximityMine otherMine = TPTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);

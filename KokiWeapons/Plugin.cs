@@ -22,7 +22,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
-    internal static bool Debug = true;
+    internal static bool Debug = false;
 
     private void Awake()
     {
