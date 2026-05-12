@@ -25,7 +25,7 @@ public static class KBGrenadeMechanics
         matcher.Advance(1).CreateLabel(out Label resumeLoopLogic);
 
         return matcher.Insert(
-            // If mine is not KB continue
+            // If mine is not KB resume
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Callvirt, gameObject),
             new CodeInstruction(OpCodes.Call, getIsKBGrenade),
@@ -42,6 +42,7 @@ public static class KBGrenadeMechanics
         .InstructionEnumeration();
     }
 
+    // This will apply many times (~70) to the same player in a short span of time because of the way vanilla works...
     public static void KBEffect(PlayerHealth ph)
     {
         ph.RemoveHealth(1);
