@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -34,7 +35,7 @@ public static class KBGrenadeMechanics
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Callvirt, gameObject),
             new CodeInstruction(OpCodes.Call, getIsKBGrenade),
-            new CodeInstruction(OpCodes.Call, implicitBool),
+            // new CodeInstruction(OpCodes.Call, implicitBool),
             new CodeInstruction(OpCodes.Brfalse, loopStart),
 
             // Execute KB effect
@@ -46,8 +47,9 @@ public static class KBGrenadeMechanics
         .InstructionEnumeration();
     }
 
-    public static void KBEffect(Collider[] colliders, PlayerHealth[] healths)
+    public static void KBEffect(Collider[] colliders, ref PlayerHealth[] healths)
     {
-
+        healths = [.. healths.Distinct()];
+        healths.Do(x => KokiDebug.Log(x));
     }
 }

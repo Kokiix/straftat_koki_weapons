@@ -103,16 +103,16 @@ public static class KBGrenade
         // Object.Destroy(physGOTransform.transform.Find("Cube").gameObject);
     }
 
-    public static IsKBGrenade GetIsKBGrenade(GameObject go)
+    public static bool GetIsKBGrenade(GameObject go)
     {
         if (!KokiWeaponsPlugin.Debug)
             return go.GetComponent<IsKBGrenade>();
 
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "IsKBGrenade") return (IsKBGrenade)c;
+            if (c.GetType().Name == "IsKBGrenade") return true;
         }
-        return null;
+        return false;
     }
 }
 
