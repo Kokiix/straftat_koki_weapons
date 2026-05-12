@@ -7,7 +7,7 @@ using MyceliumNetworking;
 using UnityEngine;
 
 [HarmonyPatch]
-public static class TeleportTrap
+public static class TPTrap
 {
     public static GameObject TemplateGameObject;
     public static GameObject TemplatePhysGameObject;

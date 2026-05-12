@@ -11,12 +11,13 @@ using System.Reflection.Emit;
 [HarmonyPatch]
 public static class TPTrapMechanics
 {
+    // Now that I think about it isn't this what objToSpawn in WeaponHandSpawner is for? Why doesn't that work?
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
     static void SwapTemplateGO(WeaponHandSpawner __instance, ref GameObject obj)
     {
         if (__instance.gameObject.GetComponent<TrapLink>())
-            obj = TeleportTrap.TemplatePhysGameObject;
+            obj = TPTrap.TemplatePhysGameObject;
     }
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
@@ -53,28 +54,28 @@ public static class TPTrapMechanics
         anim["torus"].enabled = true;
         anim.Play("torus");
 
-        MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-        nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
-        newTrap.GetComponent<NetworkObject>().ObjectId, nameof(TeleportTrap.ConvertToPhysTPTrap), false);
+        MyceliumNetwork.RPC(TPTrapNetworking.MyceliumID,
+        nameof(TPTrapNetworking.DisplayClientVisual), ReliableType.Reliable,
+        newTrap.GetComponent<NetworkObject>().ObjectId, nameof(TPTrap.ConvertToPhysTPTrap), false);
 
         if (connector.otherTrap)
         {
             GameObject otherTrap = connector.otherTrap.gameObject;
 
-            TeleportTrap.GetTrapLink(otherTrap).otherTrap = newTrap;
-            TeleportTrap.GetTrapLink(newTrap).otherTrap = otherTrap;
+            TPTrap.GetTrapLink(otherTrap).otherTrap = newTrap;
+            TPTrap.GetTrapLink(newTrap).otherTrap = otherTrap;
 
             ProximityMine otherMine = otherTrap.GetComponent<ProximityMine>();
             otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
             newTrap.transform.Find("radius(Clone)").gameObject.SetActive(true);
 
-            MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-            nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
-            otherTrap.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
+            MyceliumNetwork.RPC(TPTrapNetworking.MyceliumID,
+            nameof(TPTrapNetworking.DisplayClientVisual), ReliableType.Reliable,
+            otherTrap.GetComponent<NetworkObject>().ObjectId, nameof(TPTrapNetworking.ToggleRadius), false);
 
-            MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-            nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
-            newTrap.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
+            MyceliumNetwork.RPC(TPTrapNetworking.MyceliumID,
+            nameof(TPTrapNetworking.DisplayClientVisual), ReliableType.Reliable,
+            newTrap.GetComponent<NetworkObject>().ObjectId, nameof(TPTrapNetworking.ToggleRadius), false);
         }
         else
             connector.otherTrap = newTrap;
@@ -84,9 +85,9 @@ public static class TPTrapMechanics
     [HarmonyPostfix]
     public static void DetectExplosion(ProximityMine __instance)
     {
-        if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return;
+        if (!TPTrap.GetTrapLink(__instance.gameObject)) return;
 
-        GameObject otherTrap = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap;
+        GameObject otherTrap = TPTrap.GetTrapLink(__instance.gameObject).otherTrap;
 
         if (!InstanceFinder.IsServer || __instance.stunMine || !otherTrap) return;
 
@@ -98,11 +99,11 @@ public static class TPTrapMechanics
     [HarmonyPrefix]
     public static bool HandleExplosion(ProximityMine __instance)
     {
-        if (!TeleportTrap.GetTrapLink(__instance.gameObject)) return true;
+        if (!TPTrap.GetTrapLink(__instance.gameObject)) return true;
 
         if (!InstanceFinder.IsServer) return false;
 
-        ProximityMine otherMine = TeleportTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
+        ProximityMine otherMine = TPTrap.GetTrapLink(__instance.gameObject).otherTrap.GetComponent<ProximityMine>();
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
         Vector3 destination = otherMine.transform.position;
@@ -128,7 +129,7 @@ public static class TPTrapMechanics
                     else
                     {
                         ulong.TryParse(fpc.Owner.GetAddress(), out ulong steamID);
-                        MyceliumNetwork.RPCTarget(CustomWeaponNetworkManager.MyceliumID, nameof(CustomWeaponNetworkManager.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, destination);
+                        MyceliumNetwork.RPCTarget(TPTrapNetworking.MyceliumID, nameof(TPTrapNetworking.TeleportClient), (CSteamID)steamID, ReliableType.Reliable, destination);
                     }
                 }
             }
@@ -141,7 +142,7 @@ public static class TPTrapMechanics
     [HarmonyTranspiler]
     public static IEnumerable<CodeInstruction> StopActivateCoroutine(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        var getTrapLink = AccessTools.Method(typeof(TeleportTrap), nameof(TeleportTrap.GetTrapLink));
+        var getTrapLink = AccessTools.Method(typeof(TPTrap), nameof(TPTrap.GetTrapLink));
 
         return new CodeMatcher(instructions, generator)
             .End()
@@ -161,22 +162,22 @@ public static class TPTrapMechanics
     public static void ExplodeTPTrapOnHit(Weapon __instance, GameObject obj)
     {
         GameObject trap = obj.transform.root.gameObject;
-        if (obj.CompareTag("Mine") && TeleportTrap.GetTrapLink(trap))
+        if (obj.CompareTag("Mine") && TPTrap.GetTrapLink(trap))
         {
             if (!InstanceFinder.IsHost)
             {
-                MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-                nameof(CustomWeaponNetworkManager.ExplodeMineFromClient), ReliableType.Reliable,
+                MyceliumNetwork.RPC(TPTrapNetworking.MyceliumID,
+                nameof(TPTrapNetworking.ExplodeMineFromClient), ReliableType.Reliable,
                 obj.transform.root.gameObject.GetComponent<NetworkObject>().ObjectId);
                 return;
             }
-            GameObject otherTrap = TeleportTrap.GetTrapLink(trap).otherTrap;
+            GameObject otherTrap = TPTrap.GetTrapLink(trap).otherTrap;
             if (otherTrap)
             {
                 otherTrap.transform.Find("radius(Clone)").gameObject.SetActive(false);
-                MyceliumNetwork.RPC(CustomWeaponNetworkManager.MyceliumID,
-                nameof(CustomWeaponNetworkManager.DisplayClientVisual), ReliableType.Reliable,
-                otherTrap.GetComponent<NetworkObject>().ObjectId, nameof(CustomWeaponNetworkManager.ToggleRadius), false);
+                MyceliumNetwork.RPC(TPTrapNetworking.MyceliumID,
+                nameof(TPTrapNetworking.DisplayClientVisual), ReliableType.Reliable,
+                otherTrap.GetComponent<NetworkObject>().ObjectId, nameof(TPTrapNetworking.ToggleRadius), false);
             }
 
             obj.transform.root.GetComponent<ProximityMine>().ChangeState();

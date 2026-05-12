@@ -48,16 +48,15 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             return;
         }
 
-        // Networking
-        this.gameObject.AddComponent<CustomWeaponNetworkManager>();
+        this.gameObject.AddComponent<TPTrapNetworking>();
 
         Harmony.PatchAll();
-        TeleportTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
-        TeleportTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
-        TeleportTrap.SphereAnim = Bundle.LoadAsset<AnimationClip>("tpmineSphere");
-        TeleportTrap.TorusAnim = Bundle.LoadAsset<AnimationClip>("tpmineTorus");
-        TeleportTrap.SphereAnim.wrapMode = WrapMode.Loop;
-        TeleportTrap.TorusAnim.wrapMode = WrapMode.Loop;
+        TPTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
+        TPTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
+        TPTrap.SphereAnim = Bundle.LoadAsset<AnimationClip>("tpmineSphere");
+        TPTrap.TorusAnim = Bundle.LoadAsset<AnimationClip>("tpmineTorus");
+        TPTrap.SphereAnim.wrapMode = WrapMode.Loop;
+        TPTrap.TorusAnim.wrapMode = WrapMode.Loop;
     }
 
     public void OnDestroy()
@@ -72,10 +71,10 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 }
             }
 
-        TeleportTrap.TemplateGameObject = null;
-        TeleportTrap.TemplatePhysGameObject = null;
-        TeleportTrap.MineMesh = null;
-        TeleportTrap.PhysMineMesh = null;
+        TPTrap.TemplateGameObject = null;
+        TPTrap.TemplatePhysGameObject = null;
+        TPTrap.MineMesh = null;
+        TPTrap.PhysMineMesh = null;
 
         Harmony.UnpatchSelf();
     }

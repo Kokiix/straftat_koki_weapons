@@ -12,12 +12,12 @@ using MyceliumNetworking;
 using UnityEngine;
 
 [HarmonyPatch]
-public class CustomWeaponNetworkManager : MonoBehaviour
+public class TPTrapNetworking : MonoBehaviour
 {
     public const uint MyceliumID = 932828;
     public void Awake()
     {
-        MyceliumNetwork.DeregisterNetworkObject(this.gameObject.GetComponent<CustomWeaponNetworkManager>(), CustomWeaponNetworkManager.MyceliumID);
+        MyceliumNetwork.DeregisterNetworkObject(this.gameObject.GetComponent<TPTrapNetworking>(), TPTrapNetworking.MyceliumID);
         MyceliumNetwork.RegisterNetworkObject(this, MyceliumID);
     }
 
@@ -26,22 +26,8 @@ public class CustomWeaponNetworkManager : MonoBehaviour
     public static void SendClientWeaponVisuals(NetworkObject nob)
     {
         GameObject go = nob.gameObject;
-        if (TeleportTrap.GetTrapLink(go))
-            MyceliumNetwork.RPC(MyceliumID, nameof(DisplayClientVisual), ReliableType.Reliable, nob.ObjectId, nameof(TeleportTrap.ConvertToTPTrap), true);
-    }
-
-    [CustomRPC]
-    public void TeleportClient(Vector3 pos)
-    {
-        FirstPersonController.instance.Teleport(pos, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-    }
-
-    [CustomRPC]
-    public void ExplodeMineFromClient(int nobID)
-    {
-        if (!InstanceFinder.IsHost) return;
-        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
-        TPTrapMechanics.ExplodeTPTrapOnHit(null, nob.gameObject);
+        if (TPTrap.GetTrapLink(go))
+            MyceliumNetwork.RPC(MyceliumID, nameof(DisplayClientVisual), ReliableType.Reliable, nob.ObjectId, nameof(TPTrap.ConvertToTPTrap), true);
     }
 
     [CustomRPC]
@@ -50,8 +36,8 @@ public class CustomWeaponNetworkManager : MonoBehaviour
         if (InstanceFinder.IsServer) return;
 
         Dictionary<string, Action<GameObject, bool>> callbackNameToMethod = new() {
-            { nameof(TeleportTrap.ConvertToTPTrap), TeleportTrap.ConvertToTPTrap },
-            { nameof(TeleportTrap.ConvertToPhysTPTrap), TeleportTrap.ConvertToPhysTPTrap },
+            { nameof(TPTrap.ConvertToTPTrap), TPTrap.ConvertToTPTrap },
+            { nameof(TPTrap.ConvertToPhysTPTrap), TPTrap.ConvertToPhysTPTrap },
             { nameof(ToggleRadius), ToggleRadius }
         };
 
@@ -77,4 +63,19 @@ public class CustomWeaponNetworkManager : MonoBehaviour
         radius.transform.localPosition = Vector3.zero;
         radius.SetActive(!radius.activeSelf);
     }
+
+    [CustomRPC]
+    public void TeleportClient(Vector3 pos)
+    {
+        FirstPersonController.instance.Teleport(pos, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+    }
+
+    [CustomRPC]
+    public void ExplodeMineFromClient(int nobID)
+    {
+        if (!InstanceFinder.IsHost) return;
+        InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
+        TPTrapMechanics.ExplodeTPTrapOnHit(null, nob.gameObject);
+    }
+
 }
