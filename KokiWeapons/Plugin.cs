@@ -51,6 +51,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         this.gameObject.AddComponent<TPTrapNetworking>();
 
         Harmony.PatchAll();
+        if (!Debug)
+            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
+
         TPTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
         TPTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
         TPTrap.SphereAnim = Bundle.LoadAsset<AnimationClip>("tpmineSphere");
