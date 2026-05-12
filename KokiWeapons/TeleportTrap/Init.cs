@@ -59,7 +59,7 @@ public static class TeleportTrap
             // mesh.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             // mesh.transform.localRotation = Quaternion.identity;
         }
-        mesh.SetActive(true); 
+        mesh.SetActive(true);
 
         BoxCollider coll = go.GetComponent<BoxCollider>();
         coll.center = new Vector3(0, 0.16f, 0f);
@@ -81,7 +81,7 @@ public static class TeleportTrap
         Object.DontDestroyOnLoad(go);
 
         ProximityMine mine = go.GetComponent<ProximityMine>();
-        mine.instantExplode = false;
+        mine.canActivate = false;
 
         // Replace mesh
         Transform physGOTransform = go.transform;
@@ -107,7 +107,7 @@ public static class TeleportTrap
 
         // Adjust radius for player detection
         BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
-        collider.size = new Vector3(1.6f, 1.6f, 1.6f); 
+        collider.size = new Vector3(1.6f, 1.6f, 1.6f);
 
         // Remove bullet collider since comes with one
         Object.Destroy(physGOTransform.transform.Find("Cube").gameObject);
