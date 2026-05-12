@@ -1,6 +1,7 @@
 # Koki Weapons
 
 Custom weapons! Use them with the weapon randomizer or swapper in game.
+
 *Credit to Znoki, DankoBanko for modeling, testing, and ideas*
 <details open>
   <summary>Weapon List:</summary>
@@ -29,5 +30,23 @@ Comes in pairs. When activated, swaps the positions of the players touching eith
 - If you have "Invert fire binding when holding two weapons" enabled, placing your final ammo from left hand will also trigger your right hand to place. This is a vanilla bug I might fix. For now, you have to not use that setting to use TP mines effectively :(
 - Vending machine dispenses AP mines instead of TP mines when randomizer is set to 100% TP mines
 - Client console fills with warnings every time client moves
+
+## Repulsar Grenade
+<img src="https://files.catbox.moe/d7h09v.png" width="40%" />
+<img src="https://files.catbox.moe/gakore.gif" width="59%" />
+
+Launches players and items.
+
+**Swapper Codes**
+- <details>
+  <summary>Could be swapped for repulsar on all maps.</summary>
+  
+  todo
+</details>
+
+- Send me swapper codes you find fun and I'll put them here :)
+
+**Known Issues**:
+- fsdfsdf
 ---
 Contact me with weapon or mod suggestions, balancing changes, issues, whatever, at `zkoki` on Discord :D

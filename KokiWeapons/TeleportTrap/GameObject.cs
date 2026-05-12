@@ -49,6 +49,7 @@ public static class TPTrap
         TemplateGameObject = templateAPMine;
         TemplateGameObject.SetActive(false);
         Object.DontDestroyOnLoad(TemplateGameObject);
+        Object.DontDestroyOnLoad(TemplatePhysGameObject);
     }
 
     public static void ConvertToTPTrap(GameObject go, bool isClientVisual)
@@ -92,7 +93,6 @@ public static class TPTrap
     public static void ConvertToPhysTPTrap(GameObject go, bool isClientVisual)
     {
         go.name = "Physics Teleport Mine";
-        Object.DontDestroyOnLoad(go);
 
         ProximityMine mine = go.GetComponent<ProximityMine>();
         mine.canActivate = false;

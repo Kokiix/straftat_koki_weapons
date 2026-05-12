@@ -14,7 +14,7 @@ public static class KBGrenadeMechanics
         var isOwner = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.isOwner));
         var ph2 = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.ph2));
         var makeBlood = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.makeBlood));
-        var kbEffect = AccessTools.Method(typeof(KBGrenadeMechanics), nameof(KBEffect));
+        var kbEffect = AccessTools.Method(typeof(KBGrenadeMechanics), nameof(KBAll));
         var getIsKBGrenade = AccessTools.Method(typeof(KBGrenade), nameof(KBGrenade.GetIsKBGrenade));
         var implicitBool = AccessTools.Method(typeof(Object), "op_Implicit");
         var gameObject = AccessTools.PropertyGetter(typeof(PhysicsGrenade), nameof(PhysicsGrenade.gameObject));
@@ -35,10 +35,11 @@ public static class KBGrenadeMechanics
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Callvirt, gameObject),
             new CodeInstruction(OpCodes.Call, getIsKBGrenade),
-            new CodeInstruction(OpCodes.Call, implicitBool),
+            // new CodeInstruction(OpCodes.Call, implicitBool),
             new CodeInstruction(OpCodes.Brfalse, loopStart),
 
             // Execute KB effect
+            new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Ldloc_2),
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Ldfld, ph2),
@@ -47,9 +48,33 @@ public static class KBGrenadeMechanics
         .InstructionEnumeration();
     }
 
-    public static void KBEffect(Collider[] colliders, PlayerHealth[] healths)
+    public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)
     {
-        PlayerHealth[] uniqueHealth = [.. healths.Distinct()];
-        healths.Do(x => KokiDebug.Log(x));
+        healths.Distinct().Do(ph =>
+        {
+            if (!ph) return;
+
+            Vector3 force = ph.controller.transform.position - instance.transform.position;
+            if (force.y < 0)
+                force.y = 0;
+            force.Normalize();
+            force *= 2.5f;
+            if (force.y == 0)
+                force.y = 1f;
+
+            // KokiDebug.Log(force);
+            // KokiDebug.Log(ph.controller.moveDirection);
+            // ph.controller.AddHorizontalForce(force, 10);
+            // KokiDebug.Log(ph.controller.moveDirection);
+
+            ph.controller.AddForce(new Vector3(10, 10, 10), 1);
+        });
     }
+
+    // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
+    // [HarmonyPrefix]
+    // public static bool test()
+    // {
+    //     return false;
+    // }
 }

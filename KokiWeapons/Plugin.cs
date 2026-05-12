@@ -22,7 +22,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
-    internal static bool Debug = false;
+    internal static bool Debug = true;
 
     private void Awake()
     {
@@ -55,6 +55,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
         TPTrap.LoadBundleAssets(Bundle);
+        KBGrenade.LoadBundleAssets(Bundle);
     }
 
     public void OnDestroy()
