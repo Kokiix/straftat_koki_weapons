@@ -18,12 +18,22 @@ public static class TPTrap
     public static AnimationClip SphereAnim;
     public static AnimationClip TorusAnim;
 
+    public static void LoadBundleAssets(AssetBundle bundle)
+    {
+        MineMesh = bundle.LoadAsset<GameObject>("TeleTrapMesh");
+        PhysMineMesh = bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
+        SphereAnim = bundle.LoadAsset<AnimationClip>("tpmineSphere");
+        TorusAnim = bundle.LoadAsset<AnimationClip>("tpmineTorus");
+        SphereAnim.wrapMode = WrapMode.Loop;
+        TorusAnim.wrapMode = WrapMode.Loop;
+    }
+
     [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
     [HarmonyPostfix]
     public static void RegisterWeapon()
     {
         if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Mine")) return;
-        Init();
+        InitTemplate();
         GameObject TPTrap = TemplateGameObject;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
         SpawnerManager.AllWeapons[^1] = TPTrap;
@@ -32,7 +42,7 @@ public static class TPTrap
         SpawnerManager.NameToIndexDict.Add(TPTrap.name, SpawnerManager.AllWeapons.Length - 1);
     }
 
-    public static void Init()
+    public static void InitTemplate()
     {
         GameObject templateAPMine = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["APMine"]);
         ConvertToTPTrap(templateAPMine, false);
@@ -75,6 +85,7 @@ public static class TPTrap
             TemplatePhysGameObject = physGO;
         }
 
+        // this doesn't seem to work... still end up needing to patch the spawn function
         spawner.objToSpawn = TemplatePhysGameObject;
     }
 

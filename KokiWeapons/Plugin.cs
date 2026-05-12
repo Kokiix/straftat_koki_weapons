@@ -54,17 +54,12 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (!Debug)
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
-        TPTrap.MineMesh = Bundle.LoadAsset<GameObject>("TeleTrapMesh");
-        TPTrap.PhysMineMesh = Bundle.LoadAsset<GameObject>("TeleTrapPhysMesh");
-        TPTrap.SphereAnim = Bundle.LoadAsset<AnimationClip>("tpmineSphere");
-        TPTrap.TorusAnim = Bundle.LoadAsset<AnimationClip>("tpmineTorus");
-        TPTrap.SphereAnim.wrapMode = WrapMode.Loop;
-        TPTrap.TorusAnim.wrapMode = WrapMode.Loop;
+        TPTrap.LoadBundleAssets(Bundle);
     }
 
     public void OnDestroy()
     {
-        // Cleanup stuff spawned by Debug
+        // Cleanup my debug spawns
         if (Debug)
             foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
             {
