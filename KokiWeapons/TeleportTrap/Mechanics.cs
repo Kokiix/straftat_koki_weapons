@@ -16,11 +16,7 @@ public static class TPTrapMechanics
     static void SwapTemplateGO(WeaponHandSpawner __instance, ref GameObject obj)
     {
         if (__instance.gameObject.GetComponent<TrapLink>())
-        {
-            if (KokiWeaponsPlugin.Debug)
-                SpawnWeaponOnTaunt.weapons.Add(obj);
             obj = TPTrap.TemplatePhysGameObject;
-        }
     }
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
@@ -43,6 +39,10 @@ public static class TPTrapMechanics
     {
         TrapLink connector = __instance.gameObject.GetComponent<TrapLink>();
         if (!connector) return;
+
+
+        if (KokiWeaponsPlugin.Debug)
+            SpawnWeaponOnTaunt.weapons.Add(newTrap);
 
         ProximityMine mine = newTrap.GetComponent<ProximityMine>();
         mine.activated = false;
