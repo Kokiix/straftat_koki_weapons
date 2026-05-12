@@ -6,15 +6,13 @@ Custom weapons! Use them with the weapon randomizer or swapper in game.
   <summary>Weapon List:</summary>
 
 - Teleport Mine
+- (Coming soon) Repulsion Grenade
 </details>
 
 
-
 ## Teleport Mine
-<img src="https://files.catbox.moe/gnt0rz.png" width="40%" />
-<img src="https://files.catbox.moe/j59ai7.gif" width="59%" />
-
-*^ Placeholder art*
+<img src="https://files.catbox.moe/d7h09v.png" width="40%" />
+<img src="https://files.catbox.moe/gakore.gif" width="59%" />
 
 Comes in pairs. When activated, swaps the positions of the players touching either mine.
 
