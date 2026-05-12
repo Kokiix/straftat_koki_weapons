@@ -62,14 +62,14 @@ public static class TeleportTrap
         mesh.SetActive(true);
 
         BoxCollider coll = go.GetComponent<BoxCollider>();
-        coll.center = new Vector3(0, 0.16f, 0f);
-        coll.size = new Vector3(0.28f, 0.8f, 0.28f);
+        coll.center = new Vector3(0, 0.09f, 0f);
+        coll.size = new Vector3(0.21f, 0.5f, 0.16f);
 
         if (!TemplatePhysGameObject)
         {
             GameObject physGO = Object.Instantiate(spawner.objToSpawn);
             ConvertToPhysTPTrap(physGO, false);
-            TemplatePhysGameObject = physGO;
+            TemplatePhysGameObject = physGO; 
         }
 
         spawner.objToSpawn = TemplatePhysGameObject;
