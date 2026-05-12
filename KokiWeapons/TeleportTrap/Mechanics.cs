@@ -11,13 +11,16 @@ using System.Reflection.Emit;
 [HarmonyPatch]
 public static class TPTrapMechanics
 {
-    // Now that I think about it isn't this what objToSpawn in WeaponHandSpawner is for? Why doesn't that work?
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
     [HarmonyPrefix]
     static void SwapTemplateGO(WeaponHandSpawner __instance, ref GameObject obj)
     {
         if (__instance.gameObject.GetComponent<TrapLink>())
+        {
+            if (KokiWeaponsPlugin.Debug)
+                SpawnWeaponOnTaunt.weapons.Add(obj);
             obj = TPTrap.TemplatePhysGameObject;
+        }
     }
 
     [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
