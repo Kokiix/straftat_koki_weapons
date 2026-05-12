@@ -147,7 +147,7 @@ public static class TPTrap
         // Debug
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "TrapLink") return (dynamic)c;
+            if (c.GetType().Name == "TrapLink") return (TrapLink)c;
         }
         return null;
     }

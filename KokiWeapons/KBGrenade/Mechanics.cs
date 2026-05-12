@@ -12,40 +12,42 @@ public static class KBGrenadeMechanics
     {
         var isOwner = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.isOwner));
         var ph2 = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.ph2));
+        var makeBlood = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.makeBlood));
         var kbEffect = AccessTools.Method(typeof(KBGrenadeMechanics), nameof(KBEffect));
         var getIsKBGrenade = AccessTools.Method(typeof(KBGrenade), nameof(KBGrenade.GetIsKBGrenade));
         var implicitBool = AccessTools.Method(typeof(Object), "op_Implicit");
         var gameObject = AccessTools.PropertyGetter(typeof(PhysicsGrenade), nameof(PhysicsGrenade.gameObject));
 
-        var matcher = new CodeMatcher(instructions, generator)
-        .MatchForward(useEnd: false, new CodeMatch(OpCodes.Ldfld, isOwner));
+        return new CodeMatcher(instructions, generator)
+        .MatchForward(useEnd: false,
+        new CodeMatch(OpCodes.Ldstr, "Player"))
+        .CreateLabel(out Label loopEnd)
 
-        var loopContinue = (Label)matcher.Advance(1).Instruction.operand;
+        .MatchBack(useEnd: false,
+        new CodeMatch(OpCodes.Stfld, makeBlood))
+        .MatchForward(useEnd: false,
+        new CodeMatch(OpCodes.Ldc_I4_0))
+        .CreateLabel(out Label loopStart)
 
-        matcher.Advance(1).CreateLabel(out Label resumeLoopLogic);
-
-        return matcher.Insert(
+        .Insert(
             // If mine is not KB resume
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Callvirt, gameObject),
             new CodeInstruction(OpCodes.Call, getIsKBGrenade),
             new CodeInstruction(OpCodes.Call, implicitBool),
-            new CodeInstruction(OpCodes.Brfalse, resumeLoopLogic),
+            new CodeInstruction(OpCodes.Brfalse, loopStart),
 
-            // Execute KB
+            // Execute KB effect
+            new CodeInstruction(OpCodes.Ldloc_2),
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Ldfld, ph2),
-            new CodeInstruction(OpCodes.Ldloc, 16),
-            new CodeInstruction(OpCodes.Ldelem_Ref),
             new CodeInstruction(OpCodes.Call, kbEffect),
-            new CodeInstruction(OpCodes.Br, loopContinue))
+            new CodeInstruction(OpCodes.Br, loopEnd))
         .InstructionEnumeration();
     }
 
-    // This will apply many times (~70) to the same player in a short span of time because of the way vanilla works...
-    public static void KBEffect(PlayerHealth ph)
+    public static void KBEffect(Collider[] colliders, PlayerHealth[] healths)
     {
-        ph.RemoveHealth(1);
-        KokiDebug.Log(ph.name);
+
     }
 }

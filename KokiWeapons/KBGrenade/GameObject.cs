@@ -110,7 +110,7 @@ public static class KBGrenade
 
         foreach (var c in go.GetComponents<Component>())
         {
-            if (c.GetType().Name == "IsKBGrenade") return (dynamic)c;
+            if (c.GetType().Name == "IsKBGrenade") return (IsKBGrenade)c;
         }
         return null;
     }
