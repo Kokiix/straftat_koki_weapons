@@ -60,11 +60,6 @@ public static class KBGrenade
             // mesh.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
             // mesh.transform.localRotation = Quaternion.identity;
         }
-        // mesh.SetActive(true);
-
-        // BoxCollider coll = go.GetComponent<BoxCollider>();
-        // coll.center = new Vector3(0, 0.09f, 0f);
-        // coll.size = new Vector3(0.21f, 0.5f, 0.16f); 
     }
 
     public static void ToPhysKBGrenade(GameObject go, bool isClientVisual)
@@ -91,13 +86,6 @@ public static class KBGrenade
             // anim["torus"].enabled = true;
             // anim.Play("torus");
         }
-
-        // Adjust radius for player detection
-        // BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
-        // collider.size = new Vector3(1.6f, 1.6f, 1.6f);
-
-        // Remove bullet collider since comes with one
-        // Object.Destroy(physGOTransform.transform.Find("Cube").gameObject);
     }
 
     public static bool GetIsKBGrenade(GameObject go)

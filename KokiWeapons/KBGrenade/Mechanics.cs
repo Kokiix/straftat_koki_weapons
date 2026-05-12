@@ -50,31 +50,28 @@ public static class KBGrenadeMechanics
 
     public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)
     {
-        healths.Distinct().Do(ph =>
+        healths.Distinct().DoIf(ph => ph, ph =>
         {
-            if (!ph) return;
-
             Vector3 force = ph.controller.transform.position - instance.transform.position;
-            if (force.y < 0)
-                force.y = 0;
+            force.y = 0;
             force.Normalize();
-            force *= 2.5f;
-            if (force.y == 0)
-                force.y = 1f;
 
-            // KokiDebug.Log(force);
-            // KokiDebug.Log(ph.controller.moveDirection);
-            // ph.controller.AddHorizontalForce(force, 10);
-            // KokiDebug.Log(ph.controller.moveDirection);
+            if (ph.controller.isGrounded)
+                ph.controller.transform.position += new Vector3(0, 2.5f, 0);
+            ph.controller.CustomAddForce(force, 150);
+        });
 
-            ph.controller.AddForce(new Vector3(10, 10, 10), 1);
+        colliders.DoIf(c => c && c.gameObject.GetComponent<Rigidbody>(),
+        item =>
+        {
+            Vector3 force = item.transform.position - instance.transform.position;
+            force.y = 0;
+            force.Normalize();
+            force *= 10;
+            force.y = 2;
+
+            item.transform.position += new Vector3(0, 2.5f, 0);
+            item.GetComponent<Rigidbody>().AddForce(force, ForceMode.Impulse);
         });
     }
-
-    // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
-    // [HarmonyPrefix]
-    // public static bool test()
-    // {
-    //     return false;
-    // }
 }
