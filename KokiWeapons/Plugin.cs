@@ -70,11 +70,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 }
             }
 
-        TPTrap.TemplateGameObject = null;
-        TPTrap.TemplatePhysGameObject = null;
-        TPTrap.MineMesh = null;
-        TPTrap.PhysMineMesh = null;
-
         Harmony.UnpatchSelf();
     }
 }

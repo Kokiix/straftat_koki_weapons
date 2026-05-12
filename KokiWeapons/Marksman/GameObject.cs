@@ -42,7 +42,13 @@ public static class Marksman
     public static void GunToMarksman(GameObject go, bool isClientVisual)
     {
         go.name = name;
-        go.GetComponent<ItemBehaviour>().weaponName = name;
+        var ib = go.GetComponent<ItemBehaviour>();
+        ib.weaponName = name;
+        ib.aimWeapon = false;
+        ib.aimCrosshair = null;
+
+        var gun = go.GetComponent<Gun>();
+        gun.requireBothHands = true;
 
         // Transform meshParent = go.transform.Find("ElbowPivotPoint").Find("AimStrafePivot");
         // meshParent.Find("SM_StunGrenade_00").gameObject.SetActive(false);
