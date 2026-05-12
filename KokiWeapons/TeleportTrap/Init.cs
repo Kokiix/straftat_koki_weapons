@@ -55,15 +55,15 @@ public static class TeleportTrap
         mesh.transform.SetParent(meshParent);
         if (isClientVisual)
         {
-            mesh.transform.localPosition = new Vector3(0.2f, -0.45f, -0.2f);
-            mesh.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            mesh.transform.localRotation = Quaternion.identity;
+            // mesh.transform.localPosition = new Vector3(0.2f, -0.45f, -0.2f);
+            // mesh.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            // mesh.transform.localRotation = Quaternion.identity;
         }
-        mesh.SetActive(true);
+        mesh.SetActive(true); 
 
         BoxCollider coll = go.GetComponent<BoxCollider>();
-        coll.center = new Vector3(0, 0.03f, 0.01f);
-        coll.size = new Vector3(0.25f, 0.41f, 0.29f);
+        coll.center = new Vector3(0, 0.16f, 0f);
+        coll.size = new Vector3(0.28f, 0.8f, 0.28f);
 
         if (!TemplatePhysGameObject)
         {
@@ -107,7 +107,7 @@ public static class TeleportTrap
 
         // Adjust radius for player detection
         BoxCollider collider = physGOTransform.GetComponent<BoxCollider>();
-        collider.size = new Vector3(1.6f, 1.6f, 1.6f);
+        collider.size = new Vector3(1.6f, 1.6f, 1.6f); 
 
         // Remove bullet collider since comes with one
         Object.Destroy(physGOTransform.transform.Find("Cube").gameObject);
