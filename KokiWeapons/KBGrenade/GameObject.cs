@@ -21,12 +21,12 @@ public static class KBGrenade
     {
         if (SpawnerManager.NameToWeaponDict.ContainsKey("Repulsion Grenade")) return;
         InitTemplate();
-        GameObject TPTrap = TemplateGameObject;
+        GameObject KBGrenade = TemplateGameObject;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-        SpawnerManager.AllWeapons[^1] = TPTrap;
+        SpawnerManager.AllWeapons[^1] = KBGrenade;
 
-        SpawnerManager.NameToWeaponDict.Add(TPTrap.name, TPTrap);
-        SpawnerManager.NameToIndexDict.Add(TPTrap.name, SpawnerManager.AllWeapons.Length - 1);
+        SpawnerManager.NameToWeaponDict.Add(KBGrenade.name, KBGrenade);
+        SpawnerManager.NameToIndexDict.Add(KBGrenade.name, SpawnerManager.AllWeapons.Length - 1);
     }
 
     public static void InitTemplate()

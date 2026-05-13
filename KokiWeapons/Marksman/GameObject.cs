@@ -25,12 +25,12 @@ public static class Marksman
     {
         if (SpawnerManager.NameToWeaponDict.ContainsKey(name)) return;
         InitTemplates();
-        GameObject TPTrap = TemplateGameObject;
+        GameObject Marksman = TemplateGameObject;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-        SpawnerManager.AllWeapons[^1] = TPTrap;
+        SpawnerManager.AllWeapons[^1] = Marksman;
 
-        SpawnerManager.NameToWeaponDict.Add(TPTrap.name, TPTrap);
-        SpawnerManager.NameToIndexDict.Add(TPTrap.name, SpawnerManager.AllWeapons.Length - 1);
+        SpawnerManager.NameToWeaponDict.Add(Marksman.name, Marksman);
+        SpawnerManager.NameToIndexDict.Add(Marksman.name, SpawnerManager.AllWeapons.Length - 1);
     }
 
     public static void InitTemplates()
@@ -75,21 +75,14 @@ public static class Marksman
         coin.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
         return coin;
     }
-
-    public static bool GetIsMarksman(GameObject go)
-    {
-        if (!KokiWeaponsPlugin.Debug)
-            return go.GetComponent<IsMarksman>();
-
-        foreach (var c in go.GetComponents<Component>())
-        {
-            if (c.GetType().Name == "IsMarksman") return c;
-        }
-        return false;
-    }
 }
 
-public class IsMarksman : MonoBehaviour
+public class Coin : MonoBehaviour
 {
+    void Update()
+    {
+        var rb = gameObject.GetComponent<Rigidbody>();
 
+        // if (rb.velocity.magnitude)
+    }
 }

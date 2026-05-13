@@ -40,6 +40,8 @@ public static class MarksmanMechanics
         coinTossForce.y += 2.5f;
         coinRB.AddForce(coinTossForce, ForceMode.Impulse);
 
+        coin.AddComponent<Coin>();
+        
         // TODO: play coin spin animation
     }
 
