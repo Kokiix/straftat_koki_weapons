@@ -32,14 +32,14 @@ public static class TPTrap
     [HarmonyPostfix]
     public static void RegisterWeapon()
     {
-        if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Mine")) return;
-        InitTemplate();
-        GameObject TPTrap = TemplateGameObject;
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-        SpawnerManager.AllWeapons[^1] = TPTrap;
+        // if (SpawnerManager.NameToWeaponDict.ContainsKey("Teleport Mine")) return;
+        // InitTemplate();
+        // GameObject TPTrap = TemplateGameObject;
+        // System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+        // SpawnerManager.AllWeapons[^1] = TPTrap;
 
-        SpawnerManager.NameToWeaponDict.Add(TPTrap.name, TPTrap);
-        SpawnerManager.NameToIndexDict.Add(TPTrap.name, SpawnerManager.AllWeapons.Length - 1);
+        // SpawnerManager.NameToWeaponDict.Add(TPTrap.name, TPTrap);
+        // SpawnerManager.NameToIndexDict.Add(TPTrap.name, SpawnerManager.AllWeapons.Length - 1);
     }
 
     public static void InitTemplate()

@@ -21,13 +21,16 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
-    internal static AssetBundle Bundle;
     internal static bool Debug = true;
+    internal static GameObject[] CustomWeapons;
 
     private void Awake()
     {
         Logger = base.Logger;
         Harmony = new Harmony("com.koki.weapons");
+        Harmony.PatchAll();
+        if (!Debug)
+            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
         // For hot reload
         this.gameObject.hideFlags = HideFlags.HideAndDontSave;
@@ -36,40 +39,47 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (existingBundle)
             existingBundle.Unload(true);
 
-        string bundlePath;
-        if (Debug)
-            bundlePath = Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle");
-        else
-            bundlePath = Path.Combine(Path.GetDirectoryName(Info.Location), "kokiWeaponsBundle");
-        Bundle = AssetBundle.LoadFromFile(bundlePath);
-        if (!Bundle)
+        string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle") : Path.Combine(Path.GetDirectoryName(Info.Location), "kokiWeaponsBundle");
+        var bundle = AssetBundle.LoadFromFile(bundlePath);
+        if (!bundle)
         {
             Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");
             return;
         }
 
-        this.gameObject.AddComponent<TPTrapNetworking>();
+        // Old system
+        // TPTrap.LoadBundleAssets(bundle);
+        // this.gameObject.AddComponent<TPTrapNetworking>();
 
-        Harmony.PatchAll();
-        if (!Debug)
-            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
-
-        TPTrap.LoadBundleAssets(Bundle);
-        KBGrenade.LoadBundleAssets(Bundle);
+        // New system
+        CustomWeapons = bundle.LoadAllAssets<GameObject>();
     }
 
     public void OnDestroy()
     {
-        // Cleanup my debug spawns
         if (Debug)
             foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
             {
                 if (weapon)
-                {
                     InstanceFinder.ServerManager.Despawn(weapon);
-                }
             }
-
         Harmony.UnpatchSelf();
+    }
+
+    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+    public static class RegisterWeapons
+    {
+        public static void Postfix()
+        {
+            foreach (var weapon in CustomWeapons)
+            {
+                if (SpawnerManager.NameToWeaponDict.ContainsKey(weapon.name)) return;
+                System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+                SpawnerManager.AllWeapons[^1] = weapon;
+
+                SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
+                SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
+            }
+        }
     }
 }

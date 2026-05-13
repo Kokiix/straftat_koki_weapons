@@ -23,14 +23,14 @@ public static class Marksman
     [HarmonyPostfix]
     public static void RegisterWeapon()
     {
-        if (SpawnerManager.NameToWeaponDict.ContainsKey(name)) return;
-        InitTemplates();
-        GameObject Marksman = TemplateGameObject;
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
-        SpawnerManager.AllWeapons[^1] = Marksman;
+        // if (SpawnerManager.NameToWeaponDict.ContainsKey(name)) return;
+        // InitTemplates();
+        // GameObject Marksman = TemplateGameObject;
+        // System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
+        // SpawnerManager.AllWeapons[^1] = Marksman;
 
-        SpawnerManager.NameToWeaponDict.Add(Marksman.name, Marksman);
-        SpawnerManager.NameToIndexDict.Add(Marksman.name, SpawnerManager.AllWeapons.Length - 1);
+        // SpawnerManager.NameToWeaponDict.Add(Marksman.name, Marksman);
+        // SpawnerManager.NameToIndexDict.Add(Marksman.name, SpawnerManager.AllWeapons.Length - 1);
     }
 
     public static void InitTemplates()
