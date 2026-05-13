@@ -6,6 +6,7 @@ using UnityEngine;
 public static class Marksman
 {
     public static GameObject TemplateGameObject;
+    public static GameObject TemplateCoin;
     public static GameObject Mesh;
     public static GameObject PhysMesh;
     public static string name = "Marksman";
@@ -21,7 +22,7 @@ public static class Marksman
     public static void RegisterWeapon()
     {
         if (SpawnerManager.NameToWeaponDict.ContainsKey(name)) return;
-        InitTemplate();
+        InitTemplates();
         GameObject TPTrap = TemplateGameObject;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
         SpawnerManager.AllWeapons[^1] = TPTrap;
@@ -30,13 +31,17 @@ public static class Marksman
         SpawnerManager.NameToIndexDict.Add(TPTrap.name, SpawnerManager.AllWeapons.Length - 1);
     }
 
-    public static void InitTemplate()
+    public static void InitTemplates()
     {
         GameObject template = UnityEngine.Object.Instantiate(SpawnerManager.NameToWeaponDict["Gun"]);
         GunToMarksman(template, false);
         TemplateGameObject = template;
         TemplateGameObject.SetActive(false);
         Object.DontDestroyOnLoad(TemplateGameObject);
+
+        TemplateCoin = InitCoin();
+        TemplateCoin.SetActive(false);
+        Object.DontDestroyOnLoad(TemplateCoin);
     }
 
     public static void GunToMarksman(GameObject go, bool isClientVisual)
@@ -59,6 +64,14 @@ public static class Marksman
             // mesh.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
             // mesh.transform.localRotation = Quaternion.identity;
         }
+    }
+
+    public static GameObject InitCoin()
+    {
+        var coin = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        coin.AddComponent<Rigidbody>();
+        coin.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+        return coin;
     }
 
     public static bool GetIsMarksman(GameObject go)

@@ -25,6 +25,7 @@ public class TPTrapNetworking : MonoBehaviour
     [HarmonyPostfix]
     public static void SendClientWeaponVisuals(NetworkObject nob)
     {
+        if (!nob) return;
         GameObject go = nob.gameObject;
         if (TPTrap.GetTrapLink(go))
             MyceliumNetwork.RPC(MyceliumID, nameof(DisplayClientVisual), ReliableType.Reliable, nob.ObjectId, nameof(TPTrap.ConvertToTPTrap), true);

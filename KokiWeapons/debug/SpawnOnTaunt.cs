@@ -30,7 +30,7 @@ public class SpawnWeaponOnTaunt
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             if (!Marksman.TemplateGameObject)
-                Marksman.InitTemplate();
+                Marksman.InitTemplates();
             weaponBase = Marksman.TemplateGameObject;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
