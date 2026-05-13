@@ -37,7 +37,6 @@ public static class MarksmanMechanics
 
         var coinRB = coin.GetComponent<Rigidbody>();
         var coinTossForce = fpc.playerCamera.transform.forward.normalized * 15f;
-        KDBG.Log(coinTossForce);
         coinTossForce.y += 2.5f;
         coinRB.AddForce(coinTossForce, ForceMode.Impulse);
 
@@ -54,11 +53,13 @@ public static class MarksmanMechanics
         // TODO: replace with custom tag
         if (obj.name == "coin")
         {
-            var shot = false;
+            var prevShootPoint = __instance.shootPoint;
+            __instance.shootPoint = obj.transform;
+            Vector3 reflectDir = Vector3.zero;
             foreach (var player in SteamLobby.Instance.players)
             {
                 var playerPos = player.gameObject.GetComponent<ClientInstance>().PlayerSpawner.player.playerCamera.transform.position;
-                KDBG.Log(playerPos);
+                playerPos.y -= 0.5f;
                 var rayCastHits = Physics.RaycastAll(obj.transform.position,
                     playerPos - obj.transform.position,
                     float.PositiveInfinity);
@@ -67,18 +68,23 @@ public static class MarksmanMechanics
                 {
                     var hitObjLayer = hit.transform.gameObject.layer;
                     if (bulletPassThroughLayers.Contains(hitObjLayer)) continue;
-                    if (hitObjLayer == 11)
+                    if (hitObjLayer == 11 || hitObjLayer == 16) // DEBUG: 16 lets you shoot yourself
                     {
-                        ((Gun)__instance).ShootServer(
-                            __instance.damage * Marksman.CoinDamageBoost,
-                            obj.transform.position,
-                            playerPos - obj.transform.position);
-                        shot = true;
+                        reflectDir = playerPos - obj.transform.position;
                         break;
                     }
                 }
-                if (shot) break;
+                if (reflectDir != Vector3.zero) break;
             }
+
+            if (reflectDir == Vector3.zero)
+                reflectDir = UnityEngine.Random.onUnitSphere;
+            ((Gun)__instance).ShootServer(
+                __instance.damage * Marksman.CoinDamageBoost,
+                obj.transform.position,
+                reflectDir);
+
+            __instance.shootPoint = prevShootPoint;
         }
     }
 }
