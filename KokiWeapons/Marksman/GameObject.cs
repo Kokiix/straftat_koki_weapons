@@ -11,6 +11,8 @@ public static class Marksman
     public static GameObject PhysMesh;
     public static string name = "Marksman";
 
+    public static float CoinDamageBoost = 1.2f;
+
     public static void LoadBundleAssets(AssetBundle bundle)
     {
         // Mesh = bundle.LoadAsset<GameObject>("RepulsorGrenade");

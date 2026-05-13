@@ -4,3 +4,4 @@ obj
 .thunderstore/*.zip
 .thunderstore/manifest.json
 .thunderstore/kokiWeaponsBundle
+issues.md

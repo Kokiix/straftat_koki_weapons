@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class KokiDebug
+public static class KDBG
 {
     public static void Log(object s)
     {
