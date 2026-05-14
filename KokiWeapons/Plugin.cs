@@ -12,6 +12,7 @@ using UnityEngine;
 using MyceliumNetworking;
 using FishNet.Object;
 using HarmonyLib.Tools;
+using FishNet.Managing.Object;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
@@ -74,11 +75,20 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             foreach (var weapon in CustomWeapons)
             {
                 if (SpawnerManager.NameToWeaponDict.ContainsKey(weapon.name)) return;
+
                 System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + 1);
                 SpawnerManager.AllWeapons[^1] = weapon;
 
                 SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
                 SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
+
+                var nm = InstanceFinder.NetworkManager;
+                var collectionID = (ushort)("com.koki.weapons".GetHashCode() & 0xFFFF);
+                var collection = (SinglePrefabObjects)nm.GetPrefabObjects<SinglePrefabObjects>(collectionID, createIfMissing: true);
+                collection.AddObject(weapon.GetComponent<NetworkObject>());
+
+                var weaponIdx = collection.GetObjectCount() - 1;
+                ManagedObjects.InitializePrefab(weapon.GetComponent<NetworkObject>(), weaponIdx, collectionID);
             }
         }
     }

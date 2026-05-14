@@ -17,21 +17,19 @@ public class SpawnWeaponOnTaunt
         GameObject weaponBase = null;
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            if (!TPTrap.TemplateGameObject)
-                TPTrap.InitTemplate();
-            weaponBase = TPTrap.TemplateGameObject;
+            // if (!TPTrap.TemplateGameObject)
+            //     TPTrap.InitTemplate();
+            // weaponBase = TPTrap.TemplateGameObject;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            if (!KBGrenade.TemplateGameObject)
-                KBGrenade.InitTemplate();
-            weaponBase = KBGrenade.TemplateGameObject;
+            weaponBase = SpawnerManager.NameToWeaponDict["Repulsion Grenade"];
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            if (!Marksman.TemplateGameObject)
-                Marksman.InitTemplates();
-            weaponBase = Marksman.TemplateGameObject;
+            // if (!Marksman.TemplateGameObject)
+            //     Marksman.InitTemplates();
+            // weaponBase = Marksman.TemplateGameObject;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
