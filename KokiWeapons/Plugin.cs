@@ -126,6 +126,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
             nm.SpawnablePrefabs.InitializePrefabRange(allPrefabIdx);
             KBGrenade.Init.Run();
+            TeleportTrap.Init.Run();
             RegisteredWeapons = true;
         }
     }
@@ -137,6 +138,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
         foreach (var comp in go.GetComponents<Component>())
         {
+            // KDBG.Log(comp.GetType().Name);
+            // KDBG.Log(compType.Name);
             if (comp.GetType().Name == compType.Name) return comp;
         }
         return null;

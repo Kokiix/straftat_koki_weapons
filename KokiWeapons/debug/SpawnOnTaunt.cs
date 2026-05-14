@@ -23,6 +23,8 @@ public class SpawnWeaponOnTaunt
             weapon = "Repulsar";
         else if (Input.GetKeyDown(KeyCode.Alpha4))
             weapon = "Teleport Mine";
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+            weapon = "APMine"; 
 
         if (weapon == "" || !InstanceFinder.IsServer) return;
 
