@@ -29,6 +29,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     private void Awake()
     {
+        this.gameObject.hideFlags = HideFlags.HideAndDontSave;
         Logger = base.Logger;
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
@@ -36,15 +37,16 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
         // For hot reload
-        this.gameObject.hideFlags = HideFlags.HideAndDontSave;
-        var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
-        var existingBundle = loadedBundles.FirstOrDefault(b => b.name == "kokiweaponsbundle");
-        if (existingBundle)
-            existingBundle.Unload(true);
+        foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles()) 
+        {
+            if (existingBundle.name == "kokiweaponsbundle" || existingBundle.name == "weaponmaterials")
+                existingBundle.Unload(true);
+        }
 
-        string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons/kokiWeaponsBundle") : Path.Combine(Path.GetDirectoryName(Info.Location), "kokiWeaponsBundle");
-        var bundle = AssetBundle.LoadFromFile(bundlePath);
-        if (!bundle)
+        string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
+        var mainBundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiWeaponsBundle"));
+        var weaponMaterials = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "weaponmaterials"));
+        if (!mainBundle)
         {
             Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");
             return;
@@ -55,12 +57,12 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         // this.gameObject.AddComponent<TPTrapNetworking>();
 
         // New system
-        CustomWeapons = bundle.LoadAllAssets<GameObject>();
+        CustomWeapons = mainBundle.LoadAllAssets<GameObject>();
 
         if (Debug)
             RegisterWeapons.Postfix();
 
-        AssetSwap(bundle);
+        LoadShaders(mainBundle, weaponMaterials);
     }
 
     public void OnDestroy()
@@ -71,6 +73,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
         }
 
+        Harmony.UnpatchSelf();
+        if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Length);
         InstanceFinder.NetworkManager._runtimeSpawnablePrefabs.Remove(FishNetCollectionID);
         foreach (var weapon in CustomWeapons)
@@ -78,9 +82,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             SpawnerManager.NameToWeaponDict.Remove(weapon.name);
             SpawnerManager.NameToIndexDict.Remove(weapon.name);
         }
-        Harmony.UnpatchSelf();
     }
 
+    internal static bool RegisteredWeapons = false;
     [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
     public static class RegisterWeapons
     {
@@ -100,21 +104,25 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 collection.AddObject(weapon.GetComponent<NetworkObject>());
                 ManagedObjects.InitializePrefab(weapon.GetComponent<NetworkObject>(), weaponIdx++, FishNetCollectionID);
             }
+
+            SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+            .GetComponent<TrickShot>().template.gameObject
+            .GetComponent<PhysicsGrenade>().explosionDecal =
+            SpawnerManager.NameToWeaponDict["StunGrenade"]
+            .GetComponent<TrickShot>().template.gameObject
+            .GetComponent<PhysicsGrenade>().explosionDecal;
+            RegisteredWeapons = true;
         }
     }
 
-    public static void AssetSwap(AssetBundle bundle)
+    public static void LoadShaders(AssetBundle main, AssetBundle weaponMaterials)
     {
-        bundle.LoadAsset<Material>("M_StunGrenade_Radius_00 1").shader = Shader.Find("S_HandGrenadeRadius_00");
-        bundle.LoadAsset<Material>("M_Taser_Sphere_00").shader = Shader.Find("S_DoubleSided_Emissive_00");
-        bundle.LoadAsset<Material>("WFX_M_SmokeScroll SoftMult").shader = Shader.Find("WFX/Scroll/Multiply Soft Tint");
-        bundle.LoadAsset<Material>("WFX_M_SmallDots Add").shader = Shader.Find("WFX/Additive Alpha8");
-        SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-        .GetComponent<TrickShot>().template.gameObject
-        .GetComponent<PhysicsGrenade>().explosionDecal =
-        SpawnerManager.NameToWeaponDict["StunGrenade"]
-        .GetComponent<TrickShot>().template.gameObject
-        .GetComponent<PhysicsGrenade>().explosionDecal;
+        weaponMaterials.LoadAllAssets<Material>().Do(m => m.shader = Shader.Find("S_WeaponOutline_00"));
+
+        main.LoadAsset<Material>("M_StunGrenade_Radius_00 1").shader = Shader.Find("S_HandGrenadeRadius_00");
+        main.LoadAsset<Material>("M_Taser_Sphere_00").shader = Shader.Find("S_DoubleSided_Emissive_00");
+        main.LoadAsset<Material>("WFX_M_SmokeScroll SoftMult").shader = Shader.Find("WFX/Scroll/Multiply Soft Tint");
+        main.LoadAsset<Material>("WFX_M_SmallDots Add").shader = Shader.Find("WFX/Additive Alpha8");
     }
 
     // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
