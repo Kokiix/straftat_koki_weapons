@@ -106,6 +106,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     public static void AssetSwap(AssetBundle bundle)
     {
         bundle.LoadAsset<Material>("M_StunGrenade_Radius_00 1").shader = Shader.Find("S_HandGrenadeRadius_00");
+        bundle.LoadAsset<Material>("M_Taser_Sphere_00").shader = Shader.Find("S_DoubleSided_Emissive_00");
+        bundle.LoadAsset<Material>("WFX_M_SmokeScroll SoftMult").shader = Shader.Find("WFX/Scroll/Multiply Soft Tint");
+        bundle.LoadAsset<Material>("WFX_M_SmallDots Add").shader = Shader.Find("WFX/Additive Alpha8");
         SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
         .GetComponent<TrickShot>().template.gameObject
         .GetComponent<PhysicsGrenade>().explosionDecal =
