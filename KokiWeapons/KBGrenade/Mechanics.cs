@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -9,47 +10,56 @@ public static class KBGrenadeMechanics
     [HarmonyPatch(typeof(PhysicsGrenade), "RpcLogic___HandleExplosion_4276783012")]
     public static class InsertKBEffect
     {
-        // public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-        // {
-        // var isOwner = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.isOwner));
-        // var ph2 = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.ph2));
-        // var makeBlood = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.makeBlood));
-        // var kbEffect = AccessTools.Method(typeof(KBGrenadeMechanics), nameof(KBAll));
-        // var implicitBool = AccessTools.Method(typeof(Object), "op_Implicit");
-        // var gameObject = AccessTools.PropertyGetter(typeof(PhysicsGrenade), nameof(PhysicsGrenade.gameObject));
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            var isOwner = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.isOwner));
+            var ph2 = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.ph2));
+            var makeBlood = AccessTools.Field(typeof(PhysicsGrenade), nameof(PhysicsGrenade.makeBlood));
 
-        // return new CodeMatcher(instructions, generator)
-        // .MatchForward(useEnd: false,
-        // new CodeMatch(OpCodes.Ldstr, "Player"))
-        // .CreateLabel(out Label loopEnd)
+            var kbEffect = AccessTools.Method(typeof(KBGrenadeMechanics), nameof(KBAll));
+            var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
+            // var getKBGrenade = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), parameters: null, generics: [typeof(RepulsionGrenade)]);
+            var getKBGrenade = AccessTools.Method(typeof(KokiWeaponsPlugin), nameof(KokiWeaponsPlugin.DebugGetComponent));
+            var getTypeFromHandle = AccessTools.Method(typeof(Type), nameof(Type.GetTypeFromHandle), [typeof(System.RuntimeTypeHandle)]);
 
-        // .MatchBack(useEnd: false,
-        // new CodeMatch(OpCodes.Stfld, makeBlood))
-        // .MatchForward(useEnd: false,
-        // new CodeMatch(OpCodes.Ldc_I4_0))
-        // .CreateLabel(out Label loopStart)
+            var gameObject = AccessTools.PropertyGetter(typeof(PhysicsGrenade), nameof(PhysicsGrenade.gameObject));
 
-        // .Insert(
-        //     // If mine is not KB resume
-        //     new CodeInstruction(OpCodes.Ldarg_0),
-        //     new CodeInstruction(OpCodes.Callvirt, gameObject),
-        //     new CodeInstruction(OpCodes.Call, getIsKBGrenade), // TODO: use getcomponent
-        //     new CodeInstruction(OpCodes.Call, implicitBool),
-        //     new CodeInstruction(OpCodes.Brfalse, loopStart),
+            return new CodeMatcher(instructions, generator)
+            .MatchForward(useEnd: false,
+            new CodeMatch(OpCodes.Ldstr, "Player"))
+            .CreateLabel(out Label loopEnd)
 
-        //     // Execute KB effect
-        //     new CodeInstruction(OpCodes.Ldarg_0),
-        //     new CodeInstruction(OpCodes.Ldloc_2),
-        //     new CodeInstruction(OpCodes.Ldarg_0),
-        //     new CodeInstruction(OpCodes.Ldfld, ph2),
-        //     new CodeInstruction(OpCodes.Call, kbEffect),
-        //     new CodeInstruction(OpCodes.Br, loopEnd))
-        // .InstructionEnumeration();
-        // }
+            .MatchBack(useEnd: false,
+            new CodeMatch(OpCodes.Stfld, makeBlood))
+            .MatchForward(useEnd: false,
+            new CodeMatch(OpCodes.Ldc_I4_0))
+            .CreateLabel(out Label loopStart)
+
+            .Insert(
+                // If mine is not KB resume
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Callvirt, gameObject),
+
+                new CodeInstruction(OpCodes.Ldtoken, typeof(RepulsionGrenade)),
+                new CodeInstruction(OpCodes.Callvirt, getTypeFromHandle),
+
+                new CodeInstruction(OpCodes.Call, getKBGrenade),
+                new CodeInstruction(OpCodes.Call, implicitBool),
+                new CodeInstruction(OpCodes.Brfalse, loopStart),
+
+                // Execute KB effect
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldloc_2),
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldfld, ph2),
+                new CodeInstruction(OpCodes.Call, kbEffect),
+                new CodeInstruction(OpCodes.Br, loopEnd))
+            .InstructionEnumeration();
+        }
 
         public static void Postfix(PhysicsGrenade __instance)
         {
-            __instance.transform.Find("meshScale").gameObject.SetActive(false);
+            __instance.transform.Find("meshScale").gameObject.SetActive(false); 
         }
     }
     public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)

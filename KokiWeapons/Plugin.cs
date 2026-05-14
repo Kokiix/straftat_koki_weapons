@@ -14,6 +14,7 @@ using FishNet.Object;
 using HarmonyLib.Tools;
 using FishNet.Managing.Object;
 using HeathenEngineering.PhysKit;
+using System;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
@@ -107,18 +108,28 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 ManagedObjects.InitializePrefab(nob, weaponIdx++, FishNetCollectionID);
             }
 
-            var physGrenade = SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-            .GetComponent<TrickShot>().template.gameObject;
-            physGrenade.GetComponent<PhysicsGrenade>().explosionDecal =
-            SpawnerManager.NameToWeaponDict["StunGrenade"]
-            .GetComponent<TrickShot>().template.gameObject
-            .GetComponent<PhysicsGrenade>().explosionDecal;
-            RegisteredWeapons = true;
-
-            physGrenade.TryGetComponent(out NetworkObject nobj);
+            // Register non-weapon netobjs
+            SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+                .GetComponent<TrickShot>().template.gameObject
+                .TryGetComponent(out NetworkObject nobj);
             collection.AddObject(nobj);
             ManagedObjects.InitializePrefab(nobj, weaponIdx++, FishNetCollectionID);
+
+            KBGrenade.Init.Run();
+            RegisteredWeapons = true;
         }
+    }
+
+    public static object DebugGetComponent(GameObject go, Type compType)
+    {
+        if (!Debug)
+            return go.GetComponent(compType);
+
+        foreach (var comp in go.GetComponents<Component>())
+        {
+            if (comp.GetType().Name == compType.Name) return comp;
+        }
+        return null;
     }
 
     // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
