@@ -104,16 +104,25 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
 
                 weapon.TryGetComponent(out NetworkObject nob);
-                collection.AddObject(nob);
+                nob.Preinitialize_Internal(InstanceFinder.NetworkManager, nob.PrefabId, null, asServer: false);
+                collection.AddObject(nob); 
                 ManagedObjects.InitializePrefab(nob, weaponIdx++, FishNetCollectionID);
             }
 
-            // Register non-weapon netobjs 
-            SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-                .GetComponent<TrickShot>().template.gameObject
-                .TryGetComponent(out NetworkObject nobj);
-            collection.AddObject(nobj);
-            ManagedObjects.InitializePrefab(nobj, weaponIdx++, FishNetCollectionID);
+            GameObject[] nonWeaponNetobjs = [
+                SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+                .GetComponent<TrickShot>().template.gameObject,
+                SpawnerManager.NameToWeaponDict["Teleport Mine"]
+                .GetComponent<WeaponHandSpawner>().objToSpawn
+            ];
+            KDBG.Log(nonWeaponNetobjs[1].GetComponent<NetworkObject>());
+            foreach (var obj in nonWeaponNetobjs)
+            {
+                obj.TryGetComponent(out NetworkObject nobj);
+                collection.AddObject(nobj);
+                nobj.Preinitialize_Internal(InstanceFinder.NetworkManager, nobj.PrefabId, null, asServer: false);
+                ManagedObjects.InitializePrefab(nobj, weaponIdx++, FishNetCollectionID);
+            }
 
             KBGrenade.Init.Run();
             RegisteredWeapons = true;

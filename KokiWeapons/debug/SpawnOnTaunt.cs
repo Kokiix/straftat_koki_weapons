@@ -20,16 +20,9 @@ public class SpawnWeaponOnTaunt
         else if (Input.GetKeyDown(KeyCode.Alpha2))
             weapon = "Repulsion Grenade";
         else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            weapon = "Repulsar"; 
-        }
+            weapon = "Repulsar";
         else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            // weapon = SpawnerManager.NameToWeaponDict["Gun"];
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-        }
+            weapon = "Teleport Mine";
 
         if (weapon == "" || !InstanceFinder.IsServer) return;
 
