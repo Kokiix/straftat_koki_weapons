@@ -39,18 +39,19 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         // For hot reload
         foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles())
         {
-            if (existingBundle.name == "kokiweaponsbundle" || existingBundle.name == "weaponmaterials")
+            if (existingBundle.name == "kokiweaponsbundle")
                 existingBundle.Unload(true);
         }
 
         string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
         var mainBundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiWeaponsBundle"));
-        var weaponMaterials = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "weaponmaterials"));
         if (!mainBundle)
         {
             Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");
             return;
         }
+        foreach (var material in mainBundle.LoadAllAssets<Material>())
+            material.shader = Shader.Find(material.shader.name);
 
         // Old system
         // TPTrap.LoadBundleAssets(bundle);
@@ -62,7 +63,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (Debug)
             RegisterWeapons.Postfix();
 
-        LoadShaders(mainBundle, weaponMaterials);
     }
 
     public void OnDestroy()
@@ -116,16 +116,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             collection.AddObject(physGrenade.GetComponent<NetworkObject>());
             ManagedObjects.InitializePrefab(physGrenade.GetComponent<NetworkObject>(), weaponIdx++, FishNetCollectionID);
         }
-    }
-
-    public static void LoadShaders(AssetBundle main, AssetBundle weaponMaterials)
-    {
-        weaponMaterials.LoadAllAssets<Material>().Do(m => m.shader = Shader.Find("S_WeaponOutline_00"));
-
-        main.LoadAsset<Material>("M_StunGrenade_Radius_00 1").shader = Shader.Find("S_HandGrenadeRadius_00");
-        main.LoadAsset<Material>("M_Taser_Sphere_00").shader = Shader.Find("S_DoubleSided_Emissive_00");
-        main.LoadAsset<Material>("WFX_M_SmokeScroll SoftMult").shader = Shader.Find("WFX/Scroll/Multiply Soft Tint");
-        main.LoadAsset<Material>("WFX_M_SmallDots Add").shader = Shader.Find("WFX/Additive Alpha8");
     }
 
     // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
