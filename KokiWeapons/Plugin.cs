@@ -91,7 +91,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Length);
             var nm = InstanceFinder.NetworkManager;
             var collection = (SinglePrefabObjects)nm.GetPrefabObjects<SinglePrefabObjects>(FishNetCollectionID, createIfMissing: true);
-            var weaponIdx = collection.GetObjectCount() - 1;
+            var allPrefabIdx = nm.SpawnablePrefabs.GetObjectCount();
+            var collectionIdx = 0;
             foreach (var weapon in CustomWeapons)
             {
                 SpawnerManager.NameToWeaponDict.Remove(weapon.name);
@@ -105,7 +106,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
                 weapon.TryGetComponent(out NetworkObject nob);
                 collection.AddObject(nob);
-                ManagedObjects.InitializePrefab(nob, weaponIdx++, FishNetCollectionID);
+                ManagedObjects.InitializePrefab(nob, collectionIdx++, FishNetCollectionID);
                 nm.SpawnablePrefabs.AddObject(nob);
             }
 
@@ -119,11 +120,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             {
                 obj.TryGetComponent(out NetworkObject nobj);
                 collection.AddObject(nobj);
-                ManagedObjects.InitializePrefab(nobj, weaponIdx++, FishNetCollectionID);
+                ManagedObjects.InitializePrefab(nobj, collectionIdx++, FishNetCollectionID);
                 nm.SpawnablePrefabs.AddObject(nobj);
             }
 
-            nm.ServerManager.Objects.Initialize(nm);
+            nm.SpawnablePrefabs.InitializePrefabRange(allPrefabIdx);
             KBGrenade.Init.Run();
             RegisteredWeapons = true;
         }
