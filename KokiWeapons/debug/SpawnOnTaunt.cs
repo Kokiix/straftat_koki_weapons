@@ -14,17 +14,11 @@ public class SpawnWeaponOnTaunt
     [HarmonyPatch("IncreaseTauntsAmount")]
     public static void Prefix(Settings __instance)
     {
-        GameObject weaponBase = null;
+        string weapon = "";
         if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            // if (!TPTrap.TemplateGameObject)
-            //     TPTrap.InitTemplate();
-            // weaponBase = TPTrap.TemplateGameObject;
-        }
+            weapon = "StunGrenade";
         else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            weaponBase = SpawnerManager.NameToWeaponDict["Repulsion Grenade"];
-        }
+            weapon = "Repulsion Grenade";
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             // if (!Marksman.TemplateGameObject)
@@ -33,19 +27,19 @@ public class SpawnWeaponOnTaunt
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            weaponBase = SpawnerManager.NameToWeaponDict["Gun"];
+            // weapon = SpawnerManager.NameToWeaponDict["Gun"];
         }
         else if (Input.GetKeyDown(KeyCode.Alpha5))
         {
         }
 
-        if (!weaponBase || !InstanceFinder.IsServer) return;
+        if (weapon == "" || !InstanceFinder.IsServer) return;
 
         foreach (var fpc in Object.FindObjectsOfType<FirstPersonController>())
         {
             Vector3 playerPos = fpc.playerCameraHolder.transform.position + fpc.dirForward.normalized;
             playerPos.y -= 0.5f;
-            GameObject weaponInstance = Object.Instantiate(weaponBase, playerPos, Quaternion.identity);
+            GameObject weaponInstance = Object.Instantiate(SpawnerManager.NameToWeaponDict[weapon], playerPos, Quaternion.identity);
 
             weaponInstance.GetComponent<ItemBehaviour>().DispenserDrop(Vector3.zero);
             weaponInstance.GetComponent<Rigidbody>().isKinematic = true;
