@@ -106,13 +106,15 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 ManagedObjects.InitializePrefab(weapon.GetComponent<NetworkObject>(), weaponIdx++, FishNetCollectionID);
             }
 
-            SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-            .GetComponent<TrickShot>().template.gameObject
-            .GetComponent<PhysicsGrenade>().explosionDecal =
+            var physGrenade = SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+            .GetComponent<TrickShot>().template.gameObject;
+            physGrenade.GetComponent<PhysicsGrenade>().explosionDecal =
             SpawnerManager.NameToWeaponDict["StunGrenade"]
             .GetComponent<TrickShot>().template.gameObject
             .GetComponent<PhysicsGrenade>().explosionDecal;
             RegisteredWeapons = true;
+            collection.AddObject(physGrenade.GetComponent<NetworkObject>());
+            ManagedObjects.InitializePrefab(physGrenade.GetComponent<NetworkObject>(), weaponIdx++, FishNetCollectionID);
         }
     }
 
