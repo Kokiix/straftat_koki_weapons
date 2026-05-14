@@ -78,11 +78,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Length);
         InstanceFinder.NetworkManager._runtimeSpawnablePrefabs.Remove(FishNetCollectionID);
-        foreach (var weapon in CustomWeapons)
-        {
-            SpawnerManager.NameToWeaponDict.Remove(weapon.name);
-            SpawnerManager.NameToIndexDict.Remove(weapon.name);
-        }
     }
 
     internal static bool RegisteredWeapons = false;
@@ -99,14 +94,19 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             var weaponIdx = collection.GetObjectCount() - 1;
             foreach (var weapon in CustomWeapons)
             {
+                SpawnerManager.NameToWeaponDict.Remove(weapon.name);
+                SpawnerManager.NameToIndexDict.Remove(weapon.name);
+            }
+            foreach (var weapon in CustomWeapons)
+            {
                 SpawnerManager.AllWeapons[allWeaponIdx++] = weapon;
                 SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
                 SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
 
                 weapon.TryGetComponent(out NetworkObject nob);
-                nob.Preinitialize_Internal(InstanceFinder.NetworkManager, nob.PrefabId, null, asServer: false);
-                collection.AddObject(nob); 
+                collection.AddObject(nob);
                 ManagedObjects.InitializePrefab(nob, weaponIdx++, FishNetCollectionID);
+                nm.SpawnablePrefabs.AddObject(nob);
             }
 
             GameObject[] nonWeaponNetobjs = [
@@ -115,15 +115,15 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 SpawnerManager.NameToWeaponDict["Teleport Mine"]
                 .GetComponent<WeaponHandSpawner>().objToSpawn
             ];
-            KDBG.Log(nonWeaponNetobjs[1].GetComponent<NetworkObject>());
             foreach (var obj in nonWeaponNetobjs)
             {
                 obj.TryGetComponent(out NetworkObject nobj);
                 collection.AddObject(nobj);
-                nobj.Preinitialize_Internal(InstanceFinder.NetworkManager, nobj.PrefabId, null, asServer: false);
                 ManagedObjects.InitializePrefab(nobj, weaponIdx++, FishNetCollectionID);
+                nm.SpawnablePrefabs.AddObject(nobj);
             }
 
+            nm.ServerManager.Objects.Initialize(nm);
             KBGrenade.Init.Run();
             RegisteredWeapons = true;
         }
