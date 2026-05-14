@@ -13,6 +13,7 @@ using MyceliumNetworking;
 using FishNet.Object;
 using HarmonyLib.Tools;
 using FishNet.Managing.Object;
+using HeathenEngineering.PhysKit;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
@@ -58,6 +59,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
         if (Debug)
             RegisterWeapons.Postfix();
+
+        AssetSwap(bundle);
     }
 
     public void OnDestroy()
@@ -83,7 +86,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     {
         public static void Postfix()
         {
-            if (SpawnerManager.AllWeapons == null) return; 
+            if (SpawnerManager.AllWeapons == null) return;
             System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Length);
             var nm = InstanceFinder.NetworkManager;
             var collection = (SinglePrefabObjects)nm.GetPrefabObjects<SinglePrefabObjects>(FishNetCollectionID, createIfMissing: true);
@@ -99,4 +102,24 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             }
         }
     }
+
+    public static void AssetSwap(AssetBundle bundle)
+    {
+        bundle.LoadAsset<Material>("M_StunGrenade_Radius_00 1").shader = Shader.Find("S_HandGrenadeRadius_00");
+        SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+        .GetComponent<TrickShot>().template.gameObject
+        .GetComponent<PhysicsGrenade>().explosionDecal =
+        SpawnerManager.NameToWeaponDict["StunGrenade"]
+        .GetComponent<TrickShot>().template.gameObject
+        .GetComponent<PhysicsGrenade>().explosionDecal;
+    }
+
+    // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
+    // public static class DisableExplosionForInspection
+    // {
+    //     public static bool Prefix()
+    //     {
+    //         return false;
+    //     }
+    // }
 }
