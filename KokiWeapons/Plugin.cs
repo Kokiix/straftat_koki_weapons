@@ -102,8 +102,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
                 SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
 
-                collection.AddObject(weapon.GetComponent<NetworkObject>());
-                ManagedObjects.InitializePrefab(weapon.GetComponent<NetworkObject>(), weaponIdx++, FishNetCollectionID);
+                weapon.TryGetComponent(out NetworkObject nob);
+                collection.AddObject(nob);
+                ManagedObjects.InitializePrefab(nob, weaponIdx++, FishNetCollectionID);
             }
 
             var physGrenade = SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
@@ -113,8 +114,10 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             .GetComponent<TrickShot>().template.gameObject
             .GetComponent<PhysicsGrenade>().explosionDecal;
             RegisteredWeapons = true;
-            collection.AddObject(physGrenade.GetComponent<NetworkObject>());
-            ManagedObjects.InitializePrefab(physGrenade.GetComponent<NetworkObject>(), weaponIdx++, FishNetCollectionID);
+
+            physGrenade.TryGetComponent(out NetworkObject nobj);
+            collection.AddObject(nobj);
+            ManagedObjects.InitializePrefab(nobj, weaponIdx++, FishNetCollectionID);
         }
     }
 

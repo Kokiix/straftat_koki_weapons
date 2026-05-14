@@ -43,4 +43,11 @@
         </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile
+            Include="C:\Users\koki\Desktop\ripp_straf_output\ExportedProject\Assets\koki\components\*.cs">
+            <Link>KokiWeapons\components\%(RecursiveDir)%(FileName)%(Extension)</Link>
+        </Compile>
+    </ItemGroup>
+
 </Project>
