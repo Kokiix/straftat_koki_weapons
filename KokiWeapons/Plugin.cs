@@ -37,7 +37,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
         // For hot reload
-        foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles()) 
+        foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles())
         {
             if (existingBundle.name == "kokiweaponsbundle" || existingBundle.name == "weaponmaterials")
                 existingBundle.Unload(true);
@@ -91,13 +91,14 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         public static void Postfix()
         {
             if (SpawnerManager.AllWeapons == null) return;
+            var allWeaponIdx = SpawnerManager.AllWeapons.Length;
             System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Length);
             var nm = InstanceFinder.NetworkManager;
             var collection = (SinglePrefabObjects)nm.GetPrefabObjects<SinglePrefabObjects>(FishNetCollectionID, createIfMissing: true);
             var weaponIdx = collection.GetObjectCount() - 1;
             foreach (var weapon in CustomWeapons)
             {
-                SpawnerManager.AllWeapons.Append(weapon);
+                SpawnerManager.AllWeapons[allWeaponIdx++] = weapon;
                 SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
                 SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
 
