@@ -21,9 +21,7 @@ public class SpawnWeaponOnTaunt
             weapon = "Repulsion Grenade";
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            // if (!Marksman.TemplateGameObject)
-            //     Marksman.InitTemplates();
-            // weaponBase = Marksman.TemplateGameObject;
+            weapon = "Repulsar"; 
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {

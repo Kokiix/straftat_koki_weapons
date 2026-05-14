@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using FishNet;
 using HarmonyLib;
 using UnityEngine;
+using static KBGrenade.Init;
 
 public static class KBGrenadeMechanics
 {
@@ -59,7 +61,7 @@ public static class KBGrenadeMechanics
 
         public static void Postfix(PhysicsGrenade __instance)
         {
-            __instance.transform.Find("meshScale").gameObject.SetActive(false); 
+            __instance.transform.Find("meshScale").gameObject.SetActive(false);
         }
     }
     public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)

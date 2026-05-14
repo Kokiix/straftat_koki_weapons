@@ -108,7 +108,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 ManagedObjects.InitializePrefab(nob, weaponIdx++, FishNetCollectionID);
             }
 
-            // Register non-weapon netobjs
+            // Register non-weapon netobjs 
             SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
                 .GetComponent<TrickShot>().template.gameObject
                 .TryGetComponent(out NetworkObject nobj);
@@ -120,7 +120,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
     }
 
-    public static object DebugGetComponent(GameObject go, Type compType)
+    public static Component DebugGetComponent(GameObject go, Type compType)
     {
         if (!Debug)
             return go.GetComponent(compType);
