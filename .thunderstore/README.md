@@ -1,14 +1,8 @@
 # Koki Weapons
 
-Custom weapons! Use them with the weapon randomizer or swapper in game.
+1 Custom weapon (so far)! Use it with the weapon randomizer or swapper in game.
 
 *Credit to Znoki, DankoBanko for modeling, testing, and ideas*
-<details open>
-  <summary>Weapon List:</summary>
-
-- Teleport Mine
-- (Coming soon) Repulsion Grenade
-</details>
 
 
 ## Teleport Mine
