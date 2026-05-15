@@ -17,6 +17,8 @@ public class Init
         }
 
         handItem.AddComponent<TPLink>();
-        trap.AddComponent<TPTrap>();
+        TPTrap newComponent = trap.AddComponent<TPTrap>();
+        newComponent.explosionVfx = KokiWeaponsPlugin.Bundle.LoadAsset<GameObject>("boom");
+        newComponent.explosionAudio = KokiWeaponsPlugin.Bundle.LoadAsset<AudioClip>("boom");
     }
 }

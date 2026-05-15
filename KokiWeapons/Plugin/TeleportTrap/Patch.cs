@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using FishNet;
 using FishNet.Connection;
 using FishNet.Managing.Server;
 using FishNet.Object;
@@ -39,6 +40,19 @@ public static class UpdateTrapLinkOnPlace
             var nobID1 = newTrap.GetComponent<NetworkObject>().ObjectId;
             var nobID2 = link.otherTrapNob;
             TPTrapNetworking.RPC("LinkMines", [nobID1, nobID2]);
+        }
+    }
+}
+
+[HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
+public static class ExplodeTPTrapOnHit
+{
+    public static void Prefix(Weapon __instance, GameObject obj)
+    {
+        GameObject trap = obj.transform.root.gameObject;
+        if (obj.CompareTag("Mine") && obj.GetComponent<TPTrap>())
+        {
+            TPTrapNetworking.RPC("DestroyTrapPair", [trap.GetComponent<NetworkObject>().ObjectId, -1]);
         }
     }
 }

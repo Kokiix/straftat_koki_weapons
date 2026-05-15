@@ -19,10 +19,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
+    internal static AssetBundle Bundle;
 
     internal static bool Debug = true;
 
-    internal static GameObject[] CustomWeapons; 
+    internal static GameObject[] CustomWeapons;
 
     internal static ushort FishNetCollectionID = (ushort)("com.koki.weapons".GetHashCode() & 0xFFFF);
     internal static uint MyceliumID = 932828;
@@ -55,6 +56,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         CustomWeapons = mainBundle.LoadAllAssets<GameObject>();
         foreach (var material in mainBundle.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
+        Bundle = mainBundle;
 
         if (Debug)
         {
@@ -63,8 +65,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         TPTrapNetworking netw = this.gameObject.AddComponent<TPTrapNetworking>();
-        netw.explosionVfx = mainBundle.LoadAsset<GameObject>("boom");
-        netw.explosionAudio = mainBundle.LoadAsset<AudioClip>("boom");
     }
 
     public void OnDestroy()

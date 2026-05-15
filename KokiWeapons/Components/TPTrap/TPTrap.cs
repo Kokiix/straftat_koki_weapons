@@ -40,6 +40,15 @@ public class TPTrap : MonoBehaviour
         transform.Find("radius").gameObject.SetActive(true);
     }
 
+    public GameObject explosionVfx;
+    public AudioClip explosionAudio;
+    public void Explode()
+    {
+        Object.Destroy(this.gameObject);
+        Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
+        SoundManager.Instance.PlaySound(explosionAudio);
+    }
+
     private void Despawn()
     {
         if (InstanceFinder.IsHost)
