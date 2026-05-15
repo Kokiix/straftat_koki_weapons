@@ -9,7 +9,7 @@ public class TPTrap : MonoBehaviour
 
     private void Awake()
     {
-        PauseManager.OnBeforeSpawn += Despawn; 
+        PauseManager.OnBeforeSpawn += Despawn;
 
         // Play animation
         var anim = transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
@@ -46,6 +46,8 @@ public class TPTrap : MonoBehaviour
     public AudioClip explosionAudio;
     public void Explode()
     {
+        if (otherTrap)
+            otherTrap.transform.Find("radius").gameObject.SetActive(false);
         InstanceFinder.ServerManager.Despawn(this.gameObject);
         Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
         SoundManager.Instance.PlaySound(explosionAudio);

@@ -23,7 +23,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     internal static bool Debug = true;
 
-    internal static GameObject[] CustomWeapons;
+    internal static List<GameObject> CustomWeapons = new List<GameObject>();
+    internal static List<GameObject> NetworkObjects = new List<GameObject>();
 
     internal static ushort FishNetCollectionID = (ushort)("com.koki.weapons".GetHashCode() & 0xFFFF);
     internal static uint MyceliumID = 932828;
@@ -53,7 +54,14 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");
             return;
         }
-        CustomWeapons = mainBundle.LoadAllAssets<GameObject>();
+        foreach (var go in mainBundle.LoadAllAssets<GameObject>())
+        {
+            if (go.GetComponent<ItemBehaviour>())
+                CustomWeapons.Add(go);
+            if (go.GetComponent<NetworkObject>())
+                NetworkObjects.Add(go);
+        }
+
         foreach (var material in mainBundle.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
         Bundle = mainBundle;
@@ -78,7 +86,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
         Harmony.UnpatchSelf();
         if (!RegisteredWeapons) return;
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Length);
+        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
         DeregisterFishnet();
     }
 
@@ -100,7 +108,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 SpawnerManager.NameToIndexDict.Remove(weapon.name);
             }
 
-            System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Length);
+            System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Count);
 
             foreach (var weapon in CustomWeapons)
             {
@@ -127,23 +135,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             var nm = InstanceFinder.NetworkManager;
             var collection = nm.SpawnablePrefabs;
 
-            foreach (var weapon in CustomWeapons)
+            foreach (var weapon in NetworkObjects)
             {
                 if (!weapon) continue;
                 weapon.TryGetComponent(out NetworkObject nob);
                 collection.AddObject(nob);
-            }
-
-            GameObject[] nonWeaponNetobjs = [
-                SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-                .GetComponent<TrickShot>().template.gameObject,
-            SpawnerManager.NameToWeaponDict["Teleport Mine"]
-            .GetComponent<WeaponHandSpawner>().objToSpawn
-            ];
-            foreach (var obj in nonWeaponNetobjs)
-            {
-                obj.TryGetComponent(out NetworkObject nobj);
-                collection.AddObject(nobj);
             }
         }
     }
@@ -153,22 +149,10 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
         var toRemove = new HashSet<NetworkObject>();
 
-        foreach (var weapon in CustomWeapons)
+        foreach (var weapon in NetworkObjects)
         {
             toRemove.Add(weapon.GetComponent<NetworkObject>());
         }
-
-        GameObject[] nonWeaponNetobjs = [
-            SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-                .GetComponent<TrickShot>().template.gameObject,
-            SpawnerManager.NameToWeaponDict["Teleport Mine"]
-            .GetComponent<WeaponHandSpawner>().objToSpawn
-        ];
-        foreach (var obj in nonWeaponNetobjs)
-        {
-            toRemove.Add(obj.GetComponent<NetworkObject>());
-        }
-
         // foreach (var nob in toRemove)
         // {
         //     nob.PrefabId = 0;
