@@ -5,6 +5,7 @@ using UnityEngine;
 public class TPTrap : MonoBehaviour
 {
     private GameObject otherTrap;
+    private bool detonated = false;
 
     private void Awake()
     {
@@ -21,12 +22,16 @@ public class TPTrap : MonoBehaviour
     private void OnTriggerStay(Collider col)
     {
         var fpc = FirstPersonController.instance;
-        if (!otherTrap || col.gameObject != fpc.gameObject) return;
-        fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: false);
+        if (!otherTrap || col.gameObject != fpc.gameObject || detonated) return;
+        detonated = true;
+        fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
 
-        var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
-        var nob2 = otherTrap.GetComponent<NetworkObject>().ObjectId;
-        TPTrapNetworking.RPC("DestroyTrapPair", [nob1, nob2]);
+        if (!otherTrap.GetComponent<TPTrap>().detonated)
+        {
+            var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
+            var nob2 = otherTrap.GetComponent<NetworkObject>().ObjectId;
+            TPTrapNetworking.RPC("DestroyTrapPair", [nob1, nob2]);
+        }
     }
 
     public void Activate(GameObject other)

@@ -46,14 +46,13 @@ public class TPTrapNetworking : MonoBehaviour
             go1.GetComponent<TPTrap>().Activate(go2);
             go2.GetComponent<TPTrap>().Activate(go1);
         }
-
     }
 
     // Ripped straight from ProximityMine.ExplodeObservers lol
     public GameObject explosionVfx;
     public AudioClip explosionAudio;
     [CustomRPC]
-    public void DestroyTrapPair(int nobID1, int nobID2)
+    public void OnTrapPairDestroy(int nobID1, int nobID2)
     {
         foreach (var go in GameObject.FindGameObjectsWithTag("Player"))
         {
@@ -70,8 +69,23 @@ public class TPTrapNetworking : MonoBehaviour
                     shakeEase: DG.Tweening.Ease.Linear);
             }
         }
-        Object.Destroy(base.gameObject);
-        Object.Instantiate(explosionVfx, base.transform.position, Quaternion.identity);
+
+        NetworkObject nob1, nob2;
+        if (!InstanceFinder.IsServer)
+        {
+            if (!InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID1, out nob1)
+            || !InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID2, out nob2)) return;
+        }
+        else if (!InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID1, out nob1)
+            || !InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID2, out nob2))
+            return;
+
+        var go1 = nob1.gameObject;
+        var go2 = nob2.gameObject;
+        Object.Destroy(go1);
+        Object.Destroy(go2);
+        Object.Instantiate(explosionVfx, go1.transform.position, Quaternion.identity);
+        Object.Instantiate(explosionVfx, go2.transform.position, Quaternion.identity);
         SoundManager.Instance.PlaySound(explosionAudio);
     }
 }

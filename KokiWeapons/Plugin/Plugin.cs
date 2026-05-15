@@ -22,7 +22,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     internal static bool Debug = true;
 
-    internal static GameObject[] CustomWeapons;
+    internal static GameObject[] CustomWeapons; 
 
     internal static ushort FishNetCollectionID = (ushort)("com.koki.weapons".GetHashCode() & 0xFFFF);
     internal static uint MyceliumID = 932828;
