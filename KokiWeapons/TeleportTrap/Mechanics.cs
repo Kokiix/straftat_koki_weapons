@@ -30,40 +30,43 @@ public static class LinkMineOnPlace
 
     public static void OnPlace(WeaponHandSpawner __instance, GameObject newTrap)
     {
-        TrapLink link = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
-        if (!link) return;
+        TrapLink handItemLink = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
+        if (!handItemLink) return;
 
         if (KokiWeaponsPlugin.Debug)
             SpawnWeaponOnTaunt.weapons.Add(newTrap);
 
-        KDBG.Log(newTrap.name);
-        foreach (Transform x in newTrap.transform)
+        var anim = newTrap.transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
+        anim["tpmineSphere"].layer = 0;
+        anim.Play("tpmineSphere");
+        anim["tpmineTorus"].layer = 1;
+        anim.Play("tpmineTorus");
+
+        if (handItemLink.otherTrap)
         {
-            KDBG.Log(x.name);
+            GameObject otherTrap = handItemLink.otherTrap.gameObject;
+
+            ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(otherTrap, typeof(TrapLink))).otherTrap = newTrap;
+            ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(newTrap, typeof(TrapLink))).otherTrap = otherTrap;
+
+            otherTrap.transform.Find("radius").gameObject.SetActive(true);
+            newTrap.transform.Find("radius").gameObject.SetActive(true);
         }
+        else
+            handItemLink.otherTrap = newTrap;
 
-        // var anim = newTrap.transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
-        // anim["sphere"].layer = 0;
-        // anim.Play("sphere");
-        // anim["torus"].layer = 1;
-        // anim["torus"].weight = 1;
-        // anim["torus"].enabled = true;
-        // anim.Play("torus");
-
-        // if (link.otherTrap)
-        // {
-        //     GameObject otherTrap = link.otherTrap.gameObject;
-
-        //     ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(otherTrap, typeof(TrapLink))).otherTrap = newTrap;
-        //     ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(newTrap, typeof(TrapLink))).otherTrap = otherTrap;
-
-        //     otherTrap.transform.Find("radius").gameObject.SetActive(true);
-        //     newTrap.transform.Find("radius").gameObject.SetActive(true);
-        // }
-        // else
-        //     link.otherTrap = newTrap;
+        newTrap.GetComponent<ProximityMine>().canActivate = false;
     }
 }
+
+// [HarmonyPatch(typeof(ProximityMine), "OnTriggerEnter")]
+// public static class Test
+// {
+//     public static void Prefix()
+//     {
+//         KDBG.Log("sldkjf");
+//     }
+// }
 
 [HarmonyPatch(typeof(ProximityMine))]
 public static class Explosion
@@ -88,38 +91,40 @@ public static class Explosion
             new CodeMatch(OpCodes.Ldstr, "chiasse"))
         .CreateLabel(out Label resumeFunc)
 
-        // .Insert(
-        //     // If no traplink, proceed
-        //     new CodeInstruction(OpCodes.Ldarg_0),
-        //     new CodeInstruction(OpCodes.Callvirt, gameObject),
-        //     new CodeInstruction(OpCodes.Call, getTraplink),
-        //     new CodeInstruction(OpCodes.Call, implicitBool),
-        //     new CodeInstruction(OpCodes.Brfalse, resumeFunc),
+        .Insert(
+            // If no traplink, proceed
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Callvirt, gameObject),
+            new CodeInstruction(OpCodes.Call, getTraplink),
+            new CodeInstruction(OpCodes.Call, implicitBool),
+            new CodeInstruction(OpCodes.Brfalse, resumeFunc),
 
-        //     // Else, check if otherTrap exists...
-        //     new CodeInstruction(OpCodes.Ldarg_0),
-        //     new CodeInstruction(OpCodes.Callvirt, gameObject),
-        //     new CodeInstruction(OpCodes.Call, getTraplink),
-        //     new CodeInstruction(OpCodes.Ldfld, otherTrap),
-        //     new CodeInstruction(OpCodes.Call, implicitBool),
-        //     new CodeInstruction(OpCodes.Brfalse, endFunc),
+            // Else, check if otherTrap exists...
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Callvirt, gameObject),
+            new CodeInstruction(OpCodes.Call, getTraplink),
+            new CodeInstruction(OpCodes.Ldfld, otherTrap),
+            new CodeInstruction(OpCodes.Call, implicitBool),
+            new CodeInstruction(OpCodes.Brfalse, endFunc),
 
-        //     // ...AND that collider is player
-        //     new CodeInstruction(OpCodes.Ldarg_1),
-        //     new CodeInstruction(OpCodes.Ldstr, "player"),
-        //     new CodeInstruction(OpCodes.Callvirt, compareTag),
-        //     new CodeInstruction(OpCodes.Brfalse, endFunc))
+            // ...AND that collider is player
+            new CodeInstruction(OpCodes.Ldarg_1),
+            new CodeInstruction(OpCodes.Ldstr, "Player"),
+            new CodeInstruction(OpCodes.Callvirt, compareTag),
+            new CodeInstruction(OpCodes.Brfalse, endFunc))
         .InstructionEnumeration();
     }
 
     [HarmonyPatch("HandleExplosion")]
     public static bool Prefix(ProximityMine __instance)
     {
+        KDBG.Log("tp");
         var link = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
         if (!link) return true;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
+        KDBG.Log(link);
         ProximityMine otherMine = link.otherTrap.GetComponent<ProximityMine>();
         __instance.detonated = true;
         if (!otherMine.detonated)
@@ -131,9 +136,9 @@ public static class Explosion
         if (colliders.Length != 0)
         {
             Vector3 destination = otherMine.transform.position;
-            if (colliders
-            .FirstOrDefault(c => c.TryGetComponent(out PlayerHealth health) && health.IsOwner)
-            .TryGetComponent(out PlayerHealth health))
+            var currPlayer = colliders
+            .FirstOrDefault(c => c.TryGetComponent(out PlayerHealth health) && health.IsOwner);
+            if (currPlayer && currPlayer.TryGetComponent(out PlayerHealth health))
                 health.controller.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
         }
         __instance.ExplodeServer();
