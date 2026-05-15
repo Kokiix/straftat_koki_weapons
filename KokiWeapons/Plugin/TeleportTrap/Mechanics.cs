@@ -30,33 +30,31 @@ public static class LinkMineOnPlace
 
     public static void OnPlace(WeaponHandSpawner __instance, GameObject newTrap)
     {
-        TrapLink handItemLink = __instance.gameObject.GetComponent<TrapLink>();
+        TPTrap handItemLink = __instance.gameObject.GetComponent<TPTrap>();
         if (!handItemLink) return;
 
         if (KokiWeaponsPlugin.Debug)
             SpawnWeaponOnTaunt.weapons.Add(newTrap);
 
-        MyceliumNetwork.RPC(
-        KokiWeaponsPlugin.MyceliumID,
-        nameof(Networking.TeleportClient),
-        ReliableType.Reliable,
-        destination);
-
-        var anim = newTrap.transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
-        anim["tpmineSphere"].layer = 0;
-        anim.Play("tpmineSphere");
-        anim["tpmineTorus"].layer = 1;
-        anim.Play("tpmineTorus");
-
         if (handItemLink.otherTrap)
         {
             GameObject otherTrap = handItemLink.otherTrap.gameObject;
 
-            otherTrap.GetComponent<TrapLink>().otherTrap = newTrap;
-            newTrap.GetComponent<TrapLink>().otherTrap = otherTrap;
+            otherTrap.GetComponent<TPTrap>().otherTrap = newTrap;
+            newTrap.GetComponent<TPTrap>().otherTrap = otherTrap;
 
             otherTrap.transform.Find("radius").gameObject.SetActive(true);
             newTrap.transform.Find("radius").gameObject.SetActive(true);
+            MyceliumNetwork.RPC(
+            KokiWeaponsPlugin.MyceliumID,
+            nameof(Networking.ToggleRadius),
+            ReliableType.Reliable,
+            otherTrap.GetComponent<NetworkObject>().ObjectId);
+            MyceliumNetwork.RPC(
+            KokiWeaponsPlugin.MyceliumID,
+            nameof(Networking.ToggleRadius),
+            ReliableType.Reliable,
+            newTrap.GetComponent<NetworkObject>().ObjectId);
         }
         else
             handItemLink.otherTrap = newTrap;
@@ -84,8 +82,8 @@ public static class TPExplosion
         var gameObject = AccessTools.PropertyGetter(typeof(MonoBehaviour), nameof(MonoBehaviour.gameObject));
         var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
 
-        var getTraplink = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), null, [typeof(TrapLink)]);
-        var otherTrap = AccessTools.Field(typeof(TrapLink), nameof(TrapLink.otherTrap));
+        var getTraplink = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), null, [typeof(TPTrap)]);
+        var otherTrap = AccessTools.Field(typeof(TPTrap), nameof(TPTrap.otherTrap));
 
         var changeState = AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.ChangeState));
         var handleExplo = AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.HandleExplosion));
@@ -132,7 +130,7 @@ public static class TPExplosion
     [HarmonyPatch("HandleExplosion")]
     public static bool Prefix(ProximityMine __instance)
     {
-        var link = __instance.gameObject.GetComponent<TrapLink>();
+        var link = __instance.gameObject.GetComponent<TPTrap>();
         if (!link) return true;
         if (!InstanceFinder.IsHost || link.clientDetonated) return false;
 
@@ -140,7 +138,7 @@ public static class TPExplosion
 
         link.clientDetonated = true;
         ProximityMine otherMine = link.otherTrap.GetComponent<ProximityMine>();
-        if (!link.otherTrap.GetComponent<TrapLink>().clientDetonated)
+        if (!link.otherTrap.GetComponent<TPTrap>().clientDetonated)
         {
             otherMine.ChangeState();
             otherMine.HandleExplosion();

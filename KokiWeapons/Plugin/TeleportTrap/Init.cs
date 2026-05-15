@@ -9,12 +9,12 @@ public class Init
     {
         var trap = SpawnerManager.NameToWeaponDict["Teleport Mine"].GetComponent<WeaponHandSpawner>().objToSpawn;
 
-        if (trap.TryGetComponent(out TrapLink link))
+        if (trap.TryGetComponent(out TPTrap link))
         {
             Object.Destroy(link);
         }
 
-        SpawnerManager.NameToWeaponDict["Teleport Mine"].AddComponent<TrapLink>();
-        trap.AddComponent<TrapLink>();
+        SpawnerManager.NameToWeaponDict["Teleport Mine"].AddComponent<TPTrap>();
+        trap.AddComponent<TPTrap>();
     }
 }

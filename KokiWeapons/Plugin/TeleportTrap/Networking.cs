@@ -24,9 +24,9 @@ public class Networking : MonoBehaviour
     }
 
     [CustomRPC]
-    public void LinkMines(Vector3 destination)
+    public void ToggleRadius(int nobID)
     {
         if (InstanceFinder.IsHost) return;
-        FirstPersonController.instance.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+
     }
 }
