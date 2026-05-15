@@ -7,14 +7,16 @@ public class Init
 {
     public static void Run()
     {
-        var trap = SpawnerManager.NameToWeaponDict["Teleport Mine"].GetComponent<WeaponHandSpawner>().objToSpawn;
+        var handItem = SpawnerManager.NameToWeaponDict["Teleport Mine"];
+        var trap = handItem.GetComponent<WeaponHandSpawner>().objToSpawn;
 
-        if (trap.TryGetComponent(out TPTrap link))
+        if (trap.TryGetComponent(out TPTrap trapComponent) && handItem.TryGetComponent(out TPLink link))
         {
+            Object.Destroy(trapComponent);
             Object.Destroy(link);
         }
 
-        SpawnerManager.NameToWeaponDict["Teleport Mine"].AddComponent<TPTrap>();
+        handItem.AddComponent<TPLink>();
         trap.AddComponent<TPTrap>();
     }
 }
