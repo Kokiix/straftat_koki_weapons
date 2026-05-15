@@ -23,14 +23,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Mycelium" Publicize="true">
+    <Reference Include="MyceliumNetworkingForStraftat" Publicize="true">
       <HintPath>..\lib\MyceliumNetworkingForStraftat.dll</HintPath>
     </Reference>
-    <Reference Include="FishNet" Publicize="true">
+    <Reference Include="FishNet.Runtime" Publicize="true">
       <HintPath>..\lib\FishNet.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="STRAFTAT" Publicize="true">
+    <Reference Include="Assembly-CSharp" Publicize="true">
       <HintPath>..\lib\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTween" Publicize="true">
+      <HintPath>..\lib\DOTween.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

@@ -48,4 +48,30 @@ public class TPTrapNetworking : MonoBehaviour
         }
 
     }
+
+    // Ripped straight from ProximityMine.ExplodeObservers lol
+    public GameObject explosionVfx;
+    public AudioClip explosionAudio;
+    [CustomRPC]
+    public void DestroyTrapPair(int nobID1, int nobID2)
+    {
+        foreach (var go in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (go != null)
+            {
+                float distanceToExplo = Vector3.Distance(base.transform.position, go.transform.position);
+                float maxFXDistance = 40;
+                // TODO: store these hard coded values somewhere else
+                go.GetComponent<PlayerHealth>().LocalScreenshake(
+                    duration: 0.3f,
+                    strength: Mathf.Lerp(0.5f, 13, Mathf.Clamp(distanceToExplo / maxFXDistance, 0f, 1f)),
+                    vibrato: 20,
+                    randomness: 20,
+                    shakeEase: DG.Tweening.Ease.Linear);
+            }
+        }
+        Object.Destroy(base.gameObject);
+        Object.Instantiate(explosionVfx, base.transform.position, Quaternion.identity);
+        SoundManager.Instance.PlaySound(explosionAudio);
+    }
 }

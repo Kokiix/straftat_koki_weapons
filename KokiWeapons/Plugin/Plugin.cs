@@ -62,7 +62,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 RegisterWeapons.Postfix();
         }
 
-        this.gameObject.AddComponent<TPTrapNetworking>();
+        TPTrapNetworking netw = this.gameObject.AddComponent<TPTrapNetworking>();
+        netw.explosionVfx = mainBundle.LoadAsset<GameObject>("boom");
+        netw.explosionAudio = mainBundle.LoadAsset<AudioClip>("boom");
     }
 
     public void OnDestroy()

@@ -38,7 +38,7 @@ public static class UpdateTrapLinkOnPlace
         {
             var nobID1 = newTrap.GetComponent<NetworkObject>().ObjectId;
             var nobID2 = link.otherTrapNob;
-            Networking.RPC("LinkMines", [nobID1, nobID2]);
+            TPTrapNetworking.RPC("LinkMines", [nobID1, nobID2]);
         }
     }
 }
