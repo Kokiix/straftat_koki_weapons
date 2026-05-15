@@ -9,17 +9,12 @@ public class Init
     {
         var trap = SpawnerManager.NameToWeaponDict["Teleport Mine"].GetComponent<WeaponHandSpawner>().objToSpawn;
 
-        if (KokiWeaponsPlugin.DebugGetComponent(trap, typeof(TrapLink)))
+        if (trap.TryGetComponent(out TrapLink link))
         {
-            Object.Destroy(KokiWeaponsPlugin.DebugGetComponent(trap, typeof(TrapLink)));
+            Object.Destroy(link);
         }
 
         SpawnerManager.NameToWeaponDict["Teleport Mine"].AddComponent<TrapLink>();
         trap.AddComponent<TrapLink>();
     }
-}
-
-public class TrapLink : MonoBehaviour
-{
-    public GameObject otherTrap;
 }

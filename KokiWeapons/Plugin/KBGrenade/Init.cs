@@ -16,8 +16,8 @@ public class Init
 
         if (KokiWeaponsPlugin.DebugGetComponent(physGrenade, typeof(RepulsionGrenade)))
         {
-            Object.Destroy(KokiWeaponsPlugin.DebugGetComponent(physGrenade, typeof(RepulsionGrenade)));
-            Object.Destroy(KokiWeaponsPlugin.DebugGetComponent(physGrenade, typeof(SpinUntilHit)));
+            Object.Destroy(physGrenade.GetComponent<RepulsionGrenade>());
+            Object.Destroy(physGrenade.GetComponent<SpinUntilHit>());
         }
 
         physGrenade.AddComponent<RepulsionGrenade>();
@@ -25,10 +25,5 @@ public class Init
         spin.axis = new Vector3(1, 0, 0);
         spin.rotateSpeed = 250;
         spin.collisionRadius = 0.5f;
-    }
-
-    public class RepulsionGrenade : MonoBehaviour
-    {
-
     }
 }

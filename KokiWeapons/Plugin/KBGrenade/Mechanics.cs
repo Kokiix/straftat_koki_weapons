@@ -20,8 +20,7 @@ public static class KBGrenadeMechanics
 
             var kbEffect = AccessTools.Method(typeof(KBGrenadeMechanics), nameof(KBAll));
             var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
-            // var getKBGrenade = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), parameters: null, generics: [typeof(RepulsionGrenade)]);
-            var getKBGrenade = AccessTools.Method(typeof(KokiWeaponsPlugin), nameof(KokiWeaponsPlugin.DebugGetComponent));
+            var getKBGrenade = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), parameters: null, generics: [typeof(RepulsionGrenade)]);
             var getTypeFromHandle = AccessTools.Method(typeof(Type), nameof(Type.GetTypeFromHandle), [typeof(System.RuntimeTypeHandle)]);
 
             var gameObject = AccessTools.PropertyGetter(typeof(PhysicsGrenade), nameof(PhysicsGrenade.gameObject));
@@ -41,10 +40,6 @@ public static class KBGrenadeMechanics
                 // If mine is not KB resume
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Callvirt, gameObject),
-
-                new CodeInstruction(OpCodes.Ldtoken, typeof(RepulsionGrenade)),
-                new CodeInstruction(OpCodes.Callvirt, getTypeFromHandle),
-
                 new CodeInstruction(OpCodes.Call, getKBGrenade),
                 new CodeInstruction(OpCodes.Call, implicitBool),
                 new CodeInstruction(OpCodes.Brfalse, loopStart),

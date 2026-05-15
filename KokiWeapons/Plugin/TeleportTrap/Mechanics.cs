@@ -30,7 +30,7 @@ public static class LinkMineOnPlace
 
     public static void OnPlace(WeaponHandSpawner __instance, GameObject newTrap)
     {
-        TrapLink handItemLink = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
+        TrapLink handItemLink = __instance.gameObject.GetComponent<TrapLink>();
         if (!handItemLink) return;
 
         if (KokiWeaponsPlugin.Debug)
@@ -46,8 +46,8 @@ public static class LinkMineOnPlace
         {
             GameObject otherTrap = handItemLink.otherTrap.gameObject;
 
-            ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(otherTrap, typeof(TrapLink))).otherTrap = newTrap;
-            ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(newTrap, typeof(TrapLink))).otherTrap = otherTrap;
+            otherTrap.GetComponent<TrapLink>().otherTrap = newTrap;
+            newTrap.GetComponent<TrapLink>().otherTrap = otherTrap;
 
             otherTrap.transform.Find("radius").gameObject.SetActive(true);
             newTrap.transform.Find("radius").gameObject.SetActive(true);
@@ -127,7 +127,7 @@ public static class TPExplosion
     public static bool Prefix(ProximityMine __instance)
     {
         KDBG.Log("tp");
-        var link = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
+        var link = __instance.gameObject.GetComponent<TrapLink>();
         if (!link) return true;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
