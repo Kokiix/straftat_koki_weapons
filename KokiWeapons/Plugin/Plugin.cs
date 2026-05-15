@@ -31,6 +31,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static GameObject[] CustomWeapons;
 
     internal static ushort FishNetCollectionID = (ushort)("com.koki.weapons".GetHashCode() & 0xFFFF);
+    internal static uint MyceliumID = 932828;
 
     internal static KokiWeaponsPlugin Instance;
 
@@ -61,13 +62,13 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         foreach (var material in mainBundle.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
 
-        // MyceliumNetwork.LobbyEntered += RegisterFishnet;
         if (Debug)
         {
             if (InstanceFinder.NetworkManager)
                 RegisterWeapons.Postfix();
         }
 
+        this.gameObject.AddComponent<TeleportTrap.Networking>();
     }
 
     public void OnDestroy()
@@ -78,6 +79,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
         }
 
+        this.gameObject.GetComponent<TeleportTrap.Networking>().Deregister();
         Harmony.UnpatchSelf();
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Length);

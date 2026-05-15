@@ -36,6 +36,12 @@ public static class LinkMineOnPlace
         if (KokiWeaponsPlugin.Debug)
             SpawnWeaponOnTaunt.weapons.Add(newTrap);
 
+        MyceliumNetwork.RPC(
+        KokiWeaponsPlugin.MyceliumID,
+        nameof(Networking.TeleportClient),
+        ReliableType.Reliable,
+        destination);
+
         var anim = newTrap.transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
         anim["tpmineSphere"].layer = 0;
         anim.Play("tpmineSphere");
@@ -128,7 +134,7 @@ public static class TPExplosion
     {
         var link = __instance.gameObject.GetComponent<TrapLink>();
         if (!link) return true;
-        if (link.clientDetonated) return false;
+        if (!InstanceFinder.IsHost || link.clientDetonated) return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
@@ -143,10 +149,28 @@ public static class TPExplosion
         if (colliders.Length != 0)
         {
             Vector3 destination = otherMine.transform.position;
-            var currPlayer = colliders
-            .FirstOrDefault(c => c.TryGetComponent(out PlayerHealth health) && health.IsOwner);
-            if (currPlayer && currPlayer.TryGetComponent(out PlayerHealth health))
-                health.controller.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+            var healths = new HashSet<PlayerHealth>();
+            foreach (var c in colliders)
+            {
+                if (c.TryGetComponent(out PlayerHealth h))
+                    healths.Add(h);
+                foreach (var hth in healths)
+                {
+                    if (hth.controller == FirstPersonController.instance)
+                    {
+                        FirstPersonController.instance.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                        continue;
+                    }
+                    ulong.TryParse(hth.Owner.GetAddress(), out ulong steamID);
+                    MyceliumNetwork.RPCTarget(
+                        KokiWeaponsPlugin.MyceliumID,
+                        nameof(Networking.TeleportClient),
+                        (CSteamID)steamID,
+                        ReliableType.Reliable,
+                        destination);
+                }
+            }
+
         }
         __instance.ExplodeServer();
         return false;
