@@ -1,18 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using ComputerysModdingUtilities;
 using FishNet;
 using HarmonyLib;
 using UnityEngine;
-using MyceliumNetworking;
 using FishNet.Object;
-using HarmonyLib.Tools;
-using FishNet.Managing.Object;
 using HeathenEngineering.PhysKit;
 using System;
 using FishNet.Managing;
@@ -197,20 +191,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         collection.Clear();
         collection.AddObjects(baseGameObjs);
         collection.InitializePrefabRange(0);
-    }
-
-    public static Component DebugGetComponent(GameObject go, Type compType)
-    {
-        if (!Debug)
-            return go.GetComponent(compType);
-
-        foreach (var comp in go.GetComponents<Component>())
-        {
-            // KDBG.Log(comp.GetType().Name);
-            // KDBG.Log(compType.Name);
-            if (comp.GetType().Name == compType.Name) return comp;
-        }
-        return null;
     }
 
     // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
