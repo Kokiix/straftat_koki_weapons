@@ -126,9 +126,9 @@ public static class TPExplosion
     [HarmonyPatch("HandleExplosion")]
     public static bool Prefix(ProximityMine __instance)
     {
-        KDBG.Log("tp");
         var link = __instance.gameObject.GetComponent<TrapLink>();
         if (!link) return true;
+        if (__instance.detonated) return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
