@@ -14,6 +14,7 @@ public class Init
             Object.Destroy(KokiWeaponsPlugin.DebugGetComponent(trap, typeof(TrapLink)));
         }
 
+        SpawnerManager.NameToWeaponDict["Teleport Mine"].AddComponent<TrapLink>();
         trap.AddComponent<TrapLink>();
     }
 }

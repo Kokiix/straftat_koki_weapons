@@ -33,31 +33,35 @@ public static class LinkMineOnPlace
         TrapLink link = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
         if (!link) return;
 
-        KDBG.Log("place");
-
         if (KokiWeaponsPlugin.Debug)
             SpawnWeaponOnTaunt.weapons.Add(newTrap);
 
-        var anim = newTrap.transform.Find("TeleTrapPhysMesh(Clone)").Find("trap_010").GetComponent<Animation>();
-        anim["sphere"].layer = 0;
-        anim.Play("sphere");
-        anim["torus"].layer = 1;
+        KDBG.Log(newTrap.name);
+        foreach (Transform x in newTrap.transform)
+        {
+            KDBG.Log(x.name);
+        }
+
+        // var anim = newTrap.transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
+        // anim["sphere"].layer = 0;
+        // anim.Play("sphere");
+        // anim["torus"].layer = 1;
         // anim["torus"].weight = 1;
         // anim["torus"].enabled = true;
-        anim.Play("torus");
+        // anim.Play("torus");
 
-        if (link.otherTrap)
-        {
-            GameObject otherTrap = link.otherTrap.gameObject;
+        // if (link.otherTrap)
+        // {
+        //     GameObject otherTrap = link.otherTrap.gameObject;
 
-            ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(otherTrap, typeof(TrapLink))).otherTrap = newTrap;
-            ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(newTrap, typeof(TrapLink))).otherTrap = otherTrap;
+        //     ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(otherTrap, typeof(TrapLink))).otherTrap = newTrap;
+        //     ((TrapLink)KokiWeaponsPlugin.DebugGetComponent(newTrap, typeof(TrapLink))).otherTrap = otherTrap;
 
-            otherTrap.transform.Find("radius").gameObject.SetActive(true);
-            newTrap.transform.Find("radius").gameObject.SetActive(true);
-        }
-        else
-            link.otherTrap = newTrap;
+        //     otherTrap.transform.Find("radius").gameObject.SetActive(true);
+        //     newTrap.transform.Find("radius").gameObject.SetActive(true);
+        // }
+        // else
+        //     link.otherTrap = newTrap;
     }
 }
 
@@ -83,7 +87,7 @@ public static class Explosion
         .MatchBack(useEnd: false,
             new CodeMatch(OpCodes.Ldstr, "chiasse"))
         .CreateLabel(out Label resumeFunc)
- 
+
         // .Insert(
         //     // If no traplink, proceed
         //     new CodeInstruction(OpCodes.Ldarg_0),
@@ -111,7 +115,6 @@ public static class Explosion
     [HarmonyPatch("HandleExplosion")]
     public static bool Prefix(ProximityMine __instance)
     {
-        KDBG.Log(KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink)));
         var link = (TrapLink)KokiWeaponsPlugin.DebugGetComponent(__instance.gameObject, typeof(TrapLink));
         if (!link) return true;
 
