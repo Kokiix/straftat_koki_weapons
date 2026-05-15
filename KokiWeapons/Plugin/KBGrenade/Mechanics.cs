@@ -67,7 +67,7 @@ public static class KBGrenadeMechanics
             force.y = 0;
             force.Normalize();
 
-            if (ph.controller.isGrounded)
+            if (ph.controller.isGrounded) 
                 ph.controller.transform.position += new Vector3(0, 2.5f, 0);
             ph.controller.CustomAddForce(force, 150);
         });

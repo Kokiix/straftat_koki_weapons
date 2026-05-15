@@ -128,13 +128,13 @@ public static class TPExplosion
     {
         var link = __instance.gameObject.GetComponent<TrapLink>();
         if (!link) return true;
-        if (__instance.detonated) return false;
+        if (link.clientDetonated) return false;
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
+        link.clientDetonated = true;
         ProximityMine otherMine = link.otherTrap.GetComponent<ProximityMine>();
-        __instance.detonated = true;
-        if (!otherMine.detonated)
+        if (!link.otherTrap.GetComponent<TrapLink>().clientDetonated)
         {
             otherMine.ChangeState();
             otherMine.HandleExplosion();

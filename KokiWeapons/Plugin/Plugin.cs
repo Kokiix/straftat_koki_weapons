@@ -61,12 +61,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         foreach (var material in mainBundle.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
 
-        MyceliumNetwork.LobbyEntered += RegisterFishnet;
+        // MyceliumNetwork.LobbyEntered += RegisterFishnet;
         if (Debug)
         {
-            RegisterWeapons.Postfix();
             if (InstanceFinder.NetworkManager)
-                RegisterFishnet();
+                RegisterWeapons.Postfix();
         }
 
     }
@@ -79,13 +78,13 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
         }
 
-        MyceliumNetwork.LobbyEntered -= RegisterFishnet;
         Harmony.UnpatchSelf();
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Length);
-        InstanceFinder.NetworkManager._runtimeSpawnablePrefabs.Remove(FishNetCollectionID);
+        DeregisterFishnet();
     }
 
+    // Runs once at game start
     internal static bool RegisteredWeapons = false;
     [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
     public static class RegisterWeapons
@@ -115,20 +114,50 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             KBGrenade.Init.Run();
             TeleportTrap.Init.Run();
             RegisteredWeapons = true;
+            RegisterFishnet.Postfix(); // NM starts before weapons do
         }
     }
 
-    public static void RegisterFishnet()
+    // Runs each time the player quits to title screen
+    [HarmonyPatch(typeof(NetworkManager), "Start")]
+    public static class RegisterFishnet
     {
-        var nm = InstanceFinder.NetworkManager;
-        var collection = nm.SpawnablePrefabs;
+        public static void Postfix()
+        {
+            if (!RegisteredWeapons) return;
+            KDBG.Log("REGISTERED FISHNET STUFF");
+            var nm = InstanceFinder.NetworkManager;
+            var collection = nm.SpawnablePrefabs;
+
+            foreach (var weapon in CustomWeapons)
+            {
+                if (!weapon) continue;
+                weapon.TryGetComponent(out NetworkObject nob);
+                collection.AddObject(nob);
+            }
+
+            GameObject[] nonWeaponNetobjs = [
+                SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+                .GetComponent<TrickShot>().template.gameObject,
+            SpawnerManager.NameToWeaponDict["Teleport Mine"]
+            .GetComponent<WeaponHandSpawner>().objToSpawn
+            ];
+            foreach (var obj in nonWeaponNetobjs)
+            {
+                obj.TryGetComponent(out NetworkObject nobj);
+                collection.AddObject(nobj);
+            }
+        }
+    }
+
+    public static void DeregisterFishnet()
+    {
+
+        var toRemove = new HashSet<NetworkObject>();
 
         foreach (var weapon in CustomWeapons)
         {
-            if (!weapon) continue;
-            weapon.TryGetComponent(out NetworkObject nob);
-            nm.SpawnablePrefabs.AddObject(nob);
-            collection.AddObject(nob);
+            toRemove.Add(weapon.GetComponent<NetworkObject>());
         }
 
         GameObject[] nonWeaponNetobjs = [
@@ -139,10 +168,33 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         ];
         foreach (var obj in nonWeaponNetobjs)
         {
-            obj.TryGetComponent(out NetworkObject nobj);
-            nm.SpawnablePrefabs.AddObject(nobj);
-            collection.AddObject(nobj);
+            toRemove.Add(obj.GetComponent<NetworkObject>());
         }
+
+        foreach (var nob in toRemove)
+        {
+            nob.PrefabId = 0;
+            nob.SpawnableCollectionId = 0;
+        }
+
+        var nm = InstanceFinder.NetworkManager;
+        var collection = nm.SpawnablePrefabs;
+        var netobjTotal = collection.GetObjectCount();
+        var baseGameObjs = new List<NetworkObject>();
+        for (int i = 0; i < netobjTotal; i++)
+        {
+            // GetObject(bool asServer, int id) 
+            // In FishNet, 'id' corresponds to the index/PrefabId
+            NetworkObject current = collection.GetObject(true, i);
+
+            if (current != null && !toRemove.Contains(current))
+            {
+                baseGameObjs.Add(current);
+            }
+        }
+        collection.Clear();
+        collection.AddObjects(baseGameObjs);
+        collection.InitializePrefabRange(0);
     }
 
     public static Component DebugGetComponent(GameObject go, Type compType)
