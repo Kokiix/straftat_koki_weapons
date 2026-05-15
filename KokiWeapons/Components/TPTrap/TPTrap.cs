@@ -1,4 +1,5 @@
 using FishNet;
+using FishNet.Object;
 using UnityEngine;
 
 public class TPTrap : MonoBehaviour
@@ -18,7 +19,12 @@ public class TPTrap : MonoBehaviour
     private void OnTriggerStay(Collider col)
     {
         if (!otherTrap || !InstanceFinder.IsHost) return;
-        Debug.Log("sdlfkj"); 
+        Debug.Log("sdlfkj");
     }
 
+    public void Activate(GameObject other)
+    {
+        otherTrap = other;
+        transform.Find("radius").gameObject.SetActive(true);
+    }
 }

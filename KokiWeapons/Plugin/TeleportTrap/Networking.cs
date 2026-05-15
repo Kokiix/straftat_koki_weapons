@@ -1,3 +1,5 @@
+using FishNet;
+using FishNet.Object;
 using MyceliumNetworking;
 using UnityEngine;
 
@@ -28,6 +30,13 @@ public class Networking : MonoBehaviour
     [CustomRPC]
     public void LinkMines(int nobID1, int nobID2)
     {
-        KDBG.Log("link!");
+        if (InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID1, out NetworkObject nob1)
+        && InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID2, out NetworkObject nob2))
+        {
+            var go1 = nob1.gameObject;
+            var go2 = nob2.gameObject;
+            go1.GetComponent<TPTrap>().Activate(go2);
+            go2.GetComponent<TPTrap>().Activate(go1);
+        }
     }
 }
