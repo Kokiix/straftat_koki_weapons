@@ -1,4 +1,5 @@
 using FishNet;
+using FishNet.Object;
 using MyceliumNetworking;
 using UnityEngine;
 
@@ -27,6 +28,8 @@ public class Networking : MonoBehaviour
     public void ToggleRadius(int nobID)
     {
         if (InstanceFinder.IsHost) return;
-
+        InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID, out NetworkObject nob);
+        var radius = nob.transform.Find("radius").gameObject;
+        radius.SetActive(!radius.activeSelf);
     }
 }
