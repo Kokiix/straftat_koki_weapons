@@ -21,4 +21,10 @@
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1"
       PrivateAssets="all" IncludeAssets="build" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="FishNet" Publicize="true">
+      <HintPath>..\lib\FishNet.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

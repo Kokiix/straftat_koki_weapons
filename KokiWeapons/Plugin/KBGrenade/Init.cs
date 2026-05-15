@@ -14,7 +14,7 @@ public class Init
         .GetComponent<TrickShot>().template.gameObject
         .GetComponent<PhysicsGrenade>().explosionDecal;
 
-        if (KokiWeaponsPlugin.DebugGetComponent(physGrenade, typeof(RepulsionGrenade)))
+        if (physGrenade.GetComponent<RepulsionGrenade>())
         {
             Object.Destroy(physGrenade.GetComponent<RepulsionGrenade>());
             Object.Destroy(physGrenade.GetComponent<SpinUntilHit>());

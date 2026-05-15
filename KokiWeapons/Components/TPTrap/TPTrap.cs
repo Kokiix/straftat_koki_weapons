@@ -1,18 +1,24 @@
+using FishNet;
 using UnityEngine;
 
 public class TPTrap : MonoBehaviour
 {
-    public GameObject otherTrap;
-    public bool clientDetonated;
+    private GameObject otherTrap;
 
-    public void Awake()
+    private void Awake()
     {
-        var mesh = transform.Find("TeleTrapPhysMesh");
-        if (!mesh) return;
-        var anim = mesh.Find("trap_010").GetComponent<Animation>();
+        // Play animation
+        var anim = transform.Find("TeleTrapPhysMesh").Find("trap_010").GetComponent<Animation>();
         anim["tpmineSphere"].layer = 0;
         anim.Play("tpmineSphere");
         anim["tpmineTorus"].layer = 1;
         anim.Play("tpmineTorus");
     }
+
+    private void OnTriggerStay(Collider col)
+    {
+        if (!otherTrap || !InstanceFinder.IsHost) return;
+        Debug.Log("sdlfkj"); 
+    }
+
 }
