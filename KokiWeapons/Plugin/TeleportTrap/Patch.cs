@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using FishNet.Connection;
+using FishNet.Managing.Server;
 using FishNet.Object;
 using HarmonyLib;
 using UnityEngine;
@@ -12,9 +14,12 @@ public static class UpdateTrapLinkOnPlace
 {
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
+        var serverManagerSpawn = AccessTools.Method(typeof(ServerManager), nameof(ServerManager.Spawn), [typeof(GameObject), typeof(NetworkConnection)]);
         var updateTrapLink = AccessTools.Method(typeof(UpdateTrapLinkOnPlace), nameof(UpdateTrapLink));
+
         return new CodeMatcher(instructions)
-        .Insert(
+        .MatchForward(useEnd: false, new CodeMatch(OpCodes.Callvirt, serverManagerSpawn))
+        .Advance(1).Insert(
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Ldloc_0),
             new CodeInstruction(OpCodes.Call, updateTrapLink))
@@ -25,7 +30,9 @@ public static class UpdateTrapLinkOnPlace
     {
         if (!__instance.gameObject.TryGetComponent(out TPLink link)) return;
         if (link.otherTrapNob == -1)
+        {
             link.otherTrapNob = newTrap.GetComponent<NetworkObject>().ObjectId;
+        }
         else
         {
             var nobID1 = newTrap.GetComponent<NetworkObject>().ObjectId;
