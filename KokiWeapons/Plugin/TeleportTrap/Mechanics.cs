@@ -76,55 +76,15 @@ public static class LinkMineOnPlace
 public static class TPExplosion
 {
     [HarmonyPatch("OnTriggerStay")]
-    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    public static void Postfix(ProximityMine __instance)
     {
-        var compareTag = AccessTools.Method(typeof(Component), nameof(Component.CompareTag));
-        var gameObject = AccessTools.PropertyGetter(typeof(MonoBehaviour), nameof(MonoBehaviour.gameObject));
-        var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
+        var trap = __instance.gameObject.GetComponent<TPTrap>();
+        if (!trap) return;
 
-        var getTraplink = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), null, [typeof(TPTrap)]);
-        var otherTrap = AccessTools.Field(typeof(TPTrap), nameof(TPTrap.otherTrap));
+        if (!InstanceFinder.IsServer || trap.clientDetonated || !trap.otherTrap) return;
 
-        var changeState = AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.ChangeState));
-        var handleExplo = AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.HandleExplosion));
-
-        return new CodeMatcher(instructions, generator)
-
-        .End().MatchBack(useEnd: false,
-            new CodeMatch(OpCodes.Ret))
-        .CreateLabel(out Label endFunc)
-
-        .Start().CreateLabel(out Label resumeFunc)
-
-        .Insert(
-            // If no traplink, proceed
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Callvirt, gameObject),
-            new CodeInstruction(OpCodes.Call, getTraplink),
-            new CodeInstruction(OpCodes.Call, implicitBool),
-            new CodeInstruction(OpCodes.Brfalse, resumeFunc),
-
-            // Else, check if otherTrap exists...
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Callvirt, gameObject),
-            new CodeInstruction(OpCodes.Call, getTraplink),
-            new CodeInstruction(OpCodes.Ldfld, otherTrap),
-            new CodeInstruction(OpCodes.Call, implicitBool),
-            new CodeInstruction(OpCodes.Brfalse, endFunc),
-
-            // ...AND collider is player
-            new CodeInstruction(OpCodes.Ldarg_1),
-            new CodeInstruction(OpCodes.Ldstr, "Player"),
-            new CodeInstruction(OpCodes.Callvirt, compareTag),
-            new CodeInstruction(OpCodes.Brfalse, endFunc),
-
-            // Trigger explosion
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Call, changeState),
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Call, handleExplo),
-            new CodeInstruction(OpCodes.Ret))
-        .InstructionEnumeration();
+        __instance.ChangeState();
+        __instance.HandleExplosion();
     }
 
     [HarmonyPatch("HandleExplosion")]
@@ -147,30 +107,53 @@ public static class TPExplosion
         if (colliders.Length != 0)
         {
             Vector3 destination = otherMine.transform.position;
-            var healths = new HashSet<PlayerHealth>();
+            var fpcs = new HashSet<FirstPersonController>();
             foreach (var c in colliders)
             {
                 if (c.TryGetComponent(out PlayerHealth h))
-                    healths.Add(h);
-                foreach (var hth in healths)
+                    fpcs.Add(h.controller);
+            }
+            foreach (var controller in fpcs)
+            {
+                if (controller.Owner.IsLocalClient)
                 {
-                    if (hth.controller == FirstPersonController.instance)
-                    {
-                        FirstPersonController.instance.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-                        continue;
-                    }
-                    ulong.TryParse(hth.Owner.GetAddress(), out ulong steamID);
-                    MyceliumNetwork.RPCTarget(
-                        KokiWeaponsPlugin.MyceliumID,
-                        nameof(Networking.TeleportClient),
-                        (CSteamID)steamID,
-                        ReliableType.Reliable,
-                        destination);
+                    FirstPersonController.instance.Teleport(destination, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
+                    continue;
                 }
+                ulong.TryParse(controller.Owner.GetAddress(), out ulong steamID);
+                MyceliumNetwork.RPCTarget(
+                    KokiWeaponsPlugin.MyceliumID,
+                    nameof(Networking.TeleportClient),
+                    (CSteamID)steamID,
+                    ReliableType.Reliable,
+                    destination);
             }
 
         }
         __instance.ExplodeServer();
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(ProximityMine), "Start")]
+public static class StopActivateCoroutine
+{
+    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    {
+        var getTraplink = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), null, [typeof(TPTrap)]);
+        var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
+
+        return new CodeMatcher(instructions, generator)
+            .End()
+            .CreateLabel(out Label ret)
+
+            .Start()
+            .Insert(
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(ProximityMine), nameof(ProximityMine.gameObject))),
+            new CodeInstruction(OpCodes.Call, getTraplink),
+            new CodeInstruction(OpCodes.Call, implicitBool),
+            new CodeInstruction(OpCodes.Brtrue, ret))
+            .InstructionEnumeration();
     }
 }
