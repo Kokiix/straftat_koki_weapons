@@ -18,8 +18,10 @@ public class TPTrap : MonoBehaviour
 
     private void OnTriggerStay(Collider col)
     {
-        if (!otherTrap || !InstanceFinder.IsHost) return;
-        Debug.Log("sdlfkj");
+        var fpc = FirstPersonController.instance;
+        if (!otherTrap || col.gameObject != fpc.gameObject) return;
+        fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: false);
+
     }
 
     public void Activate(GameObject other)

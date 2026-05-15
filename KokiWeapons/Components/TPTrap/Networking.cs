@@ -3,24 +3,23 @@ using FishNet.Object;
 using MyceliumNetworking;
 using UnityEngine;
 
-namespace TeleportTrap;
-
-public class Networking : MonoBehaviour
+public class TPTrapNetworking : MonoBehaviour
 {
+    private static readonly uint ID = 932828;
     public void Awake()
     {
-        MyceliumNetwork.RegisterNetworkObject(this, KokiWeaponsPlugin.MyceliumID);
+        MyceliumNetwork.RegisterNetworkObject(this, ID);
     }
 
     public void Deregister()
     {
-        MyceliumNetwork.DeregisterNetworkObject(this, KokiWeaponsPlugin.MyceliumID);
+        MyceliumNetwork.DeregisterNetworkObject(this, ID);
     }
 
     public static void RPC(string methodname, object[] parameters)
     {
         MyceliumNetwork.RPC(
-            KokiWeaponsPlugin.MyceliumID,
+            ID,
             methodname,
             ReliableType.Reliable,
             parameters

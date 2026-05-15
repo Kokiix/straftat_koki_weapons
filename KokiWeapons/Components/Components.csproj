@@ -23,8 +23,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Mycelium" Publicize="true">
+      <HintPath>..\lib\MyceliumNetworkingForStraftat.dll</HintPath>
+    </Reference>
     <Reference Include="FishNet" Publicize="true">
       <HintPath>..\lib\FishNet.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="STRAFTAT" Publicize="true">
+      <HintPath>..\lib\Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

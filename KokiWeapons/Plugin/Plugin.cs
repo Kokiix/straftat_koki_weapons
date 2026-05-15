@@ -62,7 +62,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 RegisterWeapons.Postfix();
         }
 
-        this.gameObject.AddComponent<TeleportTrap.Networking>();
+        this.gameObject.AddComponent<TPTrapNetworking>();
     }
 
     public void OnDestroy()
@@ -73,7 +73,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
         }
 
-        this.gameObject.GetComponent<TeleportTrap.Networking>().Deregister();
+        this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
         Harmony.UnpatchSelf();
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Length);

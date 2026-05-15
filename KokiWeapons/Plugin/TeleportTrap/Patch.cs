@@ -4,6 +4,7 @@ using FishNet.Connection;
 using FishNet.Managing.Server;
 using FishNet.Object;
 using HarmonyLib;
+using MyceliumNetworking;
 using UnityEngine;
 
 namespace TeleportTrap;
