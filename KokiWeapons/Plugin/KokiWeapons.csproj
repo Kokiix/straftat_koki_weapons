@@ -16,8 +16,10 @@
     <ItemGroup>
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.Core" Version="5.*" ExcludeAssets="runtime" />
-        <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" PrivateAssets="all" />
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" IncludeAssets="build" />
+        <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile"
+            PrivateAssets="all" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1"
+            PrivateAssets="all" IncludeAssets="build" />
     </ItemGroup>
 
     <ItemGroup>
@@ -42,6 +44,17 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Components\Components.csproj" />
+        <ProjectReference Include="..\Components\Components.csproj" />
     </ItemGroup>
+
+    <PropertyGroup>
+        <IncludeSymbols>true</IncludeSymbols>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <Target Name="CopyDLL" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)"
+            DestinationFolder="C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins\KokiWeapons" />
+    </Target>
 </Project>

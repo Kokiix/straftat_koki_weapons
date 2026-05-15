@@ -47,10 +47,10 @@ public static class UpdateTrapLinkOnPlace
 [HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
 public static class ExplodeTPTrapOnHit
 {
-    public static void Prefix(Weapon __instance, GameObject obj)
+    public static void Prefix(Weapon __instance, GameObject obj) 
     {
         GameObject trap = obj.transform.root.gameObject;
-        if (obj.CompareTag("Mine") && obj.GetComponent<TPTrap>())
+        if (trap.GetComponent<TPTrap>())
         {
             TPTrapNetworking.RPC("DestroyTrapPair", [trap.GetComponent<NetworkObject>().ObjectId, -1]);
         }

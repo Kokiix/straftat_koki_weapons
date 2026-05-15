@@ -169,11 +169,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             toRemove.Add(obj.GetComponent<NetworkObject>());
         }
 
-        foreach (var nob in toRemove)
-        {
-            nob.PrefabId = 0;
-            nob.SpawnableCollectionId = 0;
-        }
+        // foreach (var nob in toRemove)
+        // {
+        //     nob.PrefabId = 0;
+        //     nob.SpawnableCollectionId = 0;
+        // }
 
         var nm = InstanceFinder.NetworkManager;
         var collection = nm.SpawnablePrefabs;
