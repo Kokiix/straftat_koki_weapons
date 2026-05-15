@@ -115,7 +115,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             KBGrenade.Init.Run();
             TeleportTrap.Init.Run();
             RegisteredWeapons = true;
-            KDBG.Log("registered WEAPONS");
         }
     }
 

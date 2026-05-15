@@ -69,9 +69,9 @@ public static class LinkMineOnPlace
 // }
 
 [HarmonyPatch(typeof(ProximityMine))]
-public static class Explosion
+public static class TPExplosion
 {
-    [HarmonyPatch("OnTriggerEnter")]
+    [HarmonyPatch("OnTriggerStay")]
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         var compareTag = AccessTools.Method(typeof(Component), nameof(Component.CompareTag));
@@ -81,15 +81,16 @@ public static class Explosion
         var getTraplink = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), null, [typeof(TrapLink)]);
         var otherTrap = AccessTools.Field(typeof(TrapLink), nameof(TrapLink.otherTrap));
 
+        var changeState = AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.ChangeState));
+        var handleExplo = AccessTools.Method(typeof(ProximityMine), nameof(ProximityMine.HandleExplosion));
+
         return new CodeMatcher(instructions, generator)
 
         .End().MatchBack(useEnd: false,
             new CodeMatch(OpCodes.Ret))
         .CreateLabel(out Label endFunc)
 
-        .MatchBack(useEnd: false,
-            new CodeMatch(OpCodes.Ldstr, "chiasse"))
-        .CreateLabel(out Label resumeFunc)
+        .Start().CreateLabel(out Label resumeFunc)
 
         .Insert(
             // If no traplink, proceed
@@ -107,11 +108,18 @@ public static class Explosion
             new CodeInstruction(OpCodes.Call, implicitBool),
             new CodeInstruction(OpCodes.Brfalse, endFunc),
 
-            // ...AND that collider is player
+            // ...AND collider is player
             new CodeInstruction(OpCodes.Ldarg_1),
             new CodeInstruction(OpCodes.Ldstr, "Player"),
             new CodeInstruction(OpCodes.Callvirt, compareTag),
-            new CodeInstruction(OpCodes.Brfalse, endFunc))
+            new CodeInstruction(OpCodes.Brfalse, endFunc),
+
+            // Trigger explosion
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Call, changeState),
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Call, handleExplo),
+            new CodeInstruction(OpCodes.Ret))
         .InstructionEnumeration();
     }
 
@@ -124,7 +132,6 @@ public static class Explosion
 
         Collider[] colliders = Physics.OverlapSphere(__instance.transform.position, __instance.explosionRadius, __instance.bodyLayer);
 
-        KDBG.Log(link);
         ProximityMine otherMine = link.otherTrap.GetComponent<ProximityMine>();
         __instance.detonated = true;
         if (!otherMine.detonated)
