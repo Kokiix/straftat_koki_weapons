@@ -59,10 +59,13 @@ public class TPTrap : MonoBehaviour
 
     private ulong[] GetPlayersToTeleport()
     {
-        var boxCenter = new Vector3(0.01067084f, 0.4094882f, 0.00190118f);
         var boxExtents = new Vector3(0.8f, 0.407984f, 0.8f);
         var layerMask = 1 << 11 | 1 << 16;
-        return Physics.OverlapBox(boxCenter, boxExtents, Quaternion.identity, layerMask)
+        foreach (var col in Physics.OverlapBox(this.transform.position, boxExtents, Quaternion.identity, layerMask))
+        {
+            Debug.Log(col.name);
+        }
+        return Physics.OverlapBox(this.transform.position, boxExtents, Quaternion.identity, layerMask)
             .Where(col => col.CompareTag("Player"))
             .Select(col => ulong.Parse(col.transform.root.gameObject.GetComponent<NetworkObject>().Owner.GetAddress()))
             .Distinct()
