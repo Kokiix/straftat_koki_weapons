@@ -59,7 +59,7 @@ public class TPTrap : MonoBehaviour
 
     private ulong[] GetPlayersToTeleport()
     {
-        var boxExtents = new Vector3(0.8f, 0.407984f, 0.8f);
+        var boxExtents = new Vector3(1.6f, 0.815968f, 1.6f);
         var layerMask = 1 << 11 | 1 << 16;
         foreach (var col in Physics.OverlapBox(this.transform.position, boxExtents, Quaternion.identity, layerMask))
         {
@@ -78,8 +78,7 @@ public class TPTrap : MonoBehaviour
     {
         if (otherTrap)
             otherTrap.transform.Find("radius").gameObject.SetActive(false);
-        if (InstanceFinder.IsServer)
-            InstanceFinder.ServerManager.Despawn(this.gameObject);
+        Object.Destroy(this);
         Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
         SoundManager.Instance.PlaySound(explosionAudio);
     }
