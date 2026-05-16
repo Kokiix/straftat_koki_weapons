@@ -76,7 +76,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         TPTrapNetworking netw = this.gameObject.AddComponent<TPTrapNetworking>();
     }
 
-    public void OnDestroy()
+    public void OnDestroy() 
     {
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
         {
@@ -88,7 +88,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony.UnpatchSelf();
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
-        DeregisterFishnet();
+        // DeregisterFishnet();
     }
 
     // Runs once at game start

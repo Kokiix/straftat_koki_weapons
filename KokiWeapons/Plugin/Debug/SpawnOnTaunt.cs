@@ -20,7 +20,7 @@ public class SpawnWeaponOnTaunt
         else if (Input.GetKeyDown(KeyCode.Alpha2))
             weapon = "Repulsion Grenade";
         else if (Input.GetKeyDown(KeyCode.Alpha3))
-            weapon = "Repulsar";
+            weapon = "HandGrenade";
         else if (Input.GetKeyDown(KeyCode.Alpha4))
             weapon = "Teleport Mine";
         else if (Input.GetKeyDown(KeyCode.Alpha5))
