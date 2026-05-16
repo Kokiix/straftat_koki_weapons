@@ -31,6 +31,7 @@ public static class UpdateTrapLinkOnPlace
     public static void UpdateTrapLink(WeaponHandSpawner __instance, GameObject newTrap)
     {
         if (!__instance.gameObject.TryGetComponent(out TPLink link)) return;
+        KDBG.Log(link.otherTrapNob);
         if (link.otherTrapNob == -1)
         {
             link.otherTrapNob = newTrap.GetComponent<NetworkObject>().ObjectId;
@@ -47,7 +48,7 @@ public static class UpdateTrapLinkOnPlace
 [HarmonyPatch(typeof(Weapon), "TriggerEnvironment")]
 public static class ExplodeTPTrapOnHit
 {
-    public static void Prefix(Weapon __instance, GameObject obj) 
+    public static void Prefix(GameObject obj)
     {
         GameObject trap = obj.transform.root.gameObject;
         if (trap.GetComponent<TPTrap>())
