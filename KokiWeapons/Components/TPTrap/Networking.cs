@@ -2,6 +2,7 @@ using FishNet;
 using FishNet.Object;
 using MyceliumNetworking;
 using UnityEngine;
+using Steamworks;
 
 public class TPTrapNetworking : MonoBehaviour
 {
@@ -25,6 +26,17 @@ public class TPTrapNetworking : MonoBehaviour
             parameters
         );
     }
+    public static void TargetedRPC(ulong steamID, string methodname, object[] parameters)
+    {
+        Debug.Log(steamID);
+        MyceliumNetwork.RPCTarget(
+            ID,
+            methodname,
+            (CSteamID)steamID,
+            ReliableType.Reliable,
+            parameters
+        );
+    }
 
     [CustomRPC]
     public void LinkMines(int nobID1, int nobID2)
@@ -35,16 +47,16 @@ public class TPTrapNetworking : MonoBehaviour
         {
             var go1 = nob1.gameObject;
             var go2 = nob2.gameObject;
-            go1.GetComponent<TPTrap>().Activate(go2);
-            go2.GetComponent<TPTrap>().Activate(go1);
+            go1.GetComponent<TPTrap>().Prime(go2);
+            go2.GetComponent<TPTrap>().Prime(go1);
         }
         else if (InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID1, out NetworkObject nob3)
             && InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID2, out NetworkObject nob4))
         {
             var go1 = nob3.gameObject;
             var go2 = nob4.gameObject;
-            go1.GetComponent<TPTrap>().Activate(go2);
-            go2.GetComponent<TPTrap>().Activate(go1);
+            go1.GetComponent<TPTrap>().Prime(go2);
+            go2.GetComponent<TPTrap>().Prime(go1);
         }
     }
 
@@ -84,5 +96,11 @@ public class TPTrapNetworking : MonoBehaviour
             nob1.gameObject.GetComponent<TPTrap>().Explode();
         if (nob2)
             nob2.gameObject.GetComponent<TPTrap>().Explode();
+    }
+
+    [CustomRPC]
+    public void TPPlayer(Vector3 position)
+    {
+        FirstPersonController.instance.Teleport(position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
     }
 }

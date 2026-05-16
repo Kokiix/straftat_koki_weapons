@@ -35,5 +35,8 @@
     <Reference Include="DOTween">
       <HintPath>..\lib\DOTween.dll</HintPath>
     </Reference>
+    <Reference Include="Steamworks">
+      <HintPath>..\lib\Steamworks.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

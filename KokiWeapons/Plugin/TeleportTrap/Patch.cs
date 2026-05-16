@@ -31,7 +31,7 @@ public static class UpdateTrapLinkOnPlace
     public static void UpdateTrapLink(WeaponHandSpawner __instance, GameObject newTrap)
     {
         if (!__instance.gameObject.TryGetComponent(out TPLink link)) return;
-        KDBG.Log(link.otherTrapNob);
+        // KDBG.Log(link.otherTrapNob);
         if (link.otherTrapNob == -1)
         {
             link.otherTrapNob = newTrap.GetComponent<NetworkObject>().ObjectId;

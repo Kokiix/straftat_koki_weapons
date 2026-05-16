@@ -1,5 +1,7 @@
+using System.Linq;
 using FishNet;
 using FishNet.Object;
+using HarmonyLib;
 using UnityEngine;
 
 public class TPTrap : MonoBehaviour
@@ -19,27 +21,52 @@ public class TPTrap : MonoBehaviour
         anim.Play("tpmineTorus");
     }
 
-    private void OnTriggerStay(Collider col)
-    {
-        var fpc = FirstPersonController.instance;
-        if (!otherTrap || col.gameObject != fpc.gameObject || detonated) return;
-        Debug.Log("boom");
-        detonated = true;
-        if (!otherTrap.GetComponent<TPTrap>().detonated)
-        {
-            var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
-            var nob2 = otherTrap.GetComponent<NetworkObject>().ObjectId;
-            InstanceFinder.ServerManager.Despawn(this.gameObject);
-            InstanceFinder.ServerManager.Despawn(otherTrap);
-            TPTrapNetworking.RPC("DestroyTrapPair", [nob1, nob2]);
-        }
-        fpc.Teleport(otherTrap.transform.position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
-    }
-
-    public void Activate(GameObject other)
+    public void Prime(GameObject other)
     {
         otherTrap = other;
         transform.Find("radius").gameObject.SetActive(true);
+    }
+
+    private void OnTriggerStay(Collider col)
+    {
+        if (!otherTrap || detonated
+        || !col.CompareTag("Player")
+        || !InstanceFinder.IsServer) return;
+
+        detonated = true;
+        var playerIDs = GetPlayersToTeleport();
+        otherTrap.TryGetComponent(out TPTrap otherTrapComponent);
+        Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        if (!otherTrapComponent.detonated)
+        {
+            otherTrapComponent.detonated = true;
+            var otherPlayerIDs = otherTrapComponent.GetPlayersToTeleport();
+
+            playerIDs.Do(x => Debug.Log(x));
+
+            playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [otherTrap.transform.position]));
+            otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position]));
+
+            var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
+            var nob2 = otherTrap.GetComponent<NetworkObject>().ObjectId;
+            TPTrapNetworking.RPC("DestroyTrapPair", [nob1, nob2]);
+        }
+        else
+        {
+            Debug.LogError("UHHHHHHHHHHHHHHHH OH");
+        }
+    }
+
+    private ulong[] GetPlayersToTeleport()
+    {
+        var boxCenter = new Vector3(0.01067084f, 0.4094882f, 0.00190118f);
+        var boxExtents = new Vector3(0.8f, 0.407984f, 0.8f);
+        var layerMask = 1 << 11 | 1 << 16;
+        return Physics.OverlapBox(boxCenter, boxExtents, Quaternion.identity, layerMask)
+            .Where(col => col.CompareTag("Player"))
+            .Select(col => ulong.Parse(col.transform.root.gameObject.GetComponent<NetworkObject>().Owner.GetAddress()))
+            .Distinct()
+            .ToArray();
     }
 
     public GameObject explosionVfx;
@@ -48,14 +75,15 @@ public class TPTrap : MonoBehaviour
     {
         if (otherTrap)
             otherTrap.transform.Find("radius").gameObject.SetActive(false);
-        InstanceFinder.ServerManager.Despawn(this.gameObject);
+        if (InstanceFinder.IsServer)
+            InstanceFinder.ServerManager.Despawn(this.gameObject);
         Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
         SoundManager.Instance.PlaySound(explosionAudio);
     }
 
     private void Despawn()
     {
-        if (InstanceFinder.IsServer)
+        if (InstanceFinder.IsServer && this && gameObject)
         {
             InstanceFinder.ServerManager.Despawn(this.gameObject);
         }
