@@ -98,9 +98,8 @@ public class TPTrapNetworking : MonoBehaviour
     }
 
     [CustomRPC]
-    public static void TPPlayer(Vector3 position)
+    public void TPPlayer(Vector3 position)
     {
-        Debug.Log("tp request received");
         FirstPersonController.instance.Teleport(position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
     }
 }
