@@ -26,12 +26,12 @@ public class TPTrapNetworking : MonoBehaviour
             parameters
         );
     }
-    public static void TargetedRPC(ulong steamID, string methodname, object[] parameters)
+    public static void TargetedRPC(CSteamID steamID, string methodname, object[] parameters)
     {
         MyceliumNetwork.RPCTarget(
             ID,
             methodname,
-            (CSteamID)steamID,
+            steamID,
             ReliableType.Reliable,
             parameters
         );
@@ -98,7 +98,7 @@ public class TPTrapNetworking : MonoBehaviour
     }
 
     [CustomRPC]
-    public void TPPlayer(Vector3 position)
+    public static void TPPlayer(Vector3 position)
     {
         Debug.Log("tp request received");
         FirstPersonController.instance.Teleport(position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);

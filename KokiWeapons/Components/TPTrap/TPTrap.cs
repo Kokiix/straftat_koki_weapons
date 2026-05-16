@@ -2,6 +2,7 @@ using System.Linq;
 using FishNet;
 using FishNet.Object;
 using HarmonyLib;
+using Steamworks;
 using UnityEngine;
 
 public class TPTrap : MonoBehaviour
@@ -41,8 +42,8 @@ public class TPTrap : MonoBehaviour
             otherTrapComponent.detonated = true;
             var otherPlayerIDs = otherTrapComponent.GetPlayersToTeleport();
 
-            playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [otherTrap.transform.position]));
-            otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position]));
+            playerIDs.Do(ID => SendRPCIfNotHost(ID, otherTrap.transform.position));
+            otherPlayerIDs.Do(ID => SendRPCIfNotHost(ID, this.transform.position));
 
             var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
             var nob2 = otherTrap.GetComponent<NetworkObject>().ObjectId;
@@ -54,14 +55,23 @@ public class TPTrap : MonoBehaviour
         }
     }
 
-    private ulong[] GetPlayersToTeleport()
+    /// The host can't targetRPC themselves.
+    private void SendRPCIfNotHost(CSteamID ID, Vector3 destination)
+    {
+        if (ID == SteamUser.GetSteamID())
+            TPTrapNetworking.TPPlayer(destination);
+        else
+            TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [destination]);
+    }
+
+    private CSteamID[] GetPlayersToTeleport()
     {
         var boxExtents = new Vector3(3.2f, 1.631936f, 3.2f);
         var layerMask = 1 << 11 | 1 << 16;
         return Physics.OverlapBox(this.transform.position, boxExtents, Quaternion.identity, layerMask)
             .Select(col => col.transform.root.gameObject)
             .Where(go => go.CompareTag("Player"))
-            .Select(go => ulong.Parse(go.GetComponent<NetworkObject>().Owner.GetAddress()))
+            .Select(go => (CSteamID)ulong.Parse(go.GetComponent<NetworkObject>().Owner.GetAddress()))
             .Distinct()
             .ToArray();
     }
