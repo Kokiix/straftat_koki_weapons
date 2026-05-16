@@ -57,9 +57,10 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         foreach (var go in mainBundle.LoadAllAssets<GameObject>())
         {
             if (go.GetComponent<ItemBehaviour>())
+            {
                 CustomWeapons.Add(go);
-            if (go.GetComponent<NetworkObject>())
                 NetworkObjects.Add(go);
+            }
         }
 
         foreach (var material in mainBundle.LoadAllAssets<Material>())
@@ -116,6 +117,13 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
                 SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
             }
+
+            NetworkObjects.AddRange([
+                SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
+                .GetComponent<TrickShot>().template.gameObject,
+            SpawnerManager.NameToWeaponDict["Teleport Mine"]
+            .GetComponent<WeaponHandSpawner>().objToSpawn
+            ]);
 
             KBGrenade.Init.Run();
             TeleportTrap.Init.Run();
