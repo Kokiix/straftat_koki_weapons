@@ -14,19 +14,18 @@ using FishNet.Managing;
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
 [BepInDependency(MyceliumNetworking.MyPluginInfo.PLUGIN_GUID)]
-[BepInPlugin("com.koki.weapons", "Koki Weapons", "2.0.0")]
+[BepInPlugin("com.koki.weapons", "Koki Weapons", "2.0.1")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
 
-    internal static bool Debug = true;
+    internal static bool Debug = false;
 
     internal static List<GameObject> CustomWeapons = new List<GameObject>();
     internal static List<GameObject> NetworkObjects = new List<GameObject>();
 
-    internal static ushort FishNetCollectionID = (ushort)("com.koki.weapons".GetHashCode() & 0xFFFF);
     internal static uint MyceliumID = 932828;
 
     internal static KokiWeaponsPlugin Instance;
@@ -76,7 +75,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         TPTrapNetworking netw = this.gameObject.AddComponent<TPTrapNetworking>();
     }
 
-    public void OnDestroy() 
+    public void OnDestroy()
     {
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
         {

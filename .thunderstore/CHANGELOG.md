@@ -1,5 +1,12 @@
 Entries that don't appear here are changes to the Thunderstore page, not the mod.
 
+### v2.0.2
+- Fix debug mode accidentally enabled
+
+### v2.0.1
+**Teleport Mine**
+- Fix teleport totally not working
+
 ### v2.0.0
 - Complete code rewrite.
 

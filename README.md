@@ -38,3 +38,7 @@
 
 **Components**
 - There's a primary component that replaces `ProximityMine`, `TPTrap`, as well as an auxillary component `TPLink`.
+- When a mine is placed, TPLink stores that mine's NetworkObject (nob) ID. When the second is placed, that ID is retrieved and broadcast together with the new ID to link the two mines. This is actually unnecessary rn.. as 
+
+**Patches**
+- There's a patch into the ServerRPC spawn item logic that 

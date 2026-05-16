@@ -22,6 +22,7 @@ Comes in pairs. When activated, swaps the positions of the players touching eith
 
 **Known Issues**:
 - If you have "Invert fire binding when holding two weapons" enabled, placing your final ammo from left hand will also trigger your right hand to place. This is a vanilla bug I might fix. For now, you have to not use that setting to use TP mines effectively :(
+- radius might not appear for client? unsure how to recreate this.
 
 ## Repulsar Grenade
 <img src="https://i.ibb.co/PZrwCpLQ/Repulsion-Grenade-Still-1.png" width="40%" />
