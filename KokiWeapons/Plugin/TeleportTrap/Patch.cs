@@ -14,24 +14,25 @@ namespace TeleportTrap;
 [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
 public static class UpdateTrapLinkOnPlace
 {
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         var serverManagerSpawn = AccessTools.Method(typeof(ServerManager), nameof(ServerManager.Spawn), [typeof(GameObject), typeof(NetworkConnection)]);
         var updateTrapLink = AccessTools.Method(typeof(UpdateTrapLinkOnPlace), nameof(UpdateTrapLink));
 
-        return new CodeMatcher(instructions)
-        .MatchForward(useEnd: false, new CodeMatch(OpCodes.Callvirt, serverManagerSpawn))
+        return new CodeMatcher(instructions, generator).End()
+        .MatchBack(useEnd: false, new CodeMatch(OpCodes.Ret)).CreateLabel(out Label ret)
+        .MatchBack(useEnd: false, new CodeMatch(OpCodes.Callvirt, serverManagerSpawn))
         .Advance(1).Insert(
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Ldloc_0),
-            new CodeInstruction(OpCodes.Call, updateTrapLink))
+            new CodeInstruction(OpCodes.Call, updateTrapLink),
+            new CodeInstruction(OpCodes.Brtrue, ret))
         .InstructionEnumeration();
     }
 
-    public static void UpdateTrapLink(WeaponHandSpawner __instance, GameObject newTrap)
+    public static bool UpdateTrapLink(WeaponHandSpawner __instance, GameObject newTrap)
     {
-        if (!__instance.gameObject.TryGetComponent(out TPLink link)) return;
-        // KDBG.Log(link.otherTrapNob);
+        if (!__instance.gameObject.TryGetComponent(out TPLink link)) return false;
         if (link.otherTrapNob == -1)
         {
             link.otherTrapNob = newTrap.GetComponent<NetworkObject>().ObjectId;
@@ -42,6 +43,8 @@ public static class UpdateTrapLinkOnPlace
             var nobID2 = link.otherTrapNob;
             TPTrapNetworking.RPC("LinkMines", [nobID1, nobID2]);
         }
+
+        return true;
     }
 }
 
