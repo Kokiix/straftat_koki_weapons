@@ -24,8 +24,8 @@ Comes in pairs. When activated, swaps the positions of the players touching eith
 - If you have "Invert fire binding when holding two weapons" enabled, placing your final ammo from left hand will also trigger your right hand to place. This is a vanilla bug I might fix. For now, you have to not use that setting to use TP mines effectively :(
 
 ## Repulsar Grenade
-<img src="" width="40%" />
-<img src="" width="59%" />
+<img src="https://i.ibb.co/PZrwCpLQ/Repulsion-Grenade-Still-1.png" width="40%" />
+<img src="https://i.ibb.co/LXWVjwKc/Straftat-2026-05-163-06-58-Pm-HB-ezgif-com-optimize.gif" width="59%" />
 
 Launches players and items.
 
@@ -33,12 +33,12 @@ Launches players and items.
 - <details>
   <summary>Could be swapped for repulsar on all maps.</summary>
   
-  todo
+  H4sIAAAAAAAACk2OwQoCMQxEf6XMUfYLevPkSZEqeBAPQYMsdNuStIiU/XezoiK5DJmXyXTshZUrfMeOJoZH4NKikrhjdm+9EU50Y7eOEQO2VBT+3BdxqDKmu92szDgxlZwCT1/Akq9NNMtfqHGBtcX62405uc8HzBebAfVZliL6oIL5BZMumyOiAAAA
 </details>
 
 - Send me swapper codes you find fun and I'll put them here :)
 
 **Known Issues**:
-- fsdfsdf
+- Rotation animation sometimes likes to not play in the air but shouldn't affect the actual mechancis of the grenade..
 ---
 Contact me with weapon or mod suggestions, balancing changes, issues, whatever, at `zkoki` on Discord :D

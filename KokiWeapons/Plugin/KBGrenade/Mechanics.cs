@@ -65,16 +65,16 @@ public static class KBGrenadeMechanics
     }
     public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)
     {
-        KDBG.Log("doing kb effect");
         healths.Distinct().DoIf(ph => ph, ph =>
         {
             Vector3 force = ph.controller.transform.position - instance.transform.position;
-            force.y = 0;
+            if (force.y < 0)
+                force.y = 0;
             force.Normalize();
 
             if (ph.controller.isGrounded)
                 ph.controller.transform.position += new Vector3(0, 2.5f, 0);
-            ph.controller.CustomAddForce(force, 150);
+            ph.controller.CustomAddForce(force, 120);
         });
 
         Rigidbody rb = null;
