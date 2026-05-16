@@ -25,6 +25,8 @@ public static class KBGrenadeMechanics
 
             var gameObject = AccessTools.PropertyGetter(typeof(PhysicsGrenade), nameof(PhysicsGrenade.gameObject));
 
+            var loopStart = generator.DefineLabel();
+
             return new CodeMatcher(instructions, generator)
             .MatchForward(useEnd: false,
             new CodeMatch(OpCodes.Ldstr, "Player"))
@@ -34,9 +36,8 @@ public static class KBGrenadeMechanics
             new CodeMatch(OpCodes.Stfld, makeBlood))
             .MatchForward(useEnd: false,
             new CodeMatch(OpCodes.Ldc_I4_0))
-            .CreateLabel(out Label loopStart)
 
-            .Insert(
+            .InsertAndAdvance(
                 // If grenade is not KB resume
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Callvirt, gameObject),
@@ -51,16 +52,20 @@ public static class KBGrenadeMechanics
                 new CodeInstruction(OpCodes.Ldfld, ph2),
                 new CodeInstruction(OpCodes.Call, kbEffect),
                 new CodeInstruction(OpCodes.Br, loopEnd))
+            .AddLabels([loopStart])
             .InstructionEnumeration();
         }
 
         public static void Postfix(PhysicsGrenade __instance)
         {
-            __instance.transform.Find("meshScale").gameObject.SetActive(false);
+            var mesh = __instance.transform.Find("meshScale");
+            if (mesh)
+                mesh.gameObject.SetActive(false);
         }
     }
     public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)
     {
+        KDBG.Log("doing kb effect");
         healths.Distinct().DoIf(ph => ph, ph =>
         {
             Vector3 force = ph.controller.transform.position - instance.transform.position;
