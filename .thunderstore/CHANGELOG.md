@@ -1,5 +1,14 @@
 Entries that don't appear here are changes to the Thunderstore page, not the mod.
 
+### v2.0.0
+- Complete code rewrite.
+
+**Teleport Mine**
+- Mine is now only triggered by players, not items/ragdolls
+
+**Repulsion Grenade**
+- Introduce weapon.
+
 ### v1.1.0
 
 **Teleport Mine**

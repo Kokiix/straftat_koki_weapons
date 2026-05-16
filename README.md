@@ -10,4 +10,5 @@
 > This thing is probably going to be constantly outdated lol
 
 
-rewrite incoming
+## Setup Process
+

@@ -14,7 +14,7 @@ using FishNet.Managing;
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
 [BepInDependency(MyceliumNetworking.MyPluginInfo.PLUGIN_GUID)]
-[BepInPlugin("com.koki.weapons", "Koki Weapons", "1.1.0")]
+[BepInPlugin("com.koki.weapons", "Koki Weapons", "2.0.0")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
