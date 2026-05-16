@@ -36,13 +36,10 @@ public class TPTrap : MonoBehaviour
         detonated = true;
         var playerIDs = GetPlayersToTeleport();
         otherTrap.TryGetComponent(out TPTrap otherTrapComponent);
-        Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
         if (!otherTrapComponent.detonated)
         {
             otherTrapComponent.detonated = true;
             var otherPlayerIDs = otherTrapComponent.GetPlayersToTeleport();
-
-            playerIDs.Do(x => Debug.Log(x));
 
             playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [otherTrap.transform.position]));
             otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position]));
@@ -59,15 +56,12 @@ public class TPTrap : MonoBehaviour
 
     private ulong[] GetPlayersToTeleport()
     {
-        var boxExtents = new Vector3(1.6f, 0.815968f, 1.6f);
+        var boxExtents = new Vector3(3.2f, 1.631936f, 3.2f);
         var layerMask = 1 << 11 | 1 << 16;
-        foreach (var col in Physics.OverlapBox(this.transform.position, boxExtents, Quaternion.identity, layerMask))
-        {
-            Debug.Log(col.name);
-        }
         return Physics.OverlapBox(this.transform.position, boxExtents, Quaternion.identity, layerMask)
-            .Where(col => col.CompareTag("Player"))
-            .Select(col => ulong.Parse(col.transform.root.gameObject.GetComponent<NetworkObject>().Owner.GetAddress()))
+            .Select(col => col.transform.root.gameObject)
+            .Where(go => go.CompareTag("Player"))
+            .Select(go => ulong.Parse(go.GetComponent<NetworkObject>().Owner.GetAddress()))
             .Distinct()
             .ToArray();
     }
@@ -78,7 +72,7 @@ public class TPTrap : MonoBehaviour
     {
         if (otherTrap)
             otherTrap.transform.Find("radius").gameObject.SetActive(false);
-        Object.Destroy(this);
+        Object.Destroy(this.gameObject);
         Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
         SoundManager.Instance.PlaySound(explosionAudio);
     }

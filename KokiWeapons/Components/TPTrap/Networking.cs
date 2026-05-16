@@ -28,7 +28,6 @@ public class TPTrapNetworking : MonoBehaviour
     }
     public static void TargetedRPC(ulong steamID, string methodname, object[] parameters)
     {
-        Debug.Log(steamID);
         MyceliumNetwork.RPCTarget(
             ID,
             methodname,
@@ -64,21 +63,21 @@ public class TPTrapNetworking : MonoBehaviour
     [CustomRPC]
     public void DestroyTrapPair(int nobID1, int nobID2)
     {
-        foreach (var go in GameObject.FindGameObjectsWithTag("Player"))
-        {
-            if (go != null)
-            {
-                float distanceToExplo = Vector3.Distance(base.transform.position, go.transform.position);
-                float maxFXDistance = 40;
-                // TODO: store these hard coded values somewhere else
-                go.GetComponent<PlayerHealth>().LocalScreenshake(
-                    duration: 0.3f,
-                    strength: Mathf.Lerp(0.5f, 13, Mathf.Clamp(distanceToExplo / maxFXDistance, 0f, 1f)),
-                    vibrato: 20,
-                    randomness: 20,
-                    shakeEase: DG.Tweening.Ease.Linear);
-            }
-        }
+        // foreach (var go in GameObject.FindGameObjectsWithTag("Player"))
+        // {
+        //     if (go != null)
+        //     {
+        //         float distanceToExplo = Vector3.Distance(base.transform.position, go.transform.position);
+        //         float maxFXDistance = 40;
+        //         // TODO: store these hard coded values somewhere else
+        //         go.GetComponent<PlayerHealth>().LocalScreenshake(
+        //             duration: 0.3f,
+        //             strength: Mathf.Lerp(0.5f, 13, Mathf.Clamp(distanceToExplo / maxFXDistance, 0f, 1f)),
+        //             vibrato: 20,
+        //             randomness: 20,
+        //             shakeEase: DG.Tweening.Ease.Linear);
+        //     }
+        // }
 
         NetworkObject nob1, nob2;
         if (!InstanceFinder.IsServer)
