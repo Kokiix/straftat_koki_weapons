@@ -88,8 +88,8 @@ public class TPTrapNetworking : MonoBehaviour
         }
         else
         {
-            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID1, out nob1);
-            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(nobID2, out nob2);
+            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID1, out nob1);
+            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(nobID2, out nob2);
         }
 
         if (nob1)
