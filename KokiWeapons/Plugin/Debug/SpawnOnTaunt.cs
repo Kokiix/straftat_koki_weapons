@@ -16,7 +16,7 @@ public class SpawnWeaponOnTaunt
     {
         string weapon = "";
         if (Input.GetKeyDown(KeyCode.Alpha1))
-            weapon = "StunGrenade";
+            weapon = "RC Car";
         else if (Input.GetKeyDown(KeyCode.Alpha2))
             weapon = "Repulsion Grenade";
         else if (Input.GetKeyDown(KeyCode.Alpha3))
