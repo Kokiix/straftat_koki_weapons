@@ -7,18 +7,18 @@ using HarmonyLib;
 using UnityEngine;
 
 [HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
-public static class InsertPlaceItemEvent
+public static class CreatePlaceItemEvent
 {
-    public class SpawnEventArgs : EventArgs
+    public class PlaceItemEventArgs : EventArgs
     {
         public WeaponHandSpawner spawner;
         public GameObject spawnedObj;
         public bool runOriginalCode = false;
     }
-    public static event EventHandler<SpawnEventArgs> PlaceItemEvent;
+    public static event EventHandler<PlaceItemEventArgs> PlaceItemEvent;
     public static bool TriggerPlaceItemEvent(WeaponHandSpawner __instance, GameObject obj)
     {
-        var args = new SpawnEventArgs { spawner = __instance, spawnedObj = obj };
+        var args = new PlaceItemEventArgs { spawner = __instance, spawnedObj = obj };
         PlaceItemEvent.Invoke(null, args);
         return args.runOriginalCode;
     }
@@ -26,7 +26,7 @@ public static class InsertPlaceItemEvent
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         var serverManagerSpawn = AccessTools.Method(typeof(ServerManager), nameof(ServerManager.Spawn), [typeof(GameObject), typeof(NetworkConnection)]);
-        var triggerEvent = AccessTools.Method(typeof(InsertPlaceItemEvent), nameof(TriggerPlaceItemEvent));
+        var triggerEvent = AccessTools.Method(typeof(CreatePlaceItemEvent), nameof(TriggerPlaceItemEvent));
 
         return new CodeMatcher(instructions, generator).End()
         .MatchBack(useEnd: false, new CodeMatch(OpCodes.Ret)).CreateLabel(out Label ret)

@@ -56,7 +56,6 @@ public static class FirePatch
         else
         {
             // Enter car
-            Debug.LogError("tasering");
             __instance.transform.root.gameObject.GetComponent<FirstPersonController>().sync___set_value_canMove(false, true);
         }
     }
@@ -66,21 +65,22 @@ public static class RCCarLink
 {
     public static void Init()
     {
-        InsertPlaceItemEvent.PlaceItemEvent += LinkRCCar;
+        CreatePlaceItemEvent.PlaceItemEvent += LinkRCCar;
     }
 
-    public static void LinkRCCar(object sender, InsertPlaceItemEvent.SpawnEventArgs eventArgs)
+    public static void LinkRCCar(object sender, CreatePlaceItemEvent.PlaceItemEventArgs eventArgs)
     {
         WeaponHandSpawner __instance = eventArgs.spawner;
         GameObject newCar = eventArgs.spawnedObj;
 
-        if (!__instance.gameObject.TryGetComponent(out RCCar car))
+        if (!__instance.gameObject.TryGetComponent(out RCCarItem carItem))
         {
             eventArgs.runOriginalCode = true;
         }
         else
         {
-            __instance.gameObject.GetComponent<RCCarItem>().car = car;
+            carItem.car = newCar.GetComponent<RCCar>();
+            Debug.LogError(__instance.gameObject.GetComponent<RCCarItem>().car);
         }
     }
 }

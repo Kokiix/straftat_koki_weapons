@@ -12,10 +12,10 @@ public static class UpdateTrapLinkOnPlace
 {
     public static void Init()
     {
-        InsertPlaceItemEvent.PlaceItemEvent += UpdateTrapLink;
+        CreatePlaceItemEvent.PlaceItemEvent += UpdateTrapLink;
     }
 
-    public static void UpdateTrapLink(object sender, InsertPlaceItemEvent.SpawnEventArgs eventArgs)
+    public static void UpdateTrapLink(object sender, CreatePlaceItemEvent.PlaceItemEventArgs eventArgs)
     {
         WeaponHandSpawner __instance = eventArgs.spawner;
         GameObject newTrap = eventArgs.spawnedObj;
