@@ -42,6 +42,19 @@ public static class FirePatch
 
     public static void HandleFire(WeaponHandSpawner __instance)
     {
-        Debug.Log("firing");
+        if (__instance.currentAmmo == 1)
+        {
+            // Place car
+            __instance.SpawnObject(__instance.objToSpawn, __instance.position, __instance.rotation);
+            __instance.CameraAnimation();
+            __instance.WeaponAnimation();
+
+            __instance.needsAmmo = false;
+            __instance.maxInteractionDistance = 0;
+        }
+        else
+        {
+            // Enter car
+        }
     }
 }
