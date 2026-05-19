@@ -11,6 +11,7 @@ using HeathenEngineering.PhysKit;
 using System;
 using FishNet.Managing;
 using System.Linq;
+using HarmonyLib.Tools;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
@@ -47,16 +48,16 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         LoadBundle();
         this.gameObject.AddComponent<TPTrapNetworking>();
 
+        // Also for hot reload
+        if (InstanceFinder.NetworkManager)
+            RegisterWeapons.Postfix();
+
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
         if (!Debug)
         {
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
         }
-
-        // Also for hot reload
-        if (InstanceFinder.NetworkManager)
-            RegisterWeapons.Postfix();
     }
 
     private void OnDestroy()

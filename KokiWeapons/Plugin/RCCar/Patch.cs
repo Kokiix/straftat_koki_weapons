@@ -10,10 +10,12 @@ public static class FirePatch
     {
         var fireTimer = AccessTools.Field(typeof(WeaponHandSpawner), "fireTimer");
 
-        var gameObject = AccessTools.PropertyGetter(typeof(Component), "gameObject");
-        var getRCCarItem = AccessTools.Method(typeof(GameObject), "GetComponent", parameters: null, generics: [typeof(RCCarItem)]);
+        // Does this item have RCCarItem component?
+        var gameObject = AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject));
+        var getRCCarItem = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), parameters: null, generics: [typeof(RCCarItem)]);
         var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
 
+        // If so, custom fire
         var handleFire = AccessTools.Method(typeof(FirePatch), "HandleFire");
 
         var continueFunc = generator.DefineLabel();
@@ -23,11 +25,15 @@ public static class FirePatch
         new CodeMatch(OpCodes.Stfld, fireTimer),
         new CodeMatch(OpCodes.Ldarg_0))
         .InsertAndAdvance(
+            // Does this item have RCCarItem component?
             new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Callvirt, gameObject),
             new CodeInstruction(OpCodes.Call, getRCCarItem),
             new CodeInstruction(OpCodes.Call, implicitBool),
             new CodeInstruction(OpCodes.Brfalse, continueFunc),
+
+            // If so, custom fire
+            new CodeInstruction(OpCodes.Ldarg_0),
             new CodeInstruction(OpCodes.Call, handleFire),
             new CodeInstruction(OpCodes.Ret))
         .AddLabels([continueFunc])
