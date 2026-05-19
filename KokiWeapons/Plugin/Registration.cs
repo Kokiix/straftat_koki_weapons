@@ -40,7 +40,6 @@ public static class RegisterWeapons
         // ]);
 
         KBGrenade.Init.Run();
-        TeleportTrap.Init.Run();
         KokiWeaponsPlugin.RegisteredWeapons = true;
         RegisterFishnet.Postfix(); // NM starts before weapons do
     }
