@@ -49,12 +49,15 @@ public static class FirePatch
             __instance.CameraAnimation();
             __instance.WeaponAnimation();
 
+            __instance.currentAmmo = 2;
             __instance.needsAmmo = false;
             __instance.maxInteractionDistance = 0;
         }
         else
         {
             // Enter car
+            Debug.LogError("tasering");
+            __instance.transform.root.gameObject.GetComponent<FirstPersonController>().sync___set_value_canMove(false, true);
         }
     }
 }
