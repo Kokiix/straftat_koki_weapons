@@ -58,6 +58,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         {
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
         }
+
+        UpdateTrapLinkOnPlace.Init();
+        RCCarLink.Init();
     }
 
     private void OnDestroy()

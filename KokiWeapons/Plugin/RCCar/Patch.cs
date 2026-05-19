@@ -61,3 +61,26 @@ public static class FirePatch
         }
     }
 }
+
+public static class RCCarLink
+{
+    public static void Init()
+    {
+        InsertPlaceItemEvent.PlaceItemEvent += LinkRCCar;
+    }
+
+    public static void LinkRCCar(object sender, InsertPlaceItemEvent.SpawnEventArgs eventArgs)
+    {
+        WeaponHandSpawner __instance = eventArgs.spawner;
+        GameObject newCar = eventArgs.spawnedObj;
+
+        if (!__instance.gameObject.TryGetComponent(out RCCar car))
+        {
+            eventArgs.runOriginalCode = true;
+        }
+        else
+        {
+            __instance.gameObject.GetComponent<RCCarItem>().car = car;
+        }
+    }
+}

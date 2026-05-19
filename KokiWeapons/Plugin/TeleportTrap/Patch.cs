@@ -8,32 +8,23 @@ using HarmonyLib;
 using MyceliumNetworking;
 using UnityEngine;
 
-namespace TeleportTrap;
-
-/// Runs server side only! This is necessary because it's the only point where the hand item and physics item are present in the same context.
-[HarmonyPatch(typeof(WeaponHandSpawner), "RpcLogic___SpawnObject_2587446063")]
 public static class UpdateTrapLinkOnPlace
 {
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    public static void Init()
     {
-        var serverManagerSpawn = AccessTools.Method(typeof(ServerManager), nameof(ServerManager.Spawn), [typeof(GameObject), typeof(NetworkConnection)]);
-        var updateTrapLink = AccessTools.Method(typeof(UpdateTrapLinkOnPlace), nameof(UpdateTrapLink));
-
-        return new CodeMatcher(instructions, generator).End()
-        .MatchBack(useEnd: false, new CodeMatch(OpCodes.Ret)).CreateLabel(out Label ret)
-        .MatchBack(useEnd: false, new CodeMatch(OpCodes.Callvirt, serverManagerSpawn))
-        .Advance(1).Insert(
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Ldloc_0),
-            new CodeInstruction(OpCodes.Call, updateTrapLink),
-            new CodeInstruction(OpCodes.Brtrue, ret))
-        .InstructionEnumeration();
+        InsertPlaceItemEvent.PlaceItemEvent += UpdateTrapLink;
     }
 
-    public static bool UpdateTrapLink(WeaponHandSpawner __instance, GameObject newTrap)
+    public static void UpdateTrapLink(object sender, InsertPlaceItemEvent.SpawnEventArgs eventArgs)
     {
-        if (!__instance.gameObject.TryGetComponent(out TPLink link)) return false;
-        if (link.otherTrapNob == -1)
+        WeaponHandSpawner __instance = eventArgs.spawner;
+        GameObject newTrap = eventArgs.spawnedObj;
+
+        if (!__instance.gameObject.TryGetComponent(out TPLink link))
+        {
+            eventArgs.runOriginalCode = true;
+        }
+        else if (link.otherTrapNob == -1)
         {
             link.otherTrapNob = newTrap.GetComponent<NetworkObject>().ObjectId;
         }
@@ -43,8 +34,6 @@ public static class UpdateTrapLinkOnPlace
             var nobID2 = link.otherTrapNob;
             TPTrapNetworking.RPC("LinkMines", [nobID1, nobID2]);
         }
-
-        return true;
     }
 }
 
