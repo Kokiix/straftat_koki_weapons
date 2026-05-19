@@ -30,6 +30,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     internal static KokiWeaponsPlugin Instance;
 
+    internal static bool RegisteredWeapons = false;
+
     private void Awake()
     {
         Instance = this;
@@ -87,107 +89,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Harmony.UnpatchSelf();
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
-        // DeregisterFishnet();
+        RegisterFishnet.DeregisterFishnet();
     }
-
-    // Runs once at game start
-    internal static bool RegisteredWeapons = false;
-    [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
-    public static class RegisterWeapons
-    {
-        public static void Postfix()
-        {
-            if (SpawnerManager.AllWeapons == null) return;
-
-            var weaponIdx = SpawnerManager.AllWeapons.Length;
-
-            // For hot reload
-            foreach (var weapon in CustomWeapons)
-            {
-                SpawnerManager.NameToWeaponDict.Remove(weapon.name);
-                SpawnerManager.NameToIndexDict.Remove(weapon.name);
-            }
-
-            System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Count);
-
-            foreach (var weapon in CustomWeapons)
-            {
-                SpawnerManager.AllWeapons[weaponIdx++] = weapon;
-                SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
-                SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
-            }
-
-            NetworkObjects.AddRange([
-                SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-                .GetComponent<TrickShot>().template.gameObject,
-            SpawnerManager.NameToWeaponDict["Teleport Mine"]
-            .GetComponent<WeaponHandSpawner>().objToSpawn
-            ]);
-
-            KBGrenade.Init.Run();
-            TeleportTrap.Init.Run();
-            RegisteredWeapons = true;
-            RegisterFishnet.Postfix(); // NM starts before weapons do
-        }
-    }
-
-    // Runs each time the player quits to title screen
-    [HarmonyPatch(typeof(NetworkManager), "Start")]
-    public static class RegisterFishnet
-    {
-        public static void Postfix()
-        {
-            if (!RegisteredWeapons) return;
-            var collection = InstanceFinder.NetworkManager.SpawnablePrefabs;
-
-            foreach (var obj in NetworkObjects)
-            {
-                if (!obj) continue;
-                obj.TryGetComponent(out NetworkObject nob);
-                collection.AddObject(nob);
-            }
-            collection.InitializePrefabRange(0);
-        }
-    }
-
-    public static void DeregisterFishnet()
-    {
-        var toRemove = new HashSet<NetworkObject>();
-
-        foreach (var weapon in NetworkObjects)
-        {
-            toRemove.Add(weapon.GetComponent<NetworkObject>());
-        }
-        foreach (var nob in toRemove)
-        {
-            nob.PrefabId = 0;
-            nob.SpawnableCollectionId = 0;
-        }
-
-        var nm = InstanceFinder.NetworkManager;
-        var collection = nm.SpawnablePrefabs;
-        var netobjTotal = collection.GetObjectCount();
-        var baseGameObjs = new List<NetworkObject>();
-        for (int i = 0; i < netobjTotal; i++)
-        {
-            NetworkObject current = collection.GetObject(true, i);
-
-            if (current != null && !toRemove.Contains(current))
-            {
-                baseGameObjs.Add(current);
-            }
-        }
-        collection.Clear();
-        collection.AddObjects(baseGameObjs);
-        collection.InitializePrefabRange(0);
-    }
-
-    // [HarmonyPatch(typeof(PhysicsGrenade), "Update")]
-    // public static class DisableExplosionForInspection
-    // {
-    //     public static bool Prefix()
-    //     {
-    //         return false;
-    //     }
-    // }
 }
