@@ -21,7 +21,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     internal static Harmony Harmony;
     internal static AssetBundle Bundle;
 
-    internal static bool Debug = false;
+    internal static bool Debug = true;
 
     internal static List<GameObject> CustomWeapons = new List<GameObject>();
     internal static List<GameObject> NetworkObjects = new List<GameObject>();
@@ -39,15 +39,45 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Logger = base.Logger;
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
-        if (!Debug)
-            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
 
-        // For hot reload
+        // Remove loaded bundle if hot reloading
         foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles())
         {
             if (existingBundle.name == "kokiweaponsbundle")
                 existingBundle.Unload(true);
         }
+
+        LoadBundle();
+        this.gameObject.AddComponent<TPTrapNetworking>();
+
+        if (Debug)
+        {
+            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
+        }
+
+        // Also for hot reload
+        if (InstanceFinder.NetworkManager)
+            RegisterWeapons.Postfix();
+    }
+
+    private void OnDestroy()
+    {
+        foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
+        {
+            if (weapon)
+                InstanceFinder.ServerManager.Despawn(weapon);
+        }
+
+        this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
+        Harmony.UnpatchSelf();
+
+        if (!RegisteredWeapons) return;
+        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
+        RegisterFishnet.DeregisterFishnet();
+    }
+
+    private void LoadBundle()
+    {
         string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
         Bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiWeaponsBundle"));
         if (!Bundle)
@@ -64,28 +94,5 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
         foreach (var material in Bundle.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
-
-        if (Debug && InstanceFinder.NetworkManager)
-        {
-            RegisterWeapons.Postfix();
-        }
-
-        TPTrapNetworking netw = this.gameObject.AddComponent<TPTrapNetworking>();
-    }
-
-    public void OnDestroy()
-    {
-        foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
-        {
-            if (weapon)
-                InstanceFinder.ServerManager.Despawn(weapon);
-        }
-
-        this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
-        Harmony.UnpatchSelf();
-
-        if (!RegisteredWeapons) return;
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
-        RegisterFishnet.DeregisterFishnet();
     }
 }
