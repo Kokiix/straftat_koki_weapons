@@ -38,5 +38,8 @@
     <Reference Include="Steamworks">
       <HintPath>..\lib\Steamworks.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>..\lib\Unity.InputSystem.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
