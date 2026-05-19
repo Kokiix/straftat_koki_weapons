@@ -49,29 +49,25 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 existingBundle.Unload(true);
         }
         string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
-        var mainBundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiWeaponsBundle"));
-        if (!mainBundle)
+        Bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiWeaponsBundle"));
+        if (!Bundle)
         {
             Logger.LogError("Bundle for KokiWeapons not found! Plugin will not load.");
             return;
         }
-        foreach (var go in mainBundle.LoadAllAssets<GameObject>())
+        foreach (var go in Bundle.LoadAllAssets<GameObject>())
         {
             if (go.GetComponent<ItemBehaviour>())
-            {
                 CustomWeapons.Add(go);
+            if (go.GetComponent<NetworkObject>())
                 NetworkObjects.Add(go);
-            }
         }
-
-        foreach (var material in mainBundle.LoadAllAssets<Material>())
+        foreach (var material in Bundle.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
-        Bundle = mainBundle;
 
-        if (Debug)
+        if (Debug && InstanceFinder.NetworkManager)
         {
-            if (InstanceFinder.NetworkManager)
-                RegisterWeapons.Postfix();
+            RegisterWeapons.Postfix();
         }
 
         TPTrapNetworking netw = this.gameObject.AddComponent<TPTrapNetworking>();
@@ -87,6 +83,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
         this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
         Harmony.UnpatchSelf();
+
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
         RegisterFishnet.DeregisterFishnet();
