@@ -151,8 +151,10 @@ public class RCCar : MonoBehaviour
 
         foreach (Transform transform in _playerGraphicsTransform)
         {
+            if (!transform) return;
             transform.gameObject.SetActive(false);
         }
+        _playerGraphicsTransform.GetChild(6).gameObject.SetActive(true); // Hips needed for collision
 
         _cameraTransform.SetParent(_driver.playerCameraHolder.transform);
         _cameraTransform.localPosition = Vector3.zero;
@@ -165,13 +167,12 @@ public class RCCar : MonoBehaviour
     // Mostly ripped from PhysicsGrenade.HandleExplosion
     private void Explode()
     {
-        var colliders = Physics.OverlapSphere(base.transform.position, explosionRadius, 1 << 11 | 1 << 16);
-        // List<PlayerHealth> healths;
-        colliders.Where(collider =>
+        Physics.OverlapSphere(transform.position, explosionRadius, 1 << 11 | 1 << 16)
+        .Where(collider =>
         {
             if (collider.transform.tag == "ShatterableGlass" && collider.gameObject.GetComponent<ShatterableGlass>())
                 collider.gameObject.GetComponent<ShatterableGlass>().Shatter3D(collider.transform.position, collider.transform.position - base.transform.position);
-
+            Debug.LogError(collider.name);
             return collider.GetComponentInParent<PlayerHealth>();
         })
         .Select(collider => collider.GetComponentInParent<PlayerHealth>())
