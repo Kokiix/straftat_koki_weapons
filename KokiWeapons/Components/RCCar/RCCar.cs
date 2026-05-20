@@ -123,8 +123,9 @@ public class RCCar : MonoBehaviour
     {
         if (carType == CarType.Boom)
         {
-            Explode();
+            Debug.LogError("boom");
             EndDriving();
+            Explode();
         }
     }
 
