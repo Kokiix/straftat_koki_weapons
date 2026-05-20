@@ -35,6 +35,8 @@ public class RCCar : MonoBehaviour
 
     [NonSerialized]
     public bool driving = false;
+    [NonSerialized]
+    public GameObject rcCarItem;
     private FirstPersonController _driver;
     private UnityEngine.InputSystem.InputAction _moveInput;
 
@@ -118,11 +120,11 @@ public class RCCar : MonoBehaviour
         var input = InputManager.inputActions.Player;
         input.Interact.performed -= driver.playerPickupScript.HandleInteraction;
         input.Interact.performed += EndDriving;
-        // input.FireHold.performed += TriggerWeapon;
+        input.FireHold.performed += TriggerWeapon;
     }
 
-    // public void TriggerWeapon(InputAction.CallbackContext _)
-    public void TriggerWeapon()
+    public void TriggerWeapon(InputAction.CallbackContext _)
+    // public void TriggerWeapon()
     {
         if (carType == CarType.Boom && !_exploded)
         {
@@ -130,6 +132,7 @@ public class RCCar : MonoBehaviour
             if (driving)
             {
                 EndDriving();
+                _driver.playerPickupScript.sync___set_value_objInHand(rcCarItem, true);
                 _driver.playerPickupScript.objInHand.GetComponent<WeaponHandSpawner>().currentAmmo = 0;
             }
             Explode();
@@ -142,7 +145,7 @@ public class RCCar : MonoBehaviour
         var input = InputManager.inputActions.Player;
         input.Interact.performed += _driver.playerPickupScript.HandleInteraction;
         input.Interact.performed -= EndDriving;
-        // input.FireHold.performed -= TriggerWeapon;
+        input.FireHold.performed -= TriggerWeapon;
     }
 
     public void EndDriving()

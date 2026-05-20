@@ -48,7 +48,9 @@ public class RCCarNetworking : MonoBehaviour
             Debug.LogError("nobs located");
             var carItem = nob1.gameObject;
             var car = nob2.gameObject.GetComponent<RCCar>();
+
             carItem.GetComponent<RCCarItem>().car = car;
+            car.rcCarItem = carItem;
         }
     }
 }

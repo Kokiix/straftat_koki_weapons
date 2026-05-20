@@ -60,8 +60,6 @@ public static class FirePatch
             var car = __instance.gameObject.GetComponent<RCCarItem>().car;
             if (!car.driving)
                 car.BeginDriving(__instance.playerController);
-            else
-                car.TriggerWeapon();
         }
     }
 }
@@ -85,9 +83,20 @@ public static class RCCarLink
         else
         {
             carItem.car = newCar.GetComponent<RCCar>();
+            newCar.GetComponent<RCCar>().rcCarItem = __instance.gameObject;
             RCCarNetworking.RPC("LinkCarToCarItem", [
                 __instance.gameObject.GetComponent<NetworkObject>().ObjectId,
                 newCar.GetComponent<NetworkObject>().ObjectId]);
         }
     }
 }
+
+// [HarmonyPatch(typeof(WeaponHandSpawner), "Update")]
+// public static class Test
+// {
+//     public static void Prefix(WeaponHandSpawner __instance)
+//     {
+//         Debug.LogError(__instance.inLeftHand);
+//         Debug.LogError(__instance.inRightHand);
+//     }
+// }
