@@ -4,6 +4,11 @@ using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum CarType
+{
+    Boom
+}
+
 public class RCCar : MonoBehaviour
 {
     [SerializeField]
@@ -11,10 +16,11 @@ public class RCCar : MonoBehaviour
     [SerializeField]
     private Rigidbody _rb;
 
+    public CarType carType;
     [Header("Movement Settings")]
-    public float _accel;
-    public float _maxSpeed;
-    public float _turnSpeed;
+    public float accel;
+    public float maxSpeed;
+    public float turnSpeed;
     public AnimationCurve enginePowerCurve = AnimationCurve.Linear(0, 1, 1, 0);
 
     [NonSerialized]
@@ -49,7 +55,7 @@ public class RCCar : MonoBehaviour
 
         if (_inputVector.x != 0)
         {
-            var newRotation = _inputVector.x * _inputVector.y * _turnSpeed * Time.deltaTime;
+            var newRotation = _inputVector.x * _inputVector.y * turnSpeed * Time.deltaTime;
             transform.Rotate(0, newRotation, 0);
         }
     }
@@ -61,9 +67,9 @@ public class RCCar : MonoBehaviour
         // Debug.LogError(_rb.velocity.magnitude);
         if (_inputVector.y != 0)
         {
-            var speedRatio = Mathf.Clamp01(_rb.velocity.magnitude / _maxSpeed);
+            var speedRatio = Mathf.Clamp01(_rb.velocity.magnitude / maxSpeed);
             var currEnginePower = enginePowerCurve.Evaluate(speedRatio);
-            _rb.AddForce(transform.forward * _accel * currEnginePower * _inputVector.y, ForceMode.Acceleration);
+            _rb.AddForce(transform.forward * accel * currEnginePower * _inputVector.y, ForceMode.Acceleration);
         }
     }
 
@@ -100,6 +106,11 @@ public class RCCar : MonoBehaviour
         var dropAction = InputManager.inputActions.Player.Interact;
         dropAction.performed -= driver.playerPickupScript.HandleInteraction;
         dropAction.performed += EndDriving;
+    }
+
+    public void TriggerWeapon()
+    {
+
     }
 
     public void EndDriving(InputAction.CallbackContext context)
