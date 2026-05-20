@@ -19,12 +19,29 @@ public static class RegisterWeapons
         __result = allWeapons.ToArray();
 
         if (KokiWeaponsPlugin.RegisteredWeapons) return;
-        KokiWeaponsPlugin.RegisteredWeapons = true;
+        // KokiWeaponsPlugin.RegisteredWeapons = true; // Delay until spawnermanagerpostfix for KB grenade init
 
-        KBGrenade.Init.Run();
-
-        DecalSwap.SwapDecals();
+        LoadDecalObjs();
         RegisterFishnet.Postfix();
+    }
+
+    public static void LoadDecalObjs()
+    {
+        var vanillaPhysGrenade = SpawnerManager.NameToWeaponDict["HandGrenade"].GetComponent<PhysicsGrenade>();
+        foreach (var go in KokiWeaponsPlugin.SharedBundle.LoadAllAssets<GameObject>())
+        {
+            if (go.name.EndsWith("Decal"))
+            {
+                if (go.name == "explosionDecal")
+                {
+                    Object.Instantiate(vanillaPhysGrenade.explosionDecal).transform.SetParent(go.transform);
+                }
+                else if (go.name == "bloodDecal")
+                {
+                    Object.Instantiate(vanillaPhysGrenade.bloodSplatter).transform.SetParent(go.transform);
+                }
+            }
+        }
     }
 }
 
@@ -79,24 +96,14 @@ public static class RegisterFishnet
     }
 }
 
-public static class DecalSwap
+// Legacy system, can be removed once component is added through unity instead of code
+[HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+public static class InitKBGrenade
 {
-    public static void SwapDecals()
+    public static void Postfix()
     {
-        var vanillaPhysGrenade = SpawnerManager.NameToWeaponDict["HandGrenade"].GetComponent<PhysicsGrenade>();
-        foreach (var go in KokiWeaponsPlugin.SharedBundle.LoadAllAssets<GameObject>())
-        {
-            if (go.name.EndsWith("Decal"))
-            {
-                if (go.name == "explosionDecal")
-                {
-                    Object.Instantiate(vanillaPhysGrenade.explosionDecal).transform.SetParent(go.transform);
-                }
-                else if (go.name == "bloodDecal")
-                {
-                    Object.Instantiate(vanillaPhysGrenade.bloodSplatter).transform.SetParent(go.transform);
-                }
-            }
-        }
+        if (KokiWeaponsPlugin.RegisteredWeapons) return;
+        KokiWeaponsPlugin.RegisteredWeapons = true;
+        KBGrenade.Init.Run();
     }
 }
