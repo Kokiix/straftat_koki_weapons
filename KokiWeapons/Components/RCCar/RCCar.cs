@@ -2,6 +2,7 @@ using System;
 using FishNet;
 using FishNet.Object;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class RCCar : MonoBehaviour
 {
@@ -57,14 +58,7 @@ public class RCCar : MonoBehaviour
     {
         if (!driving) return;
 
-        // var targetVelocity = transform.forward * _inputVector.y * _maxSpeed;
-        // _rb.velocity = Vector3.Lerp(
-        //     _rb.velocity,
-        //     targetVelocity,
-        //     _accel * Time.fixedDeltaTime
-        // );
-
-        Debug.LogError(_rb.velocity.magnitude);
+        // Debug.LogError(_rb.velocity.magnitude);
         if (_inputVector.y != 0)
         {
             var speedRatio = Mathf.Clamp01(_rb.velocity.magnitude / _maxSpeed);
@@ -78,15 +72,33 @@ public class RCCar : MonoBehaviour
         _moveInput = driver.move;
         driving = true;
         _driver = driver;
+
+        // Freeze player
         driver.sync___set_value_canMove(false, true);
 
+        // Move camera to car
         var cameraTransform = driver.playerCamera.transform;
         cameraTransform.SetParent(_cameraPosition);
         cameraTransform.localPosition = Vector3.zero;
 
+        // Disable arms
         var arms = cameraTransform.Find("BobPosition").Find("FPArms");
         arms.Find("BothHandPositions").gameObject.SetActive(false);
         arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
+
+        // Set up EndDriving
+        var dropAction = InputManager.inputActions.Player.Drop;
+        dropAction.performed -= driver.playerPickupScript.HandleDrop;
+        dropAction.performed += EndDriving;
+    }
+
+    public void EndDriving(InputAction.CallbackContext context)
+    {
+        EndDriving();
+        var dropAction = InputManager.inputActions.Player.Drop;
+        dropAction.performed -= EndDriving;
+        dropAction.performed += _driver.playerPickupScript.HandleDrop;
+        _driver.playerPickupScript.HandleDrop(context);
     }
 
     public void EndDriving()
