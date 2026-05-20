@@ -17,7 +17,9 @@ public class RCCar : MonoBehaviour
     [SerializeField]
     private float _maxSpeed;
     [SerializeField]
-    private float _tireGrip; // TODO add to unity
+    private float _driftMax;
+    [SerializeField]
+    private float _driftSpeed;
 
     private FirstPersonController _driver;
     private UnityEngine.InputSystem.InputAction _moveInput;
@@ -53,7 +55,15 @@ public class RCCar : MonoBehaviour
         if (!driving) return;
         var inputVector = _moveInput.ReadValue<Vector2>();
         if (inputVector.x != 0)
+        {
             transform.Rotate(0, inputVector.x * _turnSpeed * Time.deltaTime, 0);
+            // Redirect velocity for turn
+            var targetVelocity = transform.forward * _driftMax;
+            _rb.velocity = Vector3.Lerp(
+                _rb.velocity,
+                targetVelocity,
+                10 * _driftSpeed * Time.fixedDeltaTime);
+        }
     }
 
     private void FixedUpdate()
@@ -61,19 +71,16 @@ public class RCCar : MonoBehaviour
         if (!driving) return;
         var inputVector = _moveInput.ReadValue<Vector2>();
 
-        // Sliding friction
-        var sidewaysVel = transform.right * Vector3.Dot(_rb.velocity, transform.forward);
-        _rb.velocity -= sidewaysVel * _tireGrip;
-
-        // Forward friction
-        if (Vector3.Dot(_rb.velocity, transform.forward) > 0)
-            _rb.velocity -= transform.forward * _friction * -1;
-
         // Gas/Brake
         if ((inputVector.y > 0 && _rb.velocity.magnitude < _maxSpeed) || inputVector.y < 0)
         {
             _rb.AddForce(transform.forward * _accel * inputVector.y);
         }
+
+        // Forward friction
+        if (Vector3.Dot(_rb.velocity, transform.forward) > 0)
+            _rb.velocity -= transform.forward * _friction * -1;
+
     }
 
     public void BeginDriving(FirstPersonController driver)
