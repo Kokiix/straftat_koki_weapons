@@ -34,6 +34,8 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     internal static readonly string[] BundleNames = ["shared", "tptrap", "repulsiongrenade", "rccar"];
 
+    internal static AssetBundle SharedBundle;
+
     private void Awake()
     {
         Instance = this;
@@ -86,6 +88,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "shared"));
         foreach (var material in sharedAssets.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
+        SharedBundle = sharedAssets;
         foreach (var filePath in Directory.GetFiles(bundlePath))
         {
             var fileName = Path.GetFileName(filePath);

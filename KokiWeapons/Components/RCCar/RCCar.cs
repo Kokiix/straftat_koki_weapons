@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using FishNet;
 using FishNet.Object;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,6 +20,12 @@ public class RCCar : MonoBehaviour
     private Rigidbody _rb;
 
     public CarType carType;
+    [Header("Bomb Car")]
+    public GameObject explosionVFX;
+    public AudioClip explosionSound;
+    public GameObject explosionDecal;
+    public GameObject bloodDecal;
+    public float explosionRadius;
     [Header("Movement Settings")]
     public float accel;
     public float maxSpeed;
@@ -35,9 +44,11 @@ public class RCCar : MonoBehaviour
 
     private void Despawn()
     {
-        if (this && InstanceFinder.IsServer && gameObject && gameObject.GetComponent<NetworkObject>().IsSpawned)
+        if (this && gameObject)
         {
-            InstanceFinder.ServerManager.Despawn(gameObject);
+            UnityEngine.Object.Destroy(gameObject);
+            if (InstanceFinder.IsServer && gameObject.GetComponent<NetworkObject>().IsSpawned)
+                InstanceFinder.ServerManager.Despawn(gameObject);
         }
     }
 
@@ -82,7 +93,7 @@ public class RCCar : MonoBehaviour
         driving = true;
         _driver = driver;
 
-        // Freeze player
+        // Freeze player (doesn't work in singleplayer)
         driver.sync___set_value_canMove(false, true);
 
         // Move camera to car
@@ -110,7 +121,11 @@ public class RCCar : MonoBehaviour
 
     public void TriggerWeapon()
     {
-
+        if (carType == CarType.Boom)
+        {
+            Explode();
+            EndDriving();
+        }
     }
 
     public void EndDriving(InputAction.CallbackContext context)
@@ -137,5 +152,57 @@ public class RCCar : MonoBehaviour
         var arms = _cameraTransform.Find("BobPosition").Find("FPArms");
         arms.Find("BothHandPositions").gameObject.SetActive(true);
         arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(true);
+    }
+
+    // Mostly ripped from PhysicsGrenade.HandleExplosion
+    private void Explode()
+    {
+        var colliders = Physics.OverlapSphere(base.transform.position, explosionRadius, 1 << 11 | 1 << 16);
+        // List<PlayerHealth> healths;
+        colliders.Where(collider =>
+        {
+            if (collider.transform.tag == "ShatterableGlass" && collider.gameObject.GetComponent<ShatterableGlass>())
+            {
+                collider.gameObject.GetComponent<ShatterableGlass>().Shatter3D(collider.transform.position, collider.transform.position - base.transform.position);
+            }
+            else if (collider.GetComponentInParent<PlayerHealth>())
+            {
+                return true;
+            }
+            return false;
+        })
+        .Select(collider => collider.GetComponentInParent<PlayerHealth>())
+        .Distinct()
+        .Do(health =>
+        {
+            UnityEngine.Object.Instantiate(bloodDecal, health.transform.position, Quaternion.Euler(0f, UnityEngine.Random.Range(0, 360), 0f));
+
+            if (!InstanceFinder.IsServer || !health || health.sync___get_value_isKilled())
+                return;
+
+            health.ChangeKilledState(tempBool: true);
+            health.RemoveHealth(10f);
+            if (health.transform.gameObject == _driver.transform.gameObject)
+            {
+                Settings.Instance.IncreaseSuicidesAmount();
+                health.suicide = true;
+            }
+            else
+            {
+                // KillShockWave();
+                PauseManager.Instance.WriteLog("<b><color=#" + PauseManager.Instance.selfNameLogColor + ">" + health.sync___get_value_playerValues().playerClient.PlayerNameTag + "</color></b> was blown up using a <b><color=white>RC Car</color></b> by <b><color=#" + PauseManager.Instance.enemyNameLogColor + ">" + ClientInstance.Instance.PlayerNameTag + "</color></b>");
+            }
+            health.Explode(
+                explode: false,
+                dismemberment: true,
+                health.gameObject.name,
+                health.transform.position - base.transform.position,
+                force: 60,
+                base.transform.position);
+            health.SetKiller(_driver.transform);
+        });
+        UnityEngine.Object.Instantiate(explosionVFX, transform.position, Quaternion.identity);
+        SoundManager.Instance.PlaySound(explosionSound);
+        Despawn();
     }
 }

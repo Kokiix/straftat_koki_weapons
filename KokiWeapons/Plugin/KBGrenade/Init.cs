@@ -9,10 +9,10 @@ public class Init
     {
         var physGrenade = SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
         .GetComponent<TrickShot>().template.gameObject;
-        physGrenade.GetComponent<PhysicsGrenade>().explosionDecal =
-        SpawnerManager.NameToWeaponDict["StunGrenade"]
-        .GetComponent<TrickShot>().template.gameObject
-        .GetComponent<PhysicsGrenade>().explosionDecal;
+        // physGrenade.GetComponent<PhysicsGrenade>().explosionDecal =
+        // SpawnerManager.NameToWeaponDict["StunGrenade"]
+        // .GetComponent<TrickShot>().template.gameObject
+        // .GetComponent<PhysicsGrenade>().explosionDecal;
 
         if (physGrenade.GetComponent<RepulsionGrenade>())
         {

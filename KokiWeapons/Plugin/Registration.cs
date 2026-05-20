@@ -5,6 +5,7 @@ using FishNet.Managing;
 using FishNet.Object;
 using HarmonyLib;
 using HeathenEngineering.PhysKit;
+using UnityEngine;
 
 [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
 public static class RegisterWeapons
@@ -40,6 +41,7 @@ public static class RegisterWeapons
         // ]);
 
         KBGrenade.Init.Run();
+        DecalSwap.SwapDecals();
         KokiWeaponsPlugin.RegisteredWeapons = true;
         RegisterFishnet.Postfix(); // NM starts before weapons do
     }
@@ -93,5 +95,27 @@ public static class RegisterFishnet
         collection.Clear();
         collection.AddObjects(baseGameObjs);
         collection.InitializePrefabRange(0);
+    }
+}
+
+public static class DecalSwap
+{
+    public static void SwapDecals()
+    {
+        var vanillaPhysGrenade = SpawnerManager.NameToWeaponDict["HandGrenade"].GetComponent<PhysicsGrenade>();
+        foreach (var go in KokiWeaponsPlugin.SharedBundle.LoadAllAssets<GameObject>())
+        {
+            if (go.name.EndsWith("Decal"))
+            {
+                if (go.name == "explosionDecal")
+                {
+                    Object.Instantiate(vanillaPhysGrenade.explosionDecal).transform.SetParent(go.transform);
+                }
+                else if (go.name == "bloodDecal")
+                {
+                    Object.Instantiate(vanillaPhysGrenade.bloodSplatter).transform.SetParent(go.transform);
+                }
+            }
+        }
     }
 }
