@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using FishNet;
+using FishNet.Object;
 using HarmonyLib;
 using UnityEngine;
 
@@ -80,7 +82,16 @@ public static class RCCarLink
         }
         else
         {
-            carItem.car = newCar.GetComponent<RCCar>();
+            if (InstanceFinder.IsServer)
+            {
+                carItem.car = newCar.GetComponent<RCCar>();
+            }
+            else
+            {
+                RCCarNetworking.RPC("LinkCarToCarItem", [
+                    __instance.gameObject.GetComponent<NetworkObject>().ObjectId,
+                    newCar.GetComponent<NetworkObject>().ObjectId]);
+            }
         }
     }
 }

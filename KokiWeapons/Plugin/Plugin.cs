@@ -49,6 +49,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
         LoadBundle();
         this.gameObject.AddComponent<TPTrapNetworking>();
+        this.gameObject.AddComponent<RCCarNetworking>();
 
         // Also for hot reload
         if (InstanceFinder.NetworkManager)
@@ -74,6 +75,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
+        this.gameObject.AddComponent<RCCarNetworking>().Deregister();
         Harmony.UnpatchSelf();
 
         if (!RegisteredWeapons) return;
