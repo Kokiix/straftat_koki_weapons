@@ -114,12 +114,13 @@ public class RCCar : MonoBehaviour
         arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
 
         // Set up EndDriving
-        var dropAction = InputManager.inputActions.Player.Interact;
-        dropAction.performed -= driver.playerPickupScript.HandleInteraction;
-        dropAction.performed += EndDriving;
+        var input = InputManager.inputActions.Player;
+        input.Interact.performed -= driver.playerPickupScript.HandleInteraction;
+        input.Interact.performed += EndDriving;
+        input.FireHold.performed += TriggerWeapon;
     }
 
-    public void TriggerWeapon()
+    public void TriggerWeapon(InputAction.CallbackContext _)
     {
         if (carType == CarType.Boom)
         {
@@ -132,9 +133,10 @@ public class RCCar : MonoBehaviour
     public void EndDriving(InputAction.CallbackContext context)
     {
         EndDriving();
-        var dropAction = InputManager.inputActions.Player.Interact;
-        dropAction.performed -= EndDriving;
-        dropAction.performed += _driver.playerPickupScript.HandleInteraction;
+        var input = InputManager.inputActions.Player;
+        input.Interact.performed += _driver.playerPickupScript.HandleInteraction;
+        input.Interact.performed -= EndDriving;
+        input.FireHold.performed -= TriggerWeapon;
     }
 
     public void EndDriving()
