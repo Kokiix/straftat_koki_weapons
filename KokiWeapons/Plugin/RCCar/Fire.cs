@@ -60,6 +60,8 @@ public static class FirePatch
             var car = __instance.gameObject.GetComponent<RCCarItem>().car;
             if (!car.driving)
                 car.BeginDriving(__instance.playerController);
+            else
+                car.TriggerWeapon();
         }
     }
 }

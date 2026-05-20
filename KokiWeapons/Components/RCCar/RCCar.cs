@@ -118,10 +118,11 @@ public class RCCar : MonoBehaviour
         var input = InputManager.inputActions.Player;
         input.Interact.performed -= driver.playerPickupScript.HandleInteraction;
         input.Interact.performed += EndDriving;
-        input.FireHold.performed += TriggerWeapon;
+        // input.FireHold.performed += TriggerWeapon;
     }
 
-    public void TriggerWeapon(InputAction.CallbackContext _)
+    // public void TriggerWeapon(InputAction.CallbackContext _)
+    public void TriggerWeapon()
     {
         if (carType == CarType.Boom && !_exploded)
         {
@@ -141,7 +142,7 @@ public class RCCar : MonoBehaviour
         var input = InputManager.inputActions.Player;
         input.Interact.performed += _driver.playerPickupScript.HandleInteraction;
         input.Interact.performed -= EndDriving;
-        input.FireHold.performed -= TriggerWeapon;
+        // input.FireHold.performed -= TriggerWeapon;
     }
 
     public void EndDriving()
