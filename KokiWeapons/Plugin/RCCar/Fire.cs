@@ -82,8 +82,6 @@ public static class RCCarLink
         }
         else
         {
-            carItem.car = newCar.GetComponent<RCCar>();
-            newCar.GetComponent<RCCar>().rcCarItem = __instance.gameObject;
             RCCarNetworking.RPC("LinkCarToCarItem", [
                 __instance.gameObject.GetComponent<NetworkObject>().ObjectId,
                 newCar.GetComponent<NetworkObject>().ObjectId]);

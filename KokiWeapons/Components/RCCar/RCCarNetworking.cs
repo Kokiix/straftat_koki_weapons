@@ -40,17 +40,22 @@ public class RCCarNetworking : MonoBehaviour
     [CustomRPC]
     public void LinkCarToCarItem(int carItemNob, int carNob)
     {
-        Debug.LogError("received car link rpc");
-        if (!InstanceFinder.IsServer
-        && InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carItemNob, out NetworkObject nob1)
-        && InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carNob, out NetworkObject nob2))
+        NetworkObject nob1, nob2 = null;
+        if (!InstanceFinder.IsServer)
         {
-            Debug.LogError("nobs located");
-            var carItem = nob1.gameObject;
-            var car = nob2.gameObject.GetComponent<RCCar>();
-
-            carItem.GetComponent<RCCarItem>().car = car;
-            car.rcCarItem = carItem;
+            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carItemNob, out nob1);
+            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carNob, out nob2);
         }
+        else
+        {
+            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(carItemNob, out nob1);
+            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(carNob, out nob2);
+        }
+
+        var carItem = nob1.gameObject;
+        var car = nob2.gameObject.GetComponent<RCCar>();
+
+        carItem.GetComponent<RCCarItem>().car = car;
+        car.rcCarItem = carItem;
     }
 }
