@@ -11,11 +11,13 @@ public class RCCar : MonoBehaviour
     [SerializeField]
     private float _accel;
     [SerializeField]
-    private float _decel;
+    private float _friction;
     [SerializeField]
     private float _turnSpeed;
     [SerializeField]
     private float _maxSpeed;
+    [SerializeField]
+    private float _tireGrip; // TODO add to unity
 
     private FirstPersonController _driver;
     private UnityEngine.InputSystem.InputAction _moveInput;
@@ -58,13 +60,20 @@ public class RCCar : MonoBehaviour
     {
         if (!driving) return;
         var inputVector = _moveInput.ReadValue<Vector2>();
-        if (inputVector.y != 0)
+
+        // Sliding friction
+        var sidewaysVel = transform.right * Vector3.Dot(_rb.velocity, transform.forward);
+        _rb.velocity -= sidewaysVel * _tireGrip;
+
+        // Forward friction
+        if (Vector3.Dot(_rb.velocity, transform.forward) > 0)
+            _rb.velocity -= transform.forward * _friction * -1;
+
+        // Gas/Brake
+        if ((inputVector.y > 0 && _rb.velocity.magnitude < _maxSpeed) || inputVector.y < 0)
         {
-            if (_rb.velocity.magnitude < _maxSpeed)
-                _rb.AddForce(transform.forward * _accel * inputVector.y);
+            _rb.AddForce(transform.forward * _accel * inputVector.y);
         }
-        else if (Vector3.Dot(_rb.velocity, transform.forward) > 0)
-            _rb.AddForce(transform.forward * _decel * -1);
     }
 
     public void BeginDriving(FirstPersonController driver)
@@ -78,10 +87,6 @@ public class RCCar : MonoBehaviour
         cameraTransform.SetParent(_cameraPosition);
         cameraTransform.localPosition = Vector3.zero;
 
-        foreach (var x in cameraTransform.GetComponents<Component>())
-        {
-            Debug.LogError(x.GetType().Name);
-        }
         var arms = cameraTransform.Find("BobPosition").Find("FPArms");
         arms.Find("BothHandPositions").gameObject.SetActive(false);
         arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
