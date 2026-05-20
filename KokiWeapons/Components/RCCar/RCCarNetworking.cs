@@ -40,16 +40,20 @@ public class RCCarNetworking : MonoBehaviour
     [CustomRPC]
     public void LinkCarToCarItem(int carItemNob, int carNob)
     {
-        NetworkObject nob1, nob2 = null;
+        NetworkObject nob1 = null;
+        NetworkObject nob2 = null;
+        Debug.LogError("got rpc");
         if (!InstanceFinder.IsServer)
         {
             InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carItemNob, out nob1);
             InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carNob, out nob2);
+            Debug.LogError($"client nobs: {nob1}, {nob2}");
         }
         else
         {
             InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(carItemNob, out nob1);
             InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(carNob, out nob2);
+            Debug.LogError($"server nobs: {nob1}, {nob2}");
         }
 
         var carItem = nob1.gameObject;
@@ -57,5 +61,21 @@ public class RCCarNetworking : MonoBehaviour
 
         carItem.GetComponent<RCCarItem>().car = car;
         car.rcCarItem = carItem;
+    }
+
+    [CustomRPC]
+    public void ExplodeObservers(int carNob)
+    {
+        NetworkObject nob = null;
+        if (!InstanceFinder.IsServer)
+        {
+            InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(carNob, out nob);
+        }
+        else
+        {
+            InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(carNob, out nob);
+        }
+
+        nob.gameObject.GetComponent<RCCar>().Explode();
     }
 }

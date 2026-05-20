@@ -135,7 +135,7 @@ public class RCCar : MonoBehaviour
                 _driver.playerPickupScript.sync___set_value_objInHand(rcCarItem, true);
                 _driver.playerPickupScript.objInHand.GetComponent<WeaponHandSpawner>().currentAmmo = 0;
             }
-            Explode();
+            RCCarNetworking.RPC("ExplodeObservers", [gameObject.GetComponent<NetworkObject>().ObjectId]);
         }
     }
 
@@ -173,7 +173,7 @@ public class RCCar : MonoBehaviour
     }
 
     // Mostly ripped from PhysicsGrenade.HandleExplosion
-    private void Explode()
+    public void Explode()
     {
         Physics.OverlapSphere(transform.position, explosionRadius, 1 << 11 | 1 << 16)
         .Where(collider =>
