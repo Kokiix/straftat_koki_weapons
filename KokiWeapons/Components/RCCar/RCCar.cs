@@ -94,13 +94,13 @@ public class RCCar : MonoBehaviour
         driving = true;
         _driver = driver;
 
-        // Freeze player
-        driver.playerCamera = null;
-
         // Move camera to car
         _cameraTransform = driver.playerCamera.transform;
         _cameraTransform.SetParent(_cameraPosition);
         _cameraTransform.localPosition = Vector3.zero;
+
+        // Freeze player
+        driver.playerCamera = null;
 
         // Enable player to see self
         _playerGraphicsTransform = driver.transform.root.Find("Graphics").Find("PF_Aboubi_04").Find("SK_Aboubi_00");
