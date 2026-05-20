@@ -16,7 +16,7 @@ using HarmonyLib.Tools;
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
 [BepInDependency(MyceliumNetworking.MyPluginInfo.PLUGIN_GUID)]
-[BepInPlugin("com.koki.weapons", "Koki Weapons", "2.0.1")]
+[BepInPlugin("com.koki.weapons", "Koki Weapons", "2.0.3")]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static Harmony Harmony;

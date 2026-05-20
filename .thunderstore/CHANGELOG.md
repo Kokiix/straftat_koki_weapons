@@ -1,5 +1,8 @@
 Entries that don't appear here are changes to the Thunderstore page, not the mod.
 
+### v2.0.3
+- Update registration code for compat with [Gun Game Mod](https://thunderstore.io/c/straftat/p/Yeastmans/GunGame/)
+
 ### v2.0.2
 - Fix debug mode accidentally enabled
 
