@@ -14,7 +14,7 @@ public class RCCar : MonoBehaviour
     public float _accel;
     public float _maxSpeed;
     public float _turnSpeed;
-    // public AnimationCurve enginePowerCurve = AnimationCurve.Linear(0, 1, 1, 0);
+    public AnimationCurve enginePowerCurve = AnimationCurve.Linear(0, 1, 1, 0);
 
     [NonSerialized]
     public bool driving = false;
@@ -57,19 +57,20 @@ public class RCCar : MonoBehaviour
     {
         if (!driving) return;
 
-        var targetVelocity = transform.forward * _inputVector.y * _maxSpeed;
+        // var targetVelocity = transform.forward * _inputVector.y * _maxSpeed;
+        // _rb.velocity = Vector3.Lerp(
+        //     _rb.velocity,
+        //     targetVelocity,
+        //     _accel * Time.fixedDeltaTime
+        // );
 
-        _rb.velocity = Vector3.Lerp(
-            _rb.velocity,
-            targetVelocity,
-            _accel * Time.fixedDeltaTime
-        );
-
-        // Debug.LogError(_rb.velocity.magnitude);
-        // if ((_inputVector.y > 0 && _rb.velocity.magnitude < _maxSpeed) || _inputVector.y < 0)
-        // {
-        //     _rb.AddForce(transform.forward * _accel * _inputVector.y, ForceMode.Acceleration);
-        // }
+        Debug.LogError(_rb.velocity.magnitude);
+        if (_inputVector.y != 0)
+        {
+            var speedRatio = Mathf.Clamp01(_rb.velocity.magnitude / _maxSpeed);
+            var currEnginePower = enginePowerCurve.Evaluate(speedRatio);
+            _rb.AddForce(transform.forward * _accel * currEnginePower * _inputVector.y, ForceMode.Acceleration);
+        }
     }
 
     public void BeginDriving(FirstPersonController driver)
