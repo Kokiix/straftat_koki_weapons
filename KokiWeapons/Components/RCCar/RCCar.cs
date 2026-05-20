@@ -29,7 +29,7 @@ public class RCCar : MonoBehaviour
 
     private void Despawn()
     {
-        if (InstanceFinder.NetworkManager && InstanceFinder.IsServer && gameObject != null && gameObject.GetComponent<NetworkObject>().IsSpawned)
+        if (this && InstanceFinder.IsServer && gameObject && gameObject.GetComponent<NetworkObject>().IsSpawned)
         {
             InstanceFinder.ServerManager.Despawn(gameObject);
         }
@@ -67,6 +67,9 @@ public class RCCar : MonoBehaviour
         }
     }
 
+
+    private Transform _cameraTransform;
+    private Transform _playerGraphicsTransform;
     public void BeginDriving(FirstPersonController driver)
     {
         _moveInput = driver.move;
@@ -77,39 +80,50 @@ public class RCCar : MonoBehaviour
         driver.sync___set_value_canMove(false, true);
 
         // Move camera to car
-        var cameraTransform = driver.playerCamera.transform;
-        cameraTransform.SetParent(_cameraPosition);
-        cameraTransform.localPosition = Vector3.zero;
+        _cameraTransform = driver.playerCamera.transform;
+        _cameraTransform.SetParent(_cameraPosition);
+        _cameraTransform.localPosition = Vector3.zero;
+
+        // Enable player to see self
+        _playerGraphicsTransform = driver.transform.root.Find("Graphics").Find("PF_Aboubi_04").Find("SK_Aboubi_00");
+        foreach (Transform transform in _playerGraphicsTransform)
+        {
+            transform.gameObject.SetActive(true);
+        }
 
         // Disable arms
-        var arms = cameraTransform.Find("BobPosition").Find("FPArms");
+        var arms = _cameraTransform.Find("BobPosition").Find("FPArms");
         arms.Find("BothHandPositions").gameObject.SetActive(false);
         arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
 
         // Set up EndDriving
-        var dropAction = InputManager.inputActions.Player.Drop;
-        dropAction.performed -= driver.playerPickupScript.HandleDrop;
+        var dropAction = InputManager.inputActions.Player.Interact;
+        dropAction.performed -= driver.playerPickupScript.HandleInteraction;
         dropAction.performed += EndDriving;
     }
 
     public void EndDriving(InputAction.CallbackContext context)
     {
         EndDriving();
-        var dropAction = InputManager.inputActions.Player.Drop;
+        var dropAction = InputManager.inputActions.Player.Interact;
         dropAction.performed -= EndDriving;
-        dropAction.performed += _driver.playerPickupScript.HandleDrop;
-        _driver.playerPickupScript.HandleDrop(context);
+        dropAction.performed += _driver.playerPickupScript.HandleInteraction;
     }
 
     public void EndDriving()
     {
         driving = false;
         _driver.sync___set_value_canMove(true, true);
-        if (!_driver.playerCamera) return;
-        var cameraTransform = _driver.playerCamera.transform;
-        cameraTransform.SetParent(_driver.playerCameraHolder.transform);
 
-        var arms = cameraTransform.Find("BobPosition").Find("FPArms");
+        foreach (Transform transform in _playerGraphicsTransform)
+        {
+            transform.gameObject.SetActive(false);
+        }
+
+        _cameraTransform.SetParent(_driver.playerCameraHolder.transform);
+        _cameraTransform.localPosition = Vector3.zero;
+
+        var arms = _cameraTransform.Find("BobPosition").Find("FPArms");
         arms.Find("BothHandPositions").gameObject.SetActive(true);
         arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(true);
     }
