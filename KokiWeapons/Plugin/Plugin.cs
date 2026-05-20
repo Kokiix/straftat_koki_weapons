@@ -92,7 +92,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         foreach (var filePath in Directory.GetFiles(bundlePath))
         {
             var fileName = Path.GetFileName(filePath);
-            if (fileName.EndsWith(".dll") || fileName == "shared") continue;
+            if (!BundleNames.Contains(fileName) || fileName == "shared") continue;
 
             var bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, fileName));
             foreach (var go in bundle.LoadAllAssets<GameObject>())
