@@ -21,7 +21,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static Harmony Harmony;
 
-    internal static bool Debug = true;
+    internal static bool Debug = false;
 
     internal static List<GameObject> CustomWeapons = new List<GameObject>();
     internal static List<GameObject> NetworkObjects = new List<GameObject>();
@@ -47,7 +47,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             if (BundleNames.Contains(existingBundle.name))
                 existingBundle.Unload(true);
         }
-        LoadBundle();
+        LoadBundles();
         this.gameObject.AddComponent<TPTrapNetworking>();
         this.gameObject.AddComponent<RCCarNetworking>();
 
@@ -83,7 +83,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         RegisterFishnet.DeregisterFishnet();
     }
 
-    private void LoadBundle()
+    private void LoadBundles()
     {
         string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
 
