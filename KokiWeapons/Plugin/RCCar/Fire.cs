@@ -82,16 +82,10 @@ public static class RCCarLink
         }
         else
         {
-            if (InstanceFinder.IsServer)
-            {
-                carItem.car = newCar.GetComponent<RCCar>();
-            }
-            else
-            {
-                RCCarNetworking.RPC("LinkCarToCarItem", [
-                    __instance.gameObject.GetComponent<NetworkObject>().ObjectId,
-                    newCar.GetComponent<NetworkObject>().ObjectId]);
-            }
+            carItem.car = newCar.GetComponent<RCCar>();
+            RCCarNetworking.RPC("LinkCarToCarItem", [
+                __instance.gameObject.GetComponent<NetworkObject>().ObjectId,
+                newCar.GetComponent<NetworkObject>().ObjectId]);
         }
     }
 }
