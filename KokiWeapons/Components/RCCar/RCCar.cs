@@ -19,7 +19,8 @@ public class RCCar : MonoBehaviour
 
     private FirstPersonController _driver;
     private UnityEngine.InputSystem.InputAction _moveInput;
-    private bool _driving = false;
+
+    public bool driving = false;
 
     private void Awake()
     {
@@ -41,13 +42,13 @@ public class RCCar : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_driving)
+        if (driving)
             EndDriving();
     }
 
     private void Update()
     {
-        if (!_driving) return;
+        if (!driving) return;
         var inputVector = _moveInput.ReadValue<Vector2>();
         if (inputVector.x != 0)
             transform.Rotate(0, inputVector.x * _turnSpeed * Time.deltaTime, 0);
@@ -55,43 +56,47 @@ public class RCCar : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_driving) return;
+        if (!driving) return;
         var inputVector = _moveInput.ReadValue<Vector2>();
         if (inputVector.y != 0)
         {
             if (_rb.velocity.magnitude < _maxSpeed)
                 _rb.AddForce(transform.forward * _accel * inputVector.y);
         }
-        else
-            _rb.AddForce(transform.forward * _decel);
+        else if (Vector3.Dot(_rb.velocity, transform.forward) > 0)
+            _rb.AddForce(transform.forward * _decel * -1);
     }
 
     public void BeginDriving(FirstPersonController driver)
     {
         _moveInput = driver.move;
-        _driving = true;
+        driving = true;
         _driver = driver;
         driver.sync___set_value_canMove(false, true);
 
         var cameraTransform = driver.playerCamera.transform;
         cameraTransform.SetParent(_cameraPosition);
         cameraTransform.localPosition = Vector3.zero;
-        var bob = cameraTransform.Find("BobPosition");
-        bob.Find("BothHandPositions").gameObject.SetActive(false);
-        bob.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
 
-        driver.playerPickupScript.currentEnvironmentInteractable = new VictoryMenu();
+        foreach (var x in cameraTransform.GetComponents<Component>())
+        {
+            Debug.LogError(x.GetType().Name);
+        }
+        var arms = cameraTransform.Find("BobPosition").Find("FPArms");
+        arms.Find("BothHandPositions").gameObject.SetActive(false);
+        arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
     }
 
     public void EndDriving()
     {
-        _driving = false;
+        driving = false;
         _driver.sync___set_value_canMove(true, true);
         if (!_driver.playerCamera) return;
         var cameraTransform = _driver.playerCamera.transform;
         cameraTransform.SetParent(_driver.playerCameraHolder.transform);
-        var bob = cameraTransform.Find("BobPosition");
-        bob.Find("BothHandPositions").gameObject.SetActive(true);
-        bob.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(true);
+
+        var arms = cameraTransform.Find("BobPosition").Find("FPArms");
+        arms.Find("BothHandPositions").gameObject.SetActive(true);
+        arms.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(true);
     }
 }

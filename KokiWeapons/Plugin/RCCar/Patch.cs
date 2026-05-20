@@ -54,7 +54,11 @@ public static class FirePatch
             __instance.maxInteractionDistance = 0;
         }
         else
-            __instance.gameObject.GetComponent<RCCarItem>().car.BeginDriving(__instance.playerController);
+        {
+            var car = __instance.gameObject.GetComponent<RCCarItem>().car;
+            if (!car.driving)
+                car.BeginDriving(__instance.playerController);
+        }
     }
 }
 
