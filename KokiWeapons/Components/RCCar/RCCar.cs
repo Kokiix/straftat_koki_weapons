@@ -149,12 +149,15 @@ public class RCCar : MonoBehaviour
         driving = false;
         _driver.sync___set_value_canMove(true, true);
 
-        foreach (Transform transform in _playerGraphicsTransform)
+        if (_playerGraphicsTransform)
         {
-            if (!transform) return;
-            transform.gameObject.SetActive(false);
+            foreach (Transform transform in _playerGraphicsTransform)
+            {
+                if (!transform) return;
+                transform.gameObject.SetActive(false);
+            }
+            _playerGraphicsTransform.GetChild(6).gameObject.SetActive(true); // Hips needed for collision
         }
-        _playerGraphicsTransform.GetChild(6).gameObject.SetActive(true); // Hips needed for collision
 
         _cameraTransform.SetParent(_driver.playerCameraHolder.transform);
         _cameraTransform.localPosition = Vector3.zero;
@@ -172,14 +175,14 @@ public class RCCar : MonoBehaviour
         {
             if (collider.transform.tag == "ShatterableGlass" && collider.gameObject.GetComponent<ShatterableGlass>())
                 collider.gameObject.GetComponent<ShatterableGlass>().Shatter3D(collider.transform.position, collider.transform.position - base.transform.position);
-            Debug.LogError(collider.name);
+            // Debug.LogError(collider.name);
             return collider.GetComponentInParent<PlayerHealth>();
         })
         .Select(collider => collider.GetComponentInParent<PlayerHealth>())
         .Distinct()
         .Do(health =>
         {
-            Debug.LogError(health);
+            // Debug.LogError(health);
             if (!InstanceFinder.IsServer || !health || health.sync___get_value_isKilled())
                 return;
 
