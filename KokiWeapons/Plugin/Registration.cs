@@ -8,7 +8,7 @@ using HeathenEngineering.PhysKit;
 using UnityEngine;
 
 [HarmonyPatch(typeof(Resources), "LoadAll", [typeof(string), typeof(System.Type)])]
-public static class RegisterWeapons
+public static class InsertWeaponsIntoResources
 {
     public static void Postfix(string path, ref Object[] __result)
     {
@@ -17,15 +17,23 @@ public static class RegisterWeapons
         var allWeapons = new List<Object>(__result);
         allWeapons.AddRange(KokiWeaponsPlugin.CustomWeapons);
         __result = allWeapons.ToArray();
+    }
+}
 
+[HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+public static class PostWeaponRegistration
+{
+    public static void Postfix()
+    {
         if (KokiWeaponsPlugin.RegisteredWeapons) return;
-        // KokiWeaponsPlugin.RegisteredWeapons = true; // Delay until spawnermanagerpostfix for KB grenade init
+        KokiWeaponsPlugin.RegisteredWeapons = true;
 
-        LoadDecalObjs();
+        LoadDecals();
         RegisterFishnet.Postfix();
+        KBGrenade.Init.Run();
     }
 
-    public static void LoadDecalObjs()
+    public static void LoadDecals()
     {
         var vanillaPhysGrenade = SpawnerManager.NameToWeaponDict["HandGrenade"].GetComponent<PhysicsGrenade>();
         foreach (var go in KokiWeaponsPlugin.SharedBundle.LoadAllAssets<GameObject>())
@@ -93,17 +101,5 @@ public static class RegisterFishnet
         collection.Clear();
         collection.AddObjects(baseGameObjs);
         collection.InitializePrefabRange(0);
-    }
-}
-
-// Legacy system, can be removed once component is added through unity instead of code
-[HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
-public static class InitKBGrenade
-{
-    public static void Postfix()
-    {
-        if (KokiWeaponsPlugin.RegisteredWeapons) return;
-        KokiWeaponsPlugin.RegisteredWeapons = true;
-        KBGrenade.Init.Run();
     }
 }
