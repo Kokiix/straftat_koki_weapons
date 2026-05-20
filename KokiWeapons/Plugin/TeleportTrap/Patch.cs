@@ -22,6 +22,7 @@ public static class UpdateTrapLinkOnPlace
 
         if (!__instance.gameObject.TryGetComponent(out TPLink link))
         {
+            Debug.LogError("no trap lnk :(");
             eventArgs.runOriginalCode = true;
         }
         else if (link.otherTrapNob == -1)

@@ -63,7 +63,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         UpdateTrapLinkOnPlace.Init();
-        RCCarLink.Init();
+        // RCCarLink.Init();
     }
 
     private void OnDestroy()
