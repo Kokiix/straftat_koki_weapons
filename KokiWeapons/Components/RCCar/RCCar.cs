@@ -159,6 +159,7 @@ public class RCCar : MonoBehaviour
             _playerGraphicsTransform.GetChild(6).gameObject.SetActive(true); // Hips needed for collision
         }
 
+        if (!_cameraTransform) return;
         _cameraTransform.SetParent(_driver.playerCameraHolder.transform);
         _cameraTransform.localPosition = Vector3.zero;
 
