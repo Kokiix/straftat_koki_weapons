@@ -55,7 +55,7 @@ public class RCCar : MonoBehaviour
             // Redirect velocity for turn
             var targetVelocity = transform.forward * _driftMax;
             _rb.velocity = Vector3.Lerp(
-                _rb.velocity,
+                Vector3.Dot(transform.right, _rb.velocity) * transform.right,
                 targetVelocity,
                 10 * _driftSpeed * Time.fixedDeltaTime);
         }
