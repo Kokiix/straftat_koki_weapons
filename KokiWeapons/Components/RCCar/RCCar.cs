@@ -11,7 +11,11 @@ public class RCCar : MonoBehaviour
     [SerializeField]
     private float _accel;
     [SerializeField]
+    private float _decel;
+    [SerializeField]
     private float _turnSpeed;
+    [SerializeField]
+    private float _maxSpeed;
 
     private FirstPersonController _driver;
     private UnityEngine.InputSystem.InputAction _moveInput;
@@ -24,7 +28,12 @@ public class RCCar : MonoBehaviour
 
     private void Despawn()
     {
-        if (InstanceFinder.IsServer && gameObject.GetComponent<NetworkObject>().IsSpawned)
+        Debug.LogError(InstanceFinder.NetworkManager);
+        Debug.LogError(InstanceFinder.IsServer);
+        Debug.LogError(gameObject);
+        Debug.LogError(gameObject.GetComponent<NetworkObject>());
+        Debug.LogError(gameObject.GetComponent<NetworkObject>().IsSpawned);
+        if (InstanceFinder.NetworkManager && InstanceFinder.IsServer && gameObject && gameObject.GetComponent<NetworkObject>().IsSpawned)
         {
             InstanceFinder.ServerManager.Despawn(gameObject);
         }
@@ -49,7 +58,12 @@ public class RCCar : MonoBehaviour
         if (!_driving) return;
         var inputVector = _moveInput.ReadValue<Vector2>();
         if (inputVector.y != 0)
-            _rb.AddForce(transform.forward * _accel * inputVector.y);
+        {
+            if (_rb.velocity.magnitude < _maxSpeed)
+                _rb.AddForce(transform.forward * _accel * inputVector.y);
+        }
+        else
+            _rb.AddForce(transform.forward * _decel);
     }
 
     public void BeginDriving(FirstPersonController driver)
@@ -59,13 +73,25 @@ public class RCCar : MonoBehaviour
         _driver = driver;
         driver.sync___set_value_canMove(false, true);
 
-        driver.playerCamera.transform.SetParent(_cameraPosition);
+        var cameraTransform = driver.playerCamera.transform;
+        cameraTransform.SetParent(_cameraPosition);
+        cameraTransform.localPosition = Vector3.zero;
+        var bob = cameraTransform.Find("BobPosition");
+        bob.Find("BothHandPositions").gameObject.SetActive(false);
+        bob.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(false);
+
+        driver.playerPickupScript.currentEnvironmentInteractable = new VictoryMenu();
     }
 
     public void EndDriving()
     {
         _driving = false;
         _driver.sync___set_value_canMove(true, true);
-        _driver.playerCamera.transform.SetParent(_driver.playerCameraHolder.transform);
+        if (!_driver.playerCamera) return;
+        var cameraTransform = _driver.playerCamera.transform;
+        cameraTransform.SetParent(_driver.playerCameraHolder.transform);
+        var bob = cameraTransform.Find("BobPosition");
+        bob.Find("BothHandPositions").gameObject.SetActive(true);
+        bob.Find("PF_FPArm_Container_IK_00").gameObject.SetActive(true);
     }
 }
