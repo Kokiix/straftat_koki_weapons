@@ -7,43 +7,24 @@ using HarmonyLib;
 using HeathenEngineering.PhysKit;
 using UnityEngine;
 
-[HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
+[HarmonyPatch(typeof(Resources), "LoadAll", [typeof(string), typeof(System.Type)])]
 public static class RegisterWeapons
 {
-    public static void Postfix()
+    public static void Postfix(string path, ref Object[] __result)
     {
-        if (SpawnerManager.AllWeapons == null) return;
+        if (path != "RandomWeapons") return;
 
-        var CustomWeapons = KokiWeaponsPlugin.CustomWeapons;
-        var weaponIdx = SpawnerManager.AllWeapons.Length;
+        var allWeapons = new List<Object>(__result);
+        allWeapons.AddRange(KokiWeaponsPlugin.CustomWeapons);
+        __result = allWeapons.ToArray();
 
-        // Clear existing entries if hot reloaded
-        foreach (var weapon in CustomWeapons)
-        {
-            SpawnerManager.NameToWeaponDict.Remove(weapon.name);
-            SpawnerManager.NameToIndexDict.Remove(weapon.name);
-        }
-
-        System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length + CustomWeapons.Count);
-
-        foreach (var weapon in CustomWeapons)
-        {
-            SpawnerManager.AllWeapons[weaponIdx++] = weapon;
-            SpawnerManager.NameToWeaponDict.Add(weapon.name, weapon);
-            SpawnerManager.NameToIndexDict.Add(weapon.name, SpawnerManager.AllWeapons.Length - 1);
-        }
-
-        // NetworkObjects.AddRange([
-        //     SpawnerManager.NameToWeaponDict["Repulsion Grenade"]
-        //         .GetComponent<TrickShot>().template.gameObject,
-        //     SpawnerManager.NameToWeaponDict["Teleport Mine"]
-        //     .GetComponent<WeaponHandSpawner>().objToSpawn
-        // ]);
+        if (KokiWeaponsPlugin.RegisteredWeapons) return;
+        KokiWeaponsPlugin.RegisteredWeapons = true;
 
         KBGrenade.Init.Run();
+
         DecalSwap.SwapDecals();
-        KokiWeaponsPlugin.RegisteredWeapons = true;
-        RegisterFishnet.Postfix(); // NM starts before weapons do
+        RegisterFishnet.Postfix();
     }
 }
 

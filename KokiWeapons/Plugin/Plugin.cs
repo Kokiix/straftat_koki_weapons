@@ -53,7 +53,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
         // Also for hot reload
         if (InstanceFinder.NetworkManager)
-            RegisterWeapons.Postfix();
+            SpawnerManager.PopulateAllWeapons();
 
         Harmony = new Harmony("com.koki.weapons");
         Harmony.PatchAll();
