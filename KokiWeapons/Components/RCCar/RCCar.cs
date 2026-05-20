@@ -26,6 +26,7 @@ public class RCCar : MonoBehaviour
     public GameObject explosionDecal;
     public GameObject bloodDecal;
     public float explosionRadius;
+    private bool _exploded = false;
     [Header("Movement Settings")]
     public float accel;
     public float maxSpeed;
@@ -122,10 +123,14 @@ public class RCCar : MonoBehaviour
 
     public void TriggerWeapon(InputAction.CallbackContext _)
     {
-        if (carType == CarType.Boom)
+        if (carType == CarType.Boom && !_exploded)
         {
-            Debug.LogError("boom");
-            EndDriving();
+            _exploded = true;
+            if (driving)
+            {
+                EndDriving();
+                _driver.playerPickupScript.objInHand.GetComponent<WeaponHandSpawner>().currentAmmo = 0;
+            }
             Explode();
         }
     }
@@ -165,23 +170,19 @@ public class RCCar : MonoBehaviour
         colliders.Where(collider =>
         {
             if (collider.transform.tag == "ShatterableGlass" && collider.gameObject.GetComponent<ShatterableGlass>())
-            {
                 collider.gameObject.GetComponent<ShatterableGlass>().Shatter3D(collider.transform.position, collider.transform.position - base.transform.position);
-            }
-            else if (collider.GetComponentInParent<PlayerHealth>())
-            {
-                return true;
-            }
-            return false;
+
+            return collider.GetComponentInParent<PlayerHealth>();
         })
         .Select(collider => collider.GetComponentInParent<PlayerHealth>())
         .Distinct()
         .Do(health =>
         {
-            UnityEngine.Object.Instantiate(bloodDecal, health.transform.position, Quaternion.Euler(0f, UnityEngine.Random.Range(0, 360), 0f));
-
+            Debug.LogError(health);
             if (!InstanceFinder.IsServer || !health || health.sync___get_value_isKilled())
                 return;
+
+            UnityEngine.Object.Instantiate(bloodDecal, health.transform.position, Quaternion.Euler(0f, UnityEngine.Random.Range(0, 360), 0f));
 
             health.ChangeKilledState(tempBool: true);
             health.RemoveHealth(10f);
