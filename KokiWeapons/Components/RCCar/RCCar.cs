@@ -1,3 +1,4 @@
+using System;
 using FishNet;
 using FishNet.Object;
 using UnityEngine;
@@ -8,23 +9,16 @@ public class RCCar : MonoBehaviour
     private Transform _cameraPosition;
     [SerializeField]
     private Rigidbody _rb;
-    [SerializeField]
-    private float _accel;
-    [SerializeField]
-    private float _friction;
-    [SerializeField]
-    private float _turnSpeed;
-    [SerializeField]
-    private float _maxSpeed;
-    [SerializeField]
-    private float _driftMax;
-    [SerializeField]
-    private float _driftSpeed;
 
+    [Header("Movement Settings")]
+    public float _accel;
+    public float _maxSpeed;
+    public float _turnSpeed;
+
+    [NonSerialized]
+    public bool driving = false;
     private FirstPersonController _driver;
     private UnityEngine.InputSystem.InputAction _moveInput;
-
-    public bool driving = false;
 
     private void Awake()
     {
@@ -45,19 +39,16 @@ public class RCCar : MonoBehaviour
             EndDriving();
     }
 
+    private Vector3 _inputVector;
     private void Update()
     {
         if (!driving) return;
-        var inputVector = _moveInput.ReadValue<Vector2>();
-        if (inputVector.x != 0)
+        _inputVector = _moveInput.ReadValue<Vector2>();
+
+        if (_inputVector.x != 0)
         {
-            transform.Rotate(0, inputVector.x * _turnSpeed * Time.deltaTime, 0);
-            // Redirect velocity for turn
-            var targetVelocity = transform.forward * _driftMax;
-            _rb.velocity = Vector3.Lerp(
-                Vector3.Dot(transform.right, _rb.velocity) * transform.right,
-                targetVelocity,
-                10 * _driftSpeed * Time.fixedDeltaTime);
+            var newRotation = _inputVector.x * _inputVector.y * _turnSpeed * Time.deltaTime;
+            transform.Rotate(0, newRotation, 0);
         }
     }
 
@@ -71,11 +62,6 @@ public class RCCar : MonoBehaviour
         {
             _rb.AddForce(transform.forward * _accel * inputVector.y);
         }
-
-        // Forward friction
-        if (Vector3.Dot(_rb.velocity, transform.forward) > 0)
-            _rb.velocity -= transform.forward * _friction * -1;
-
     }
 
     public void BeginDriving(FirstPersonController driver)
