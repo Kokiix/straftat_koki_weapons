@@ -55,7 +55,7 @@ public static class FirePatch
             __instance.needsAmmo = false;
             __instance.maxInteractionDistance = 0;
         }
-        else
+        else if (__instance.playerController.IsOwner)
         {
             var car = __instance.gameObject.GetComponent<RCCarItem>().car;
             if (!car.driving)
