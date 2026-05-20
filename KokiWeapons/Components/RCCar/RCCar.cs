@@ -94,8 +94,8 @@ public class RCCar : MonoBehaviour
         driving = true;
         _driver = driver;
 
-        // Freeze player (doesn't work in singleplayer)
-        driver.sync___set_value_canMove(false, true);
+        // Freeze player
+        driver.playerCamera = null;
 
         // Move camera to car
         _cameraTransform = driver.playerCamera.transform;
@@ -147,7 +147,6 @@ public class RCCar : MonoBehaviour
     public void EndDriving()
     {
         driving = false;
-        _driver.sync___set_value_canMove(true, true);
 
         if (_playerGraphicsTransform)
         {
@@ -160,6 +159,7 @@ public class RCCar : MonoBehaviour
         }
 
         if (!_cameraTransform) return;
+        _driver.playerCamera = _cameraTransform.GetComponent<Camera>();
         _cameraTransform.SetParent(_driver.playerCameraHolder.transform);
         _cameraTransform.localPosition = Vector3.zero;
 
