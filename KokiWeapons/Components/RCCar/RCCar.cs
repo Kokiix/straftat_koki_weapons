@@ -33,11 +33,6 @@ public class RCCar : MonoBehaviour
 
     private void Despawn()
     {
-        Debug.LogError(InstanceFinder.NetworkManager);
-        Debug.LogError(InstanceFinder.IsServer);
-        Debug.LogError(gameObject);
-        Debug.LogError(gameObject.GetComponent<NetworkObject>());
-        Debug.LogError(gameObject.GetComponent<NetworkObject>().IsSpawned);
         if (InstanceFinder.NetworkManager && InstanceFinder.IsServer && gameObject && gameObject.GetComponent<NetworkObject>().IsSpawned)
         {
             InstanceFinder.ServerManager.Despawn(gameObject);

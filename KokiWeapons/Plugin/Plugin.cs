@@ -83,26 +83,21 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     {
         string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
 
+        var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "shared"));
+        foreach (var material in sharedAssets.LoadAllAssets<Material>())
+            material.shader = Shader.Find(material.shader.name);
         foreach (var filePath in Directory.GetFiles(bundlePath))
         {
             var fileName = Path.GetFileName(filePath);
-            if (fileName.EndsWith(".dll")) continue;
+            if (fileName.EndsWith(".dll") || fileName == "shared") continue;
 
             var bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, fileName));
-            if (fileName == "shared")
+            foreach (var go in bundle.LoadAllAssets<GameObject>())
             {
-                foreach (var material in bundle.LoadAllAssets<Material>())
-                    material.shader = Shader.Find(material.shader.name);
-            }
-            else
-            {
-                foreach (var go in bundle.LoadAllAssets<GameObject>())
-                {
-                    if (go.GetComponent<ItemBehaviour>())
-                        CustomWeapons.Add(go);
-                    if (go.GetComponent<NetworkObject>())
-                        NetworkObjects.Add(go);
-                }
+                if (go.GetComponent<ItemBehaviour>())
+                    CustomWeapons.Add(go);
+                if (go.GetComponent<NetworkObject>())
+                    NetworkObjects.Add(go);
             }
         }
     }
