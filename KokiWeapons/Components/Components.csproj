@@ -1,45 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>Latest</LangVersion>
     <Authors>Koki</Authors>
-    <Version>1.0.0</Version>
 
-    <RestoreAdditionalProjectSources>
-      https://api.nuget.org/v3/index.json;
-      https://nuget.bepinex.dev/v3/index.json;
-      https://nuget.windows10ce.com/nuget/v3/index.json
-    </RestoreAdditionalProjectSources>
+    <BepInExPluginGuid>com.koki.kokiweapons</BepInExPluginGuid>
+    <BepInExPluginName>Koki Weapons</BepInExPluginName>
+    <BepInExPluginVersion>2.0.5</BepInExPluginVersion>
+
+    <BepInExPluginDir>C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins</BepInExPluginDir>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.*" ExcludeAssets="runtime" />
-    <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile"
-      PrivateAssets="all" />
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1"
-      PrivateAssets="all" IncludeAssets="build" />
+    <PackageReference Include="BepInEx.Analyzers" Version="*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="*" ExcludeAssets="runtime" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="*" PrivateAssets="all" IncludeAssets="build" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="*" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Dependencies -->
+  <PropertyGroup>
+    <DLLs>D:\SteamLibrary\steamapps\common\STRAFTAT\STRAFTAT_Data\Managed</DLLs>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MyceliumNetworkingForStraftat">
-      <HintPath>..\lib\MyceliumNetworkingForStraftat.dll</HintPath>
-    </Reference>
-    <Reference Include="FishNet.Runtime">
-      <HintPath>..\lib\FishNet.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\lib\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="DOTween">
-      <HintPath>..\lib\DOTween.dll</HintPath>
-    </Reference>
-    <Reference Include="Steamworks">
-      <HintPath>..\lib\Steamworks.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.InputSystem">
-      <HintPath>..\lib\Unity.InputSystem.dll</HintPath>
-    </Reference>
+    <PackageReference Include="kestrel-Mod_Menu" Version="*" />
+    <PackageReference Include="straftatmodding-MyceliumNetworking" Version="*" />
+
+    <Reference Include="$(DLLs)\Assembly-CSharp.dll" Publicize="true" />
+    <Reference Include="$(DLLs)\ComputerysModdingUtilities.dll" />
+
+    <Reference Include="$(DLLs)\FishNet.Runtime.dll" />
+    <Reference Include="$(DLLs)\Unity.InputSystem.dll" />
+    <Reference Include="$(DLLs)\com.rlabrecque.steamworks.net.dll" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <IncludeSymbols>true</IncludeSymbols>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <Target Name="CopyDLL" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)' == 'Debug' ">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)" />
+  </Target>
 </Project>

@@ -12,21 +12,20 @@ using System;
 using FishNet.Managing;
 using System.Linq;
 using HarmonyLib.Tools;
+using KokiWeapons;
 
 [assembly: StraftatMod(isVanillaCompatible: false)]
 
 [BepInDependency(MyceliumNetworking.MyPluginInfo.PLUGIN_GUID)]
-[BepInPlugin("com.koki.weapons", "Koki Weapons", "2.0.3")]
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class KokiWeaponsPlugin : BaseUnityPlugin
 {
     internal static Harmony Harmony;
 
-    internal static bool Debug = false;
-
     internal static List<GameObject> CustomWeapons = new List<GameObject>();
     internal static List<GameObject> NetworkObjects = new List<GameObject>();
 
-    internal static uint MyceliumID = 932828;
+    internal static readonly uint MyceliumID = 932828;
 
     internal static KokiWeaponsPlugin Instance;
 
@@ -41,6 +40,9 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         Instance = this;
         this.gameObject.hideFlags = HideFlags.HideAndDontSave;
 
+        Harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
+        Harmony.PatchAll();
+
         // Remove loaded bundle if hot reloading
         foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles())
         {
@@ -54,13 +56,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         // Also for hot reload
         if (InstanceFinder.NetworkManager)
             SpawnerManager.PopulateAllWeapons();
-
-        Harmony = new Harmony("com.koki.weapons");
-        Harmony.PatchAll();
-        if (!Debug)
-        {
-            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, "com.koki.weapons");
-        }
 
         UpdateTrapLinkOnPlace.Init();
         // RCCarLink.Init();
@@ -85,7 +80,12 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     private void LoadBundles()
     {
-        string bundlePath = Debug ? Path.Combine(Paths.PluginPath, "KokiWeapons") : Path.GetDirectoryName(Info.Location);
+        string bundlePath = Path.GetDirectoryName(Info.Location);
+        if (bundlePath.IsNullOrWhiteSpace())
+        {
+            bundlePath = Path.Combine(Paths.PluginPath, "DEVELOPMENT-BUILD-Koki Weapons");
+            Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, MyPluginInfo.PLUGIN_GUID);
+        }
 
         var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "shared"));
         foreach (var material in sharedAssets.LoadAllAssets<Material>())

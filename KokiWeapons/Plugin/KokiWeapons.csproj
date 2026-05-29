@@ -1,63 +1,67 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>Latest</LangVersion>
         <Authors>Koki</Authors>
-        <Version>1.0.0</Version>
 
-        <RestoreAdditionalProjectSources>
-            https://api.nuget.org/v3/index.json;
-            https://nuget.bepinex.dev/v3/index.json;
-            https://nuget.windows10ce.com/nuget/v3/index.json
-        </RestoreAdditionalProjectSources>
+        <BepInExPluginGuid>com.koki.kokiweapons</BepInExPluginGuid>
+        <BepInExPluginName>Koki Weapons</BepInExPluginName>
+        <BepInExPluginVersion>2.0.5</BepInExPluginVersion>
+
+        <BepInExPluginDir>C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins</BepInExPluginDir>
+        <Thunderstore>.\.thunderstore</Thunderstore>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-        <PackageReference Include="BepInEx.Core" Version="5.*" ExcludeAssets="runtime" />
-        <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile"
-            PrivateAssets="all" />
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1"
-            PrivateAssets="all" IncludeAssets="build" />
-    </ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="*" ExcludeAssets="runtime" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="*" PrivateAssets="all" IncludeAssets="build" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="*" />
+        <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" PrivateAssets="all" />
 
-    <ItemGroup>
-        <Reference Include="Assembly-CSharp" Publicize="true">
-            <HintPath>..\lib\Assembly-CSharp.dll</HintPath>
-        </Reference>
-        <Reference Include="ComputerysModdingUtilities" Publicize="true">
-            <HintPath>..\lib\ComputerysModdingUtilities.dll</HintPath>
-        </Reference>
-        <Reference Include="FishNet.Runtime" Publicize="true">
-            <HintPath>..\lib\FishNet.Runtime.dll</HintPath>
-        </Reference>
-        <Reference Include="Heathen.PhysKit" Publicize="true">
-            <HintPath>..\lib\Heathen.PhysKit.dll</HintPath>
-        </Reference>
-        <Reference Include="MyceliumNetworkingForStraftat">
-            <HintPath>..\lib\MyceliumNetworkingForStraftat.dll</HintPath>
-        </Reference>
-        <Reference Include="Steamworks">
-            <HintPath>..\lib\Steamworks.dll</HintPath>
-        </Reference>
-        <Reference Include="Unity.InputSystem">
-            <HintPath>..\lib\Unity.InputSystem.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\Components\Components.csproj" />
     </ItemGroup>
 
+    <!-- Dependencies -->
     <PropertyGroup>
+        <DLLs>D:\SteamLibrary\steamapps\common\STRAFTAT\STRAFTAT_Data\Managed</DLLs>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="kestrel-Mod_Menu" Version="*" />
+        <PackageReference Include="straftatmodding-MyceliumNetworking" Version="*" />
+
+        <Reference Include="$(DLLs)\Assembly-CSharp.dll" Publicize="true" />
+        <Reference Include="$(DLLs)\ComputerysModdingUtilities.dll" />
+
+        <Reference Include="$(DLLs)\FishNet.Runtime.dll" Publicize="true" />
+        <Reference Include="$(DLLs)\Heathen.PhysKit.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\**\*" />
+    </ItemGroup>
+
+    <!-- TCLI stuff -->
+    <Target Name="TCLI" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' Or '$(Configuration)' == 'Build'">
+        <!-- Prepare TCLI -->
+        <RemoveDir Condition="Exists('$(Thunderstore)\dist')" Directories="$(Thunderstore)\dist" />
+        <Copy SourceFiles="@(ModContents)" DestinationFiles="$(Thunderstore)\dist\%(RecursiveDir)%(Filename)%(Extension)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(Thunderstore)\dist\" />
+
+        <!-- Publish -->
+        <Exec Condition="'$(Configuration)' == 'Release'" Command="tcli publish --config-path $(Thunderstore)\thunderstore.toml --package-version $(BepInExPluginVersion)" />
+
+        <!-- Build -->
+        <Exec Condition="'$(Configuration)' == 'Build'" Command="tcli build --config-path $(Thunderstore)\thunderstore.toml --package-version $(BepInExPluginVersion)" />
+    </Target>
+
+    <!-- Debug -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <IncludeSymbols>true</IncludeSymbols>
         <DebugSymbols>true</DebugSymbols>
         <DebugType>embedded</DebugType>
     </PropertyGroup>
-
-    <Target Name="CopyDLL" AfterTargets="Build">
-        <Copy SourceFiles="$(TargetPath)"
-            DestinationFolder="C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins\KokiWeapons" />
+    <Target Name="CopyDLL" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)' == 'Debug' ">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)" />
     </Target>
 </Project>
