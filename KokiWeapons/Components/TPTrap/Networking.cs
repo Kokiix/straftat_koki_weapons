@@ -98,8 +98,9 @@ public class TPTrapNetworking : MonoBehaviour
     }
 
     [CustomRPC]
-    public void TPPlayer(Vector3 position)
+    public void TPPlayer(Vector3 position, TPTrap trap)
     {
+        FirstPersonController.instance.gameObject.GetComponent<PlayerHealth>().sync___set_value_killer(trap.owner, true);
         FirstPersonController.instance.Teleport(position, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
     }
 }

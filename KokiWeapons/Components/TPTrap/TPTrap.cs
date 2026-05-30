@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using FishNet;
 using FishNet.Object;
@@ -7,10 +8,11 @@ using UnityEngine;
 
 public class TPTrap : MonoBehaviour
 {
-    private GameObject otherTrap;
-    private bool detonated = false;
+    [NonSerialized] public Transform owner;
+    GameObject _otherTrap;
+    bool _detonated = false;
 
-    private void Awake()
+    void Awake()
     {
         PauseManager.OnBeforeSpawn += Despawn;
 
@@ -24,35 +26,35 @@ public class TPTrap : MonoBehaviour
 
     public void Prime(GameObject other)
     {
-        otherTrap = other;
+        _otherTrap = other;
         transform.Find("radius").gameObject.SetActive(true);
     }
 
-    private void OnTriggerStay(Collider col)
+    void OnTriggerStay(Collider col)
     {
-        if (!otherTrap || detonated
+        if (!_otherTrap || _detonated
         || !col.CompareTag("Player")
         || !InstanceFinder.IsServer) return;
 
-        detonated = true;
+        _detonated = true;
         var players = GetPlayers();
-        otherTrap.TryGetComponent(out TPTrap otherTrapComponent);
-        if (!otherTrapComponent.detonated)
+        _otherTrap.TryGetComponent(out TPTrap otherTrapComponent);
+        if (!otherTrapComponent._detonated)
         {
-            otherTrapComponent.detonated = true;
+            otherTrapComponent._detonated = true;
             var otherPlayers = otherTrapComponent.GetPlayers();
 
             // this is SO poorly written
-            var playerIDs = players.Where(player => TeleportIfHost(player, otherTrap.transform.position))
+            var playerIDs = players.Where(player => TeleportIfHost(player, _otherTrap.transform.position))
             .Select(go => GOToCSteamID(go));
             var otherPlayerIDs = otherPlayers.Where(player => TeleportIfHost(player, this.transform.position))
             .Select(go => GOToCSteamID(go));
 
-            playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [otherTrap.transform.position]));
-            otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position]));
+            playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [_otherTrap.transform.position, this]));
+            otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position, this]));
 
             var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
-            var nob2 = otherTrap.GetComponent<NetworkObject>().ObjectId;
+            var nob2 = _otherTrap.GetComponent<NetworkObject>().ObjectId;
             TPTrapNetworking.RPC("DestroyTrapPair", [nob1, nob2]);
         }
         else
@@ -72,6 +74,7 @@ public class TPTrap : MonoBehaviour
         var ID = GOToCSteamID(potentialHost);
         if (ID == SteamUser.GetSteamID())
         {
+            potentialHost.GetComponent<PlayerHealth>().sync___set_value_killer(owner, true);
             potentialHost.GetComponent<FirstPersonController>().Teleport(pos, angle: 0f, boost: false, cac: null, power: 0, decel: 0, dontTranslateRotation: true);
             return false;
         }
@@ -94,10 +97,10 @@ public class TPTrap : MonoBehaviour
     public AudioClip explosionAudio;
     public void Explode()
     {
-        if (otherTrap)
-            otherTrap.transform.Find("radius").gameObject.SetActive(false);
-        Object.Destroy(this.gameObject);
-        Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
+        if (_otherTrap)
+            _otherTrap.transform.Find("radius").gameObject.SetActive(false);
+        UnityEngine.Object.Destroy(this.gameObject);
+        UnityEngine.Object.Instantiate(explosionVfx, transform.position, Quaternion.identity);
         SoundManager.Instance.PlaySound(explosionAudio);
     }
 
