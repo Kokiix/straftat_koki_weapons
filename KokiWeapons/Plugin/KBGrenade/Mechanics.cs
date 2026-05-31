@@ -75,6 +75,7 @@ public static class KBGrenadeMechanics
             if (ph.controller.isGrounded)
                 ph.controller.transform.position += new Vector3(0, 2.5f, 0);
             ph.controller.CustomAddForce(force, 120);
+            ph.RemoveHealth(10);
         });
 
         Rigidbody rb = null;

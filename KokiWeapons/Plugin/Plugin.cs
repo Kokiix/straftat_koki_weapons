@@ -31,7 +31,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
 
     internal static bool RegisteredWeapons = false;
 
-    internal static readonly string[] BundleNames = ["shared", "tptrap", "repulsiongrenade", "rccar"];
+    internal static readonly string[] BundleNames = ["kokiweapons_shared", "tptrap", "repulsiongrenade", "rccar"];
 
     internal static AssetBundle SharedBundle;
 
@@ -83,18 +83,22 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         string bundlePath = Path.GetDirectoryName(Info.Location);
         if (bundlePath.IsNullOrWhiteSpace())
         {
+            Debug.LogError("DEBUG MODE ACTIVE");
             bundlePath = Path.Combine(Paths.PluginPath, "DEVELOPMENT-BUILD-Koki Weapons");
+        }
+        else
+        {
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, MyPluginInfo.PLUGIN_GUID);
         }
 
-        var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "shared"));
+        var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiweapons_shared"));
         foreach (var material in sharedAssets.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
         SharedBundle = sharedAssets;
         foreach (var filePath in Directory.GetFiles(bundlePath))
         {
             var fileName = Path.GetFileName(filePath);
-            if (!BundleNames.Contains(fileName) || fileName == "shared") continue;
+            if (!BundleNames.Contains(fileName) || fileName == "kokiweapons_shared") continue;
 
             var bundle = AssetBundle.LoadFromFile(Path.Combine(bundlePath, fileName));
             foreach (var go in bundle.LoadAllAssets<GameObject>())
