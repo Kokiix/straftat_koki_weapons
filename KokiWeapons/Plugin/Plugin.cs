@@ -53,10 +53,6 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         this.gameObject.AddComponent<TPTrapNetworking>();
         this.gameObject.AddComponent<RCCarNetworking>();
 
-        // Also for hot reload
-        if (InstanceFinder.NetworkManager)
-            SpawnerManager.PopulateAllWeapons();
-
         UpdateTrapLinkOnPlace.Init();
         // RCCarLink.Init();
     }
@@ -81,9 +77,11 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
     private void LoadBundles()
     {
         string bundlePath = Path.GetDirectoryName(Info.Location);
+        var debug = false;
         if (bundlePath.IsNullOrWhiteSpace())
         {
             Debug.LogError("DEBUG MODE ACTIVE");
+            debug = true;
             bundlePath = Path.Combine(Paths.PluginPath, "DEVELOPMENT-BUILD-Koki Weapons");
         }
         else
@@ -108,6 +106,12 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
                 if (go.GetComponent<NetworkObject>())
                     NetworkObjects.Add(go);
             }
+        }
+
+        if (debug)
+        {
+            SpawnerManager.AllWeapons = null;
+            SpawnerManager.PopulateAllWeapons();
         }
     }
 }
