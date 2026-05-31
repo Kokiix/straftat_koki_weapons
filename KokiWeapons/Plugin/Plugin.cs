@@ -108,7 +108,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
             }
         }
 
-        if (debug)
+        if (debug && InstanceFinder.NetworkManager)
         {
             SpawnerManager.AllWeapons = null;
             SpawnerManager.PopulateAllWeapons();

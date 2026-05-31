@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using BepInEx.Configuration;
 using FishNet;
 using HarmonyLib;
 using UnityEngine;
@@ -63,6 +64,8 @@ public static class KBGrenadeMechanics
                 mesh.gameObject.SetActive(false);
         }
     }
+
+    internal static ConfigEntry<int> GrenadeDamage;
     public static void KBAll(PhysicsGrenade instance, Collider[] colliders, PlayerHealth[] healths)
     {
         healths.Distinct().DoIf(ph => ph, ph =>
@@ -75,7 +78,8 @@ public static class KBGrenadeMechanics
             if (ph.controller.isGrounded)
                 ph.controller.transform.position += new Vector3(0, 2.5f, 0);
             ph.controller.CustomAddForce(force, 120);
-            ph.RemoveHealth(10);
+            if (GrenadeDamage.Value > 0)
+                ph.RemoveHealth(GrenadeDamage.Value / 25);
         });
 
         Rigidbody rb = null;

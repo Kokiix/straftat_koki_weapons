@@ -6,10 +6,10 @@
 
         <BepInExPluginGuid>com.koki.kokiweapons</BepInExPluginGuid>
         <BepInExPluginName>Koki Weapons</BepInExPluginName>
-        <BepInExPluginVersion>2.0.5</BepInExPluginVersion>
+        <BepInExPluginVersion>2.1.0</BepInExPluginVersion>
 
         <BepInExPluginDir>C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins</BepInExPluginDir>
-        <Thunderstore>.\.thunderstore</Thunderstore>
+        <Thunderstore>..\..\.thunderstore</Thunderstore>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,7 +38,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\**\*" />
+        <ModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\*" />
+        <NestedModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\**\*" />
     </ItemGroup>
 
     <!-- TCLI stuff -->
@@ -46,7 +47,7 @@
         <!-- Prepare TCLI -->
         <RemoveDir Condition="Exists('$(Thunderstore)\dist')" Directories="$(Thunderstore)\dist" />
         <Copy SourceFiles="@(ModContents)" DestinationFiles="$(Thunderstore)\dist\%(RecursiveDir)%(Filename)%(Extension)" />
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(Thunderstore)\dist\" />
+        <Copy SourceFiles="@(NestedModContents)" DestinationFiles="$(Thunderstore)\dist\%(RecursiveDir)%(Filename)%(Extension)" />
 
         <!-- Publish -->
         <Exec Condition="'$(Configuration)' == 'Release'" Command="tcli publish --config-path $(Thunderstore)\thunderstore.toml --package-version $(BepInExPluginVersion)" />
