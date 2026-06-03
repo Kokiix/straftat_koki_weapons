@@ -17,24 +17,18 @@ using KokiWeapons;
 
 [BepInDependency(MyceliumNetworking.MyPluginInfo.PLUGIN_GUID)]
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-public class KokiWeaponsPlugin : BaseUnityPlugin
+class KokiWeaponsPlugin : BaseUnityPlugin
 {
-    internal static Harmony Harmony;
+    internal static KokiWeaponsPlugin Instance;
+    static Harmony Harmony;
 
+    static readonly string[] BundleNames = ["kokiweapons_shared", "tptrap", "repulsiongrenade", "rccar"];
     internal static List<GameObject> CustomWeapons = new List<GameObject>();
     internal static List<GameObject> NetworkObjects = new List<GameObject>();
 
-    internal static readonly uint MyceliumID = 932828;
-
-    internal static KokiWeaponsPlugin Instance;
-
     internal static bool RegisteredWeapons = false;
 
-    internal static readonly string[] BundleNames = ["kokiweapons_shared", "tptrap", "repulsiongrenade", "rccar"];
-
-    internal static AssetBundle SharedBundle;
-
-    private void Awake()
+    void Awake()
     {
         Instance = this;
         this.gameObject.hideFlags = HideFlags.HideAndDontSave;
@@ -56,7 +50,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         // RCCarLink.Init();
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
         {
@@ -73,7 +67,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         RegisterFishnet.DeregisterFishnet();
     }
 
-    private void LoadBundles()
+    void LoadBundles()
     {
         string bundlePath = Path.GetDirectoryName(Info.Location);
         var debug = false;
@@ -91,7 +85,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiweapons_shared"));
         foreach (var material in sharedAssets.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
-        SharedBundle = sharedAssets;
+        PostWeaponRegistration.SharedAssets = sharedAssets;
         foreach (var filePath in Directory.GetFiles(bundlePath))
         {
             var fileName = Path.GetFileName(filePath);

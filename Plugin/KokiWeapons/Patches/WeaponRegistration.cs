@@ -22,6 +22,8 @@ public static class InsertWeaponsIntoResources
 [HarmonyPatch(typeof(SpawnerManager), "PopulateAllWeapons")]
 public static class PostWeaponRegistration
 {
+    internal static AssetBundle SharedAssets;
+
     public static void Postfix()
     {
         if (KokiWeaponsPlugin.RegisteredWeapons) return;
@@ -34,7 +36,7 @@ public static class PostWeaponRegistration
     public static void LoadDecals()
     {
         var vanillaPhysGrenade = SpawnerManager.NameToWeaponDict["HandGrenade"].GetComponent<PhysicsGrenade>();
-        foreach (var go in KokiWeaponsPlugin.SharedBundle.LoadAllAssets<GameObject>())
+        foreach (var go in SharedAssets.LoadAllAssets<GameObject>())
         {
             if (go.name.EndsWith("Decal"))
             {
