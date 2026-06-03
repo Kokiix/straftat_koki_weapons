@@ -1,10 +1,10 @@
 /*
 !Assets
 !.vscode
-!straftat_koki_weapons
+!Plugin
 
 Assets/*
 !Assets/koki
 
-straftat_koki_weapons/**/bin
-straftat_koki_weapons/**/obj
+Plugin/**/bin
+Plugin/**/obj
