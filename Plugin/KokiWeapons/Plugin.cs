@@ -32,35 +32,34 @@ class KokiWeaponsPlugin : BaseUnityPlugin
     {
         Instance = this;
         this.gameObject.hideFlags = HideFlags.HideAndDontSave;
-
         Harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         Harmony.PatchAll();
 
         // Remove loaded bundle if hot reloading
         foreach (var existingBundle in AssetBundle.GetAllLoadedAssetBundles())
-        {
             if (BundleNames.Contains(existingBundle.name))
                 existingBundle.Unload(true);
-        }
         LoadBundles();
+
+        // Networking components
         this.gameObject.AddComponent<TPTrapNetworking>();
         // this.gameObject.AddComponent<RCCarNetworking>();
 
+        // Event subscriptions
         UpdateTrapLinkOnPlace.Init();
         // RCCarLink.Init();
     }
 
     void OnDestroy()
     {
+        Harmony.UnpatchSelf();
+
         foreach (GameObject weapon in SpawnWeaponOnTaunt.weapons)
-        {
             if (weapon)
                 InstanceFinder.ServerManager.Despawn(weapon);
-        }
 
         this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
         // this.gameObject.AddComponent<RCCarNetworking>().Deregister();
-        Harmony.UnpatchSelf();
 
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
@@ -73,19 +72,20 @@ class KokiWeaponsPlugin : BaseUnityPlugin
         var debug = false;
         if (bundlePath.IsNullOrWhiteSpace())
         {
-            Debug.LogError("DEBUG MODE ACTIVE");
             debug = true;
+            Debug.LogError("DEBUG MODE ACTIVE");
             bundlePath = Path.Combine(Paths.PluginPath, "DEVELOPMENT-BUILD-Koki Weapons");
         }
         else
-        {
             Harmony.Unpatch(typeof(Settings).GetMethod(nameof(Settings.IncreaseTauntsAmount)), HarmonyPatchType.Prefix, MyPluginInfo.PLUGIN_GUID);
-        }
 
+        // Shader swap
         var sharedAssets = AssetBundle.LoadFromFile(Path.Combine(bundlePath, "kokiweapons_shared"));
         foreach (var material in sharedAssets.LoadAllAssets<Material>())
             material.shader = Shader.Find(material.shader.name);
         PostWeaponRegistration.SharedAssets = sharedAssets;
+
+        // Load weapons
         foreach (var filePath in Directory.GetFiles(bundlePath))
         {
             var fileName = Path.GetFileName(filePath);
@@ -101,6 +101,7 @@ class KokiWeaponsPlugin : BaseUnityPlugin
             }
         }
 
+        // Manually register loaded weapons if hot reload
         if (debug && InstanceFinder.NetworkManager)
         {
             SpawnerManager.AllWeapons = null;
