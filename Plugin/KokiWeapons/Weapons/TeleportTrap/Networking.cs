@@ -7,7 +7,7 @@ using Steamworks;
 public class TPTrapNetworking : MonoBehaviour
 {
     private static readonly uint ID = 932828;
-    public void Awake()
+    public void Start()
     {
         MyceliumNetwork.RegisterNetworkObject(this, ID);
     }
