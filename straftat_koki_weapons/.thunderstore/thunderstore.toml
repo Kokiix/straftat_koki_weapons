@@ -1,0 +1,39 @@
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2305"
+straftatmodding-MyceliumNetworking = "1.1.17"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = [ "straftat" ]
+
+[package]
+name = "Koki_Weapons"
+description = "Custom weapons by Koki"
+websiteUrl = "https://github.com/Kokiix/straftat_koki_weapons"
+
+
+
+# Unchanging
+
+namespace = "koki"
+containsNsfwContent = false
+
+[config]
+schemaVersion = "0.0.1"
+
+[build]
+icon = "./const/icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./dist"
+target = ""
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "./CHANGELOG.md"
+
+[[build.copy]]
+source = "./const/LICENSE.txt"
+target = "./LICENSE.txt"

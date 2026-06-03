@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Plugin/">
+    <Project Path="Plugin/KokiWeapons.csproj" />
+  </Folder>
+  <Project Path="Components/Components.csproj" />
+</Solution>

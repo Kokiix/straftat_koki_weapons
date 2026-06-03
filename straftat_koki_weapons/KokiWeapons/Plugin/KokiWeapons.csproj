@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>Latest</LangVersion>
+        <Authors>Koki</Authors>
+
+        <BepInExPluginGuid>com.koki.kokiweapons</BepInExPluginGuid>
+        <BepInExPluginName>Koki Weapons</BepInExPluginName>
+        <BepInExPluginVersion>2.1.0</BepInExPluginVersion>
+
+        <BepInExPluginDir>C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins</BepInExPluginDir>
+        <Thunderstore>..\..\.thunderstore</Thunderstore>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="*" ExcludeAssets="runtime" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="*" PrivateAssets="all" IncludeAssets="build" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="*" />
+        <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" PrivateAssets="all" />
+
+        <ProjectReference Include="..\Components\Components.csproj" />
+    </ItemGroup>
+
+    <!-- Dependencies -->
+    <PropertyGroup>
+        <DLLs>D:\SteamLibrary\steamapps\common\STRAFTAT\STRAFTAT_Data\Managed</DLLs>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="kestrel-Mod_Menu" Version="*" />
+        <PackageReference Include="straftatmodding-MyceliumNetworking" Version="*" />
+
+        <Reference Include="$(DLLs)\Assembly-CSharp.dll" Publicize="true" />
+        <Reference Include="$(DLLs)\ComputerysModdingUtilities.dll" />
+
+        <Reference Include="$(DLLs)\FishNet.Runtime.dll" Publicize="true" />
+        <Reference Include="$(DLLs)\Heathen.PhysKit.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\*" />
+        <NestedModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\**\*" />
+    </ItemGroup>
+
+    <!-- TCLI stuff -->
+    <Target Name="TCLI" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' Or '$(Configuration)' == 'Build'">
+        <!-- Prepare TCLI -->
+        <RemoveDir Condition="Exists('$(Thunderstore)\dist')" Directories="$(Thunderstore)\dist" />
+        <Copy SourceFiles="@(ModContents)" DestinationFiles="$(Thunderstore)\dist\%(RecursiveDir)%(Filename)%(Extension)" />
+        <Copy SourceFiles="@(NestedModContents)" DestinationFiles="$(Thunderstore)\dist\%(RecursiveDir)%(Filename)%(Extension)" />
+
+        <!-- Publish -->
+        <Exec Condition="'$(Configuration)' == 'Release'" Command="tcli publish --config-path $(Thunderstore)\thunderstore.toml --package-version $(BepInExPluginVersion)" />
+
+        <!-- Build -->
+        <Exec Condition="'$(Configuration)' == 'Build'" Command="tcli build --config-path $(Thunderstore)\thunderstore.toml --package-version $(BepInExPluginVersion)" />
+    </Target>
+
+    <!-- Debug -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <IncludeSymbols>true</IncludeSymbols>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+    <Target Name="CopyDLL" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)' == 'Debug' ">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)" />
+    </Target>
+</Project>

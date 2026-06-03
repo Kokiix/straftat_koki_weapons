@@ -1,4 +1,10 @@
-bin
-obj
-.thunderstore
-issues.md
+/*
+!Assets
+!.vscode
+!straftat_koki_weapons
+
+Assets/*
+!Assets/koki
+
+straftat_koki_weapons/KokiWeapons/**/bin
+straftat_koki_weapons/KokiWeapons/**/obj
