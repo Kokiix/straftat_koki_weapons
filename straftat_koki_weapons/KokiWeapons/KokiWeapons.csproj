@@ -31,8 +31,8 @@
         <Reference Include="$(DLLs)\Assembly-CSharp.dll" Publicize="true" />
         <Reference Include="$(DLLs)\ComputerysModdingUtilities.dll" />
 
-        <Reference Include="$(DLLs)\FishNet.Runtime.dll" Publicize="true" />
-        <Reference Include="$(DLLs)\Heathen.PhysKit.dll" />
+        <Reference Include="$(DLLs)\FishNet.Runtime.dll" /> <!-- Registering weapons...and everything else -->
+        <Reference Include="$(DLLs)\com.rlabrecque.steamworks.net.dll" /> <!-- Networking (CSteamID) -->
     </ItemGroup>
 
     <ItemGroup>
