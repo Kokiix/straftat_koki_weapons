@@ -4,7 +4,7 @@
         {
             "label": "echo",
             "type": "shell",
-            "command": "dotnet build KokiWeapons/Plugin/KokiWeapons.csproj --no-dependencies",
+            "command": "dotnet build straftat_koki_weapons -c Debug",
             "group": {
                 "kind": "build",
                 "isDefault": true

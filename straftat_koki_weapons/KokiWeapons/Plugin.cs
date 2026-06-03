@@ -7,7 +7,6 @@ using FishNet;
 using HarmonyLib;
 using UnityEngine;
 using FishNet.Object;
-using HeathenEngineering.PhysKit;
 using System;
 using FishNet.Managing;
 using System.Linq;
@@ -51,7 +50,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
         LoadBundles();
         this.gameObject.AddComponent<TPTrapNetworking>();
-        this.gameObject.AddComponent<RCCarNetworking>();
+        // this.gameObject.AddComponent<RCCarNetworking>();
 
         UpdateTrapLinkOnPlace.Init();
         // RCCarLink.Init();
@@ -66,7 +65,7 @@ public class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
-        this.gameObject.AddComponent<RCCarNetworking>().Deregister();
+        // this.gameObject.AddComponent<RCCarNetworking>().Deregister();
         Harmony.UnpatchSelf();
 
         if (!RegisteredWeapons) return;

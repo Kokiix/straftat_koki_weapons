@@ -1,8 +1,8 @@
-using System;
-using UnityEngine;
+// using System;
+// using UnityEngine;
 
-public class RCCarItem : MonoBehaviour
-{
-    [NonSerialized]
-    public RCCar car;
-}
+// public class RCCarItem : MonoBehaviour
+// {
+//     [NonSerialized]
+//     public RCCar car;
+// }

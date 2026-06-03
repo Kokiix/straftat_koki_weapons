@@ -6,5 +6,5 @@
 Assets/*
 !Assets/koki
 
-straftat_koki_weapons/KokiWeapons/**/bin
-straftat_koki_weapons/KokiWeapons/**/obj
+straftat_koki_weapons/**/bin
+straftat_koki_weapons/**/obj
