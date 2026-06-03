@@ -4,7 +4,6 @@ using FishNet;
 using FishNet.Managing;
 using FishNet.Object;
 using HarmonyLib;
-using HeathenEngineering.PhysKit;
 using UnityEngine;
 
 [HarmonyPatch(typeof(Resources), "LoadAll", [typeof(string), typeof(System.Type)])]
@@ -30,7 +29,6 @@ public static class PostWeaponRegistration
 
         LoadDecals();
         RegisterFishnet.Postfix();
-        KBGrenade.Init.Run();
     }
 
     public static void LoadDecals()
@@ -79,11 +77,11 @@ public static class RegisterFishnet
         {
             toRemove.Add(weapon.GetComponent<NetworkObject>());
         }
-        foreach (var nob in toRemove)
-        {
-            nob.PrefabId = 0;
-            nob.SpawnableCollectionId = 0;
-        }
+        // foreach (var nob in toRemove)
+        // {
+        //     nob.PrefabId = 0;
+        //     nob.SpawnableCollectionId = 0;
+        // }
 
         var nm = InstanceFinder.NetworkManager;
         var collection = nm.SpawnablePrefabs;
