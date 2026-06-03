@@ -9,7 +9,7 @@
         <BepInExPluginVersion>2.1.0</BepInExPluginVersion>
 
         <BepInExPluginDir>C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins</BepInExPluginDir>
-        <Thunderstore>..\..\.thunderstore</Thunderstore>
+        <Thunderstore>.thunderstore</Thunderstore>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,8 +18,6 @@
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="*" PrivateAssets="all" IncludeAssets="build" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="*" />
         <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" PrivateAssets="all" />
-
-        <ProjectReference Include="..\Components\Components.csproj" />
     </ItemGroup>
 
     <!-- Dependencies -->
