@@ -20,8 +20,8 @@ public static class UpdateTrapLinkOnPlace
         WeaponHandSpawner __instance = eventArgs.spawner;
         GameObject newTrap = eventArgs.spawnedObj;
 
-        newTrap.GetOrReload<TPTrap>().owner = __instance.transform.root;
-        if (!__instance.gameObject.TryGetOrReload(out TPLink link))
+        newTrap.GetComponent<TPTrap>().owner = __instance.transform.root;
+        if (!__instance.gameObject.TryGetComponent(out TPLink link))
         {
             Debug.LogError("no trap lnk :(");
             eventArgs.runOriginalCode = true;

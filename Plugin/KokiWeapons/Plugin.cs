@@ -106,6 +106,37 @@ class KokiWeaponsPlugin : BaseUnityPlugin
         {
             SpawnerManager.AllWeapons = null;
             SpawnerManager.PopulateAllWeapons();
+
+            Type[] componentTypes = [typeof(KBGrenade)];
+            Dictionary<string, Type> componNameToType = componentTypes
+            .Zip(componentTypes.Select(type => type.Name), (k, v) => new { k, v })
+            .ToDictionary(x => x.v, x => x.k);
+
+            foreach (var obj in NetworkObjects)
+            {
+                foreach (var oldComponent in obj.GetComponents<Component>())
+                {
+                    if (componNameToType.ContainsKey(oldComponent.GetType().Name))
+                    {
+                        var newComponent = obj.AddComponent(componNameToType[oldComponent.GetType().Name]);
+                        CopyComponentData(oldComponent, newComponent);
+                        UnityEngine.Object.Destroy(oldComponent);
+                    }
+                }
+            }
+        }
+    }
+
+    static void CopyComponentData(Component source, Component destination)
+    {
+        try
+        {
+            string json = JsonUtility.ToJson(source);
+            JsonUtility.FromJsonOverwrite(json, destination);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[HotReload] Failed to copy data via JsonUtility: {ex.Message}");
         }
     }
 }
