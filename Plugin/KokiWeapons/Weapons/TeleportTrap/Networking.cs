@@ -92,9 +92,9 @@ public class TPTrapNetworking : MonoBehaviour
         }
 
         if (nob1)
-            nob1.gameObject.GetComponen<TPTrap>().Explode();
+            nob1.gameObject.GetOrReload<TPTrap>().Explode();
         if (nob2)
-            nob2.gameObject.GetComponen<TPTrap>().Explode();
+            nob2.gameObject.GetOrReload<TPTrap>().Explode();
     }
 
     [CustomRPC]

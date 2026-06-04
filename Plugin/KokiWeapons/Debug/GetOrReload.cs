@@ -3,7 +3,7 @@ using UnityEngine;
 
 static class GameObjectExtension
 {
-    public static T GetComponen<T>(this GameObject go) where T : Component
+    public static T GetOrReload<T>(this GameObject go) where T : Component
     {
         if (go.TryGetComponent(out T newComponent)) return newComponent;
         else if (KokiWeaponsPlugin.KWDebug)
@@ -21,7 +21,7 @@ static class GameObjectExtension
         return null;
     }
 
-    public static bool TryGetComponen<T>(this GameObject go, out T component) where T : Component
+    public static bool TryGetOrReload<T>(this GameObject go, out T component) where T : Component
     {
         if (go.TryGetComponent(out component))
             return true;
