@@ -2,6 +2,7 @@
 !Assets
 !.vscode
 !Plugin
+!LICENSE
 
 Assets/*
 !Assets/koki
