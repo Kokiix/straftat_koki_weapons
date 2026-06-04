@@ -50,8 +50,8 @@ public class TPTrap : MonoBehaviour
             var otherPlayerIDs = otherPlayers.Where(player => TeleportIfHost(player, this.transform.position))
             .Select(go => GOToCSteamID(go));
 
-            playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [_otherTrap.transform.position, this]));
-            otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position, this]));
+            playerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [_otherTrap.transform.position]));
+            otherPlayerIDs.Do(ID => TPTrapNetworking.TargetedRPC(ID, "TPPlayer", [this.transform.position]));
 
             var nob1 = this.gameObject.GetComponent<NetworkObject>().ObjectId;
             var nob2 = _otherTrap.GetComponent<NetworkObject>().ObjectId;
