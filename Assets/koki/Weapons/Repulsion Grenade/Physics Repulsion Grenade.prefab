@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 4703437598541787}
   - component: {fileID: 82884547391421755}
   - component: {fileID: 114099118695303065}
-  - component: {fileID: 114243736805655561}
   - component: {fileID: 54061268324235159}
   - component: {fileID: 114709867586078768}
   - component: {fileID: 114044625135789424}
   - component: {fileID: 114589667821646929}
   - component: {fileID: 2455044644311205970}
+  - component: {fileID: 6281802943276310148}
   m_Layer: 20
   m_Name: Physics Repulsion Grenade
   m_TagString: Grenade
@@ -165,54 +165,6 @@ MonoBehaviour:
   time: 0
   playing: 0
   previous: 0
---- !u!114 &114243736805655561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1709254077376921}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc0e933a02a329a5d3975228495ee6d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 0
-  _networkObjectCache: {fileID: 114044625135789424}
-  weaponName: stun grenade
-  isOwner: 0
-  ragdollEjectForce: 60
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 18175
-  bodyLayer:
-    serializedVersion: 2
-    m_Bits: 16862975
-  hitVfx: {fileID: 1709254077376921, guid: 8085abd0606a0d6428d7bdc91f15dbeb, type: 3}
-  explosionVfx: {fileID: 8370700219887193010, guid: b179961c36a4de34e995281970f9c808, type: 3}
-  hitClip: {fileID: 8300000, guid: 0214d3cc61999954d9034a7a4d694c44, type: 3}
-  explosionClip: {fileID: 8300000, guid: fbd6c7fc25d4fde47ac86eec9d3b510d, type: 3}
-  swooshClip: {fileID: 8300000, guid: 98086a3276d7b414ab669c23fd6b3a56, type: 3}
-  rotateSpeed: 500
-  rotateAxis: {x: -1, y: 1, z: -0.5}
-  vfxScale: {x: 1.8, y: 1.8, z: 1.8}
-  graph: {fileID: 4402593795209344897}
-  explosionDecal: {fileID: 7509876332457146899, guid: 2cf0cbeaa2db444409dc1ab08052a596, type: 3}
-  bloodSplatter: {fileID: 0}
-  timeBeforeExplosion: 2
-  explosionRadius: 9
-  rebondForce: 0
-  duration: 0.15
-  minStrength: 0.8
-  maxStrength: 12
-  vibrato: 33
-  randomness: 10
-  shakeEase: 3
-  maxDistance: 60
-  fragGrenade: 0
-  numberOfRays: 0
-  stunGrenade: 0
-  stunTime: 2.5
 --- !u!54 &54061268324235159
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -258,7 +210,7 @@ MonoBehaviour:
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours:
-  - {fileID: 114243736805655561}
+  - {fileID: 0}
   - {fileID: 114589667821646929}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
@@ -303,6 +255,54 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.2669941, y: 1, z: 0.35813928}
   m_Center: {x: 0, y: 0.19, z: 0}
+--- !u!114 &6281802943276310148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd79d34c6574d4b9de0c18e8f6aae3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 0
+  _networkObjectCache: {fileID: 0}
+  weaponName: Repulsion Grenade
+  isOwner: 0
+  ragdollEjectForce: 60
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 18175
+  bodyLayer:
+    serializedVersion: 2
+    m_Bits: 16862975
+  hitVfx: {fileID: 0}
+  explosionVfx: {fileID: 8370700219887193010, guid: b179961c36a4de34e995281970f9c808, type: 3}
+  hitClip: {fileID: 8300000, guid: 0214d3cc61999954d9034a7a4d694c44, type: 3}
+  explosionClip: {fileID: 8300000, guid: fbd6c7fc25d4fde47ac86eec9d3b510d, type: 3}
+  swooshClip: {fileID: 8300000, guid: 98086a3276d7b414ab669c23fd6b3a56, type: 3}
+  rotateSpeed: 0
+  rotateAxis: {x: 0, y: 0, z: 0}
+  vfxScale: {x: 0, y: 0, z: 0}
+  graph: {fileID: 4703437598541787}
+  explosionDecal: {fileID: 7509876332457146899, guid: 2cf0cbeaa2db444409dc1ab08052a596, type: 3}
+  bloodSplatter: {fileID: 0}
+  timeBeforeExplosion: 2
+  explosionRadius: 9
+  rebondForce: 0
+  duration: 0
+  minStrength: 0
+  maxStrength: 0
+  vibrato: 0
+  randomness: 0
+  shakeEase: 0
+  maxDistance: 0
+  fragGrenade: 0
+  numberOfRays: 0
+  stunGrenade: 0
+  stunTime: 0
 --- !u!1 &1724804207875695
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,7 +1,9 @@
 {
     "name": "KokiWeapons",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        ""
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
