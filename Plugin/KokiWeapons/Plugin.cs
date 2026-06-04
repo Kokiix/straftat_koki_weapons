@@ -66,13 +66,13 @@ class KokiWeaponsPlugin : BaseUnityPlugin
         RegisterFishnet.DeregisterFishnet();
     }
 
+    internal static bool KWDebug = false;
     void LoadBundles()
     {
         string bundlePath = Path.GetDirectoryName(Info.Location);
-        var debug = false;
         if (bundlePath.IsNullOrWhiteSpace())
         {
-            debug = true;
+            KWDebug = true;
             Debug.LogError("DEBUG MODE ACTIVE");
             bundlePath = Path.Combine(Paths.PluginPath, "DEVELOPMENT-BUILD-Koki Weapons");
         }
@@ -102,7 +102,7 @@ class KokiWeaponsPlugin : BaseUnityPlugin
         }
 
         // Manually register loaded weapons if hot reload
-        if (debug && InstanceFinder.NetworkManager)
+        if (KWDebug && InstanceFinder.NetworkManager)
         {
             SpawnerManager.AllWeapons = null;
             SpawnerManager.PopulateAllWeapons();
