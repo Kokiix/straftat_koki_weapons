@@ -1,3 +1,8 @@
+### v2.1.1
+
+- Greatly reduce filesize of weapons
+- Backend rewrite
+
 ### v2.1.0
 
 - ..i screwed up my versioning. no real changes.

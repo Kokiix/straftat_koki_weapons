@@ -107,7 +107,7 @@ class KokiWeaponsPlugin : BaseUnityPlugin
             SpawnerManager.AllWeapons = null;
             SpawnerManager.PopulateAllWeapons();
 
-            Type[] componentTypes = [typeof(KBGrenade)];
+            Type[] componentTypes = [];
             Dictionary<string, Type> componNameToType = componentTypes
             .Zip(componentTypes.Select(type => type.Name), (k, v) => new { k, v })
             .ToDictionary(x => x.v, x => x.k);

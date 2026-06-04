@@ -11,6 +11,8 @@ public class KBGrenade : PhysicsGrenade
         new ConfigDescription("How much damage the KB Grenade should deal on impact, range from 0-100.",
         new AcceptableValueRange<int>(0, 100)));
 
+    bool _spin = true;
+
     internal void KBExplosion(Vector3 position)
     {
         transform.position = position;
@@ -33,7 +35,7 @@ public class KBGrenade : PhysicsGrenade
             });
 
             colliders
-            .Select(c => GetComponentInParent<PlayerHealth>())
+            .Select(c => c.GetComponentInParent<PlayerHealth>())
             .Distinct()
             .Do(ph =>
             {
@@ -65,6 +67,11 @@ public class KBGrenade : PhysicsGrenade
         UnityEngine.Object.Instantiate(explosionDecal, base.transform.position, Quaternion.identity);
         audio.Play();
     }
+
+    internal void Spin()
+    {
+        graph.Rotate(rotateAxis * rotateSpeed * Time.deltaTime);
+    }
 }
 
 [HarmonyPatch(typeof(PhysicsGrenade))]
@@ -79,5 +86,14 @@ class KBGrenadeOverrides
             return false;
         }
         return true;
+    }
+
+    [HarmonyPatch("Update"), HarmonyPostfix]
+    static void StartSpin(PhysicsGrenade __instance)
+    {
+        if (__instance is KBGrenade kbg)
+        {
+            kbg.Spin();
+        }
     }
 }
