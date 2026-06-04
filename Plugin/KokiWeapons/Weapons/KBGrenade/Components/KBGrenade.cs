@@ -11,8 +11,6 @@ public class KBGrenade : PhysicsGrenade
         new ConfigDescription("How much damage the KB Grenade should deal on impact, range from 0-100.",
         new AcceptableValueRange<int>(0, 100)));
 
-    bool _spin = true;
-
     internal void KBExplosion(Vector3 position)
     {
         transform.position = position;

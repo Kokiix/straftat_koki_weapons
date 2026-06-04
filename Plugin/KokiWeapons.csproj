@@ -6,7 +6,7 @@
 
         <BepInExPluginGuid>com.koki.kokiweapons</BepInExPluginGuid>
         <BepInExPluginName>Koki Weapons</BepInExPluginName>
-        <BepInExPluginVersion>2.1.0</BepInExPluginVersion>
+        <BepInExPluginVersion>2.1.1</BepInExPluginVersion>
 
         <BepInExPluginDir>C:\Users\koki\AppData\Roaming\com.kesomannen.gale\straftat\profiles\Default\BepInEx\plugins</BepInExPluginDir>
         <Thunderstore>.thunderstore</Thunderstore>
@@ -37,7 +37,7 @@
 
     <ItemGroup>
         <ModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\*" />
-        <NestedModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\**\*" />
+        <NestedModContents Include="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\**\*" Exclude="$(BepInExPluginDir)\DEVELOPMENT-BUILD-$(BepInExPluginName)\.stfolder\*" />
     </ItemGroup>
 
     <!-- TCLI stuff -->

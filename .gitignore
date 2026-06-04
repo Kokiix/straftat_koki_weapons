@@ -9,3 +9,6 @@ Assets/*
 
 Plugin/**/bin
 Plugin/**/obj
+
+Plugin/.thunderstore/dist
+Plugin/.thunderstore/build
