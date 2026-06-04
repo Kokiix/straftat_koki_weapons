@@ -8,59 +8,33 @@ using UnityEngine;
 [HarmonyPatch(typeof(WeaponHandSpawner), "Fire")]
 public static class FirePatch
 {
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    public static bool Prefix(WeaponHandSpawner __instance)
     {
-        var fireTimer = AccessTools.Field(typeof(WeaponHandSpawner), "fireTimer");
+        if (!__instance.GetComponent<RCCarItem>()) return true;
 
-        // Does this item have RCCarItem component?
-        var gameObject = AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject));
-        var getRCCarItem = AccessTools.Method(typeof(GameObject), nameof(GameObject.GetComponent), parameters: null, generics: [typeof(RCCarItem)]);
-        var implicitBool = AccessTools.Method(typeof(UnityEngine.Object), "op_Implicit");
-
-        // If so, custom fire
-        var handleFire = AccessTools.Method(typeof(FirePatch), "HandleFire");
-
-        var continueFunc = generator.DefineLabel();
-
-        return new CodeMatcher(instructions, generator)
-        .MatchForward(useEnd: true,
-        new CodeMatch(OpCodes.Stfld, fireTimer),
-        new CodeMatch(OpCodes.Ldarg_0))
-        .InsertAndAdvance(
-            // Does this item have RCCarItem component?
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Callvirt, gameObject),
-            new CodeInstruction(OpCodes.Call, getRCCarItem),
-            new CodeInstruction(OpCodes.Call, implicitBool),
-            new CodeInstruction(OpCodes.Brfalse, continueFunc),
-
-            // If so, custom fire
-            new CodeInstruction(OpCodes.Ldarg_0),
-            new CodeInstruction(OpCodes.Call, handleFire),
-            new CodeInstruction(OpCodes.Ret))
-        .AddLabels([continueFunc])
-        .InstructionEnumeration();
-    }
-
-    public static void HandleFire(WeaponHandSpawner __instance)
-    {
-        if (__instance.currentAmmo == 1)
+        if (!PauseManager.Instance.pause && !(__instance.behaviour.playerPickup.currentEnvironmentInteractable != null) && __instance.playerController.IsOwner && __instance.playerController.sync___get_value_canMove() && !(__instance.fireTimer > 0f))
         {
-            // Place car
-            __instance.SpawnObject(__instance.objToSpawn, __instance.position, __instance.rotation);
-            __instance.CameraAnimation();
-            __instance.WeaponAnimation();
+            __instance.fireTimer = __instance.timeBetweenFire;
+            if (__instance.currentAmmo == 1 && __instance.canPlace)
+            {
+                // Place car
+                __instance.SpawnObject(__instance.objToSpawn, __instance.position, __instance.rotation);
+                __instance.CameraAnimation();
+                __instance.WeaponAnimation();
 
-            __instance.currentAmmo = 2;
-            __instance.needsAmmo = false;
-            __instance.maxInteractionDistance = 0;
+                __instance.currentAmmo = 2;
+                __instance.needsAmmo = false;
+                __instance.maxInteractionDistance = 0;
+            }
+            else if (__instance.playerController.IsOwner)
+            {
+                var car = __instance.gameObject.GetComponent<RCCarItem>().car;
+                if (!car.driving)
+                    car.BeginDriving(__instance.playerController);
+            }
         }
-        else if (__instance.playerController.IsOwner)
-        {
-            var car = __instance.gameObject.GetComponent<RCCarItem>().car;
-            if (!car.driving)
-                car.BeginDriving(__instance.playerController);
-        }
+
+        return false;
     }
 }
 

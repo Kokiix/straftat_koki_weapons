@@ -112,6 +112,7 @@ class KokiWeaponsPlugin : BaseUnityPlugin
             .Zip(componentTypes.Select(type => type.Name), (k, v) => new { k, v })
             .ToDictionary(x => x.v, x => x.k);
 
+            // Won't work for custom components in children for now
             foreach (var obj in NetworkObjects)
             {
                 foreach (var oldComponent in obj.GetComponents<Component>())

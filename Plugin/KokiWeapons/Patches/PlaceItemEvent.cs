@@ -21,7 +21,6 @@ public static class CreatePlaceItemEvent
         var args = new PlaceItemEventArgs { spawner = __instance, spawnedObj = obj };
         PlaceItemEvent.Invoke(null, args);
 
-        Debug.LogError("run original code: " + args.runOriginalCode);
         return args.runOriginalCode;
     }
 
