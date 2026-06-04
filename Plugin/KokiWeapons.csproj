@@ -33,6 +33,7 @@
 
         <Reference Include="$(DLLs)\FishNet.Runtime.dll" /> <!-- Registering weapons...and everything else -->
         <Reference Include="$(DLLs)\com.rlabrecque.steamworks.net.dll" /> <!-- Networking (CSteamID) -->
+        <Reference Include="$(DLLs)\Unity.InputSystem.dll" /> <!-- RCCar input capture -->
     </ItemGroup>
 
     <ItemGroup>

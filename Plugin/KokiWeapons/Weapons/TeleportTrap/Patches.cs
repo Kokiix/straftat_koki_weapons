@@ -20,11 +20,10 @@ public static class UpdateTrapLinkOnPlace
         WeaponHandSpawner __instance = eventArgs.spawner;
         GameObject newTrap = eventArgs.spawnedObj;
 
-        newTrap.GetComponent<TPTrap>().owner = __instance.transform.root;
         if (!__instance.gameObject.TryGetComponent(out TPLink link))
         {
-            Debug.LogError("no trap lnk :(");
             eventArgs.runOriginalCode = true;
+            return;
         }
         else if (link.otherTrapNob == -1)
         {
@@ -36,6 +35,7 @@ public static class UpdateTrapLinkOnPlace
             var nobID2 = link.otherTrapNob;
             TPTrapNetworking.RPC("LinkMines", [nobID1, nobID2]);
         }
+        newTrap.GetComponent<TPTrap>().owner = __instance.transform.root;
     }
 }
 

@@ -43,11 +43,11 @@ class KokiWeaponsPlugin : BaseUnityPlugin
 
         // Networking components
         this.gameObject.AddComponent<TPTrapNetworking>();
-        // this.gameObject.AddComponent<RCCarNetworking>();
+        this.gameObject.AddComponent<RCCarNetworking>();
 
         // Event subscriptions
         UpdateTrapLinkOnPlace.Init();
-        // RCCarLink.Init();
+        RCCarLink.Init();
     }
 
     void OnDestroy()
@@ -59,7 +59,7 @@ class KokiWeaponsPlugin : BaseUnityPlugin
                 InstanceFinder.ServerManager.Despawn(weapon);
 
         this.gameObject.GetComponent<TPTrapNetworking>().Deregister();
-        // this.gameObject.AddComponent<RCCarNetworking>().Deregister();
+        this.gameObject.AddComponent<RCCarNetworking>().Deregister();
 
         if (!RegisteredWeapons) return;
         System.Array.Resize(ref SpawnerManager.AllWeapons, SpawnerManager.AllWeapons.Length - CustomWeapons.Count);
@@ -107,7 +107,7 @@ class KokiWeaponsPlugin : BaseUnityPlugin
             SpawnerManager.AllWeapons = null;
             SpawnerManager.PopulateAllWeapons();
 
-            Type[] componentTypes = [];
+            Type[] componentTypes = [typeof(RCCar), typeof(RCCarItem)];
             Dictionary<string, Type> componNameToType = componentTypes
             .Zip(componentTypes.Select(type => type.Name), (k, v) => new { k, v })
             .ToDictionary(x => x.v, x => x.k);
