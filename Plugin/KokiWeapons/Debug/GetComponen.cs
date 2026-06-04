@@ -1,5 +1,4 @@
 using System.Linq;
-using HarmonyLib;
 using UnityEngine;
 
 static class GameObjectExtension
@@ -13,8 +12,10 @@ static class GameObjectExtension
             Component oldComponent = go.GetComponents<Component>().FirstOrDefault(c => c.GetType().Name == typeof(T).Name);
             if (oldComponent)
             {
+                newComponent = go.AddComponent<T>();
+                CopyComponentData(oldComponent, newComponent);
                 Object.Destroy(oldComponent);
-                return go.AddComponent<T>();
+                return newComponent;
             }
         }
         return null;
@@ -22,23 +23,34 @@ static class GameObjectExtension
 
     public static bool TryGetComponen<T>(this GameObject go, out T component) where T : Component
     {
-        if (go.TryGetComponent(out T newComponent))
-        {
-            component = newComponent;
+        if (go.TryGetComponent(out component))
             return true;
-        }
         else if (KokiWeaponsPlugin.KWDebug)
         {
-            Component oldComponent = go.GetComponent(typeof(T).Name);
+            Component oldComponent = go.GetComponents<Component>().FirstOrDefault(c => c.GetType().Name == typeof(T).Name);
             if (oldComponent)
             {
-                Object.Destroy(oldComponent);
                 component = go.AddComponent<T>();
+                CopyComponentData(oldComponent, component);
+                Object.Destroy(oldComponent);
                 return true;
             }
         }
 
         component = default(T);
         return false;
+    }
+
+    static void CopyComponentData(Component source, Component destination)
+    {
+        try
+        {
+            string json = JsonUtility.ToJson(source);
+            JsonUtility.FromJsonOverwrite(json, destination);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[HotReload] Failed to copy data via JsonUtility: {ex.Message}");
+        }
     }
 }
