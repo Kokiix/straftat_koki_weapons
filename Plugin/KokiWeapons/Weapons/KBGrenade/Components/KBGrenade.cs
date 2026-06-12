@@ -14,42 +14,42 @@ public class KBGrenade : PhysicsGrenade
     internal void KBExplosion(Vector3 position)
     {
         transform.position = position;
-        if (isOwner)
+
+        var colliders = Physics.OverlapSphere(position, explosionRadius, bodyLayer);
+
+        Rigidbody rb = null;
+        colliders.DoIf(c => c && c.gameObject.TryGetComponent(out rb),
+        item =>
         {
-            var colliders = Physics.OverlapSphere(position, explosionRadius, bodyLayer);
+            Vector3 force = item.transform.position - transform.position;
+            force.y = 0;
+            force.Normalize();
+            force *= 10;
+            force.y = 2;
 
-            Rigidbody rb = null;
-            colliders.DoIf(c => c && c.gameObject.TryGetComponent(out rb),
-            item =>
-            {
-                Vector3 force = item.transform.position - transform.position;
+            item.transform.position += new Vector3(0, 2.5f, 0);
+            rb.AddForce(force, ForceMode.Impulse);
+        });
+
+        colliders
+        .Select(c => c.GetComponentInParent<PlayerHealth>())
+        .Distinct()
+        .Do(ph =>
+        {
+            if (!ph || ph.sync___get_value_isKilled()) return;
+            Vector3 force = ph.controller.transform.position - transform.position;
+            if (force.y < 0)
                 force.y = 0;
-                force.Normalize();
-                force *= 10;
-                force.y = 2;
+            force.Normalize();
 
-                item.transform.position += new Vector3(0, 2.5f, 0);
-                rb.AddForce(force, ForceMode.Impulse);
-            });
-
-            colliders
-            .Select(c => c.GetComponentInParent<PlayerHealth>())
-            .Distinct()
-            .Do(ph =>
+            if (ph.controller.isGrounded)
+                ph.controller.transform.position += new Vector3(0, 2.5f, 0);
+            ph.controller.CustomAddForce(force, 120);
+            if (isOwner && grenadeDamage.Value > 0)
             {
-                if (!ph || ph.sync___get_value_isKilled()) return;
-                Vector3 force = ph.controller.transform.position - transform.position;
-                if (force.y < 0)
-                    force.y = 0;
-                force.Normalize();
-
-                if (ph.controller.isGrounded)
-                    ph.controller.transform.position += new Vector3(0, 2.5f, 0);
-                ph.controller.CustomAddForce(force, 120);
-                if (grenadeDamage.Value > 0)
-                    ph.RemoveHealth(grenadeDamage.Value / 25);
-            });
-        }
+                ph.RemoveHealth(grenadeDamage.Value / 25);
+            }
+        });
 
         UnityEngine.Object.Destroy(base.gameObject, 3f);
         base.enabled = false;

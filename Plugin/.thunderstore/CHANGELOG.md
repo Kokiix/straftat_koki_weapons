@@ -1,3 +1,7 @@
+### v2.1.2
+
+- Attempt to fix issue where kb grenade only applies kb to thrower
+
 ### v2.1.1
 
 - Greatly reduce filesize of weapons

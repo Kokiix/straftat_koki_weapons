@@ -118,9 +118,9 @@ public class RCCar : MonoBehaviour
 
         // Set up EndDriving
         var input = InputManager.inputActions.Player;
-        input.Interact.performed -= driver.playerPickupScript.HandleInteraction;
-        input.Interact.performed += EndDriving;
-        input.FireHold.performed += TriggerWeapon;
+        driver.playerControls.Player.Interact.performed -= driver.playerPickupScript.HandleInteraction;
+        driver.playerControls.Player.Interact.performed += EndDriving;
+        driver.playerControls.Player.FireHold.performed += TriggerWeapon;
     }
 
     public void TriggerWeapon(InputAction.CallbackContext _)
